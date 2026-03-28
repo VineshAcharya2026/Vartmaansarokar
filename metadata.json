@@ -1,0 +1,8 @@
+{
+  "name": "Vartmaan Sarokaar",
+  "description": "Premium Hindi News Portal & Digital Magazine focusing on current concerns, in-depth articles, and visual storytelling.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
