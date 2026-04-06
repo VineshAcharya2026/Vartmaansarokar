@@ -1,33 +1,58 @@
-
-import React, { useState, useRef } from 'react';
-import { useApp } from '../AppContext';
-import { UserRole, MagazineIssue } from '../types';
-import { 
-  LayoutDashboard, FileText, Book, Image as ImageIcon, Settings, Users, 
-  Plus, Edit, Trash2, FileUp, Loader2, Wand2, EyeOff, Lock, CheckCircle2, 
-  Globe, X, FileType, CheckCircle, Info
-} from 'lucide-react';
+import React, { useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
+import styled from 'styled-components';
+import {
+  LayoutDashboard, FileText, Book, Image as ImageIcon, Settings, Users,
+  Trash2, FileUp, Lock, Globe, Save, FolderOpen
+} from 'lucide-react';
+import { useApp } from '../AppContext';
+import { MagazineIssue, NewsPost, UserRole } from '../types';
+import { NEWS_CATEGORIES } from '../constants';
+import { API_BASE, getAuthHeaders, resolveAssetUrl } from '../utils/app';
+import { translateCategory, translateRole } from '../utils/i18n';
+import MediaManager, { AdminMediaItem } from '../components/admin/MediaManager';
 
 const Admin: React.FC = () => {
-  const { 
-    news, magazines, ads, users, currentUser, 
-    updateMagazine, addMagazine, deleteNews, deleteMagazine
+  const {
+    news,
+    magazines,
+    ads,
+    users,
+    currentUser,
+    addNews,
+    updateNews,
+    deleteNews,
+    addMagazine,
+    updateMagazine,
+    deleteMagazine,
+    updateUserRole,
+    updateAds
   } = useApp();
-  
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'news' | 'magazines' | 'ads' | 'users' | 'settings'>('dashboard');
-  
-  // PDF Upload States
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadStep, setUploadStep] = useState<'IDLE' | 'UPLOADING' | 'CONVERTING' | 'CONFIGURING'>('IDLE');
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
-  // New Issue Form State
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'news' | 'magazines' | 'media' | 'ads' | 'users' | 'settings'>('dashboard');
+  const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
+  const [isSavingAds, setIsSavingAds] = useState(false);
+  const magazinePdfInputRef = useRef<HTMLInputElement>(null);
+
+  const [newsForm, setNewsForm] = useState<Partial<NewsPost>>({
+    title: '',
+    category: NEWS_CATEGORIES[0],
+    excerpt: '',
+    content: '',
+    image: '',
+    author: '',
+    featured: false,
+    requiresSubscription: false
+  });
+
   const [newIssue, setNewIssue] = useState<Partial<MagazineIssue>>({
     title: '',
     issueNumber: '',
+    coverImage: '',
+    pdfUrl: '',
+    pages: [],
     priceDigital: 0,
     pricePhysical: 499,
     gatedPage: 2,
@@ -35,226 +60,239 @@ const Admin: React.FC = () => {
     blurPaywall: false
   });
 
-  if (!currentUser || (currentUser.role !== UserRole.ADMIN && currentUser.role !== UserRole.MAGAZINE)) {
+  const [editableAds, setEditableAds] = useState(ads);
+
+  React.useEffect(() => {
+    setEditableAds(ads);
+  }, [ads]);
+
+  if (!currentUser || ![UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.MAGAZINE].includes(currentUser.role)) {
     return <Navigate to="/" replace />;
   }
 
-  const isMaster = currentUser.role === UserRole.ADMIN;
+  const isMaster = currentUser.role === UserRole.SUPER_ADMIN;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      setSelectedFile(file);
-      startProcessing(file);
-    } else {
-      alert("Please upload a valid PDF file.");
+  const stats = useMemo(() => ([
+    { label: t('admin.activeIssues'), value: magazines.length, icon: Book },
+    { label: t('admin.newsArticles'), value: news.length, icon: FileText },
+    { label: t('admin.subscribers'), value: users.length, icon: Users },
+    { label: t('admin.activeAds'), value: ads.length, icon: ImageIcon }
+  ]), [ads.length, magazines.length, news.length, t, users.length]);
+
+  const resetNewsForm = () => {
+    setEditingNewsId(null);
+    setNewsForm({
+      title: '',
+      category: NEWS_CATEGORIES[0],
+      excerpt: '',
+      content: '',
+      image: '',
+      author: '',
+      featured: false,
+      requiresSubscription: false
+    });
+  };
+
+  const handleStoryImageSelected = (item: AdminMediaItem) => {
+    if (item.kind !== 'image') return;
+    setNewsForm((prev) => ({ ...prev, image: item.url }));
+  };
+
+  const handleMagazineCoverSelected = (item: AdminMediaItem) => {
+    if (item.kind !== 'image') return;
+    setNewIssue((prev) => ({ ...prev, coverImage: item.url }));
+  };
+
+  const handleMagazinePageSelected = (item: AdminMediaItem) => {
+    if (item.kind !== 'image') return;
+    setNewIssue((prev) => ({ ...prev, pages: [...(prev.pages || []), item.url] }));
+  };
+
+  const handleMagazinePdfSelected = (item: AdminMediaItem) => {
+    if (item.kind !== 'pdf') return;
+    setNewIssue((prev) => ({ ...prev, pdfUrl: item.url }));
+  };
+
+  const handleMagazinePdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const resp = await fetch(API_BASE + '/api/uploads', {
+        method: 'POST',
+        headers: { ...getAuthHeaders() },
+        body: formData
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data?.error || 'Failed to upload PDF');
+      }
+
+      if (data.media?.url) {
+        setNewIssue((prev) => ({ ...prev, pdfUrl: data.media.url }));
+      }
+    } catch (error) {
+      console.error('Failed to upload magazine PDF', error);
+    } finally {
+      if (magazinePdfInputRef.current) {
+        magazinePdfInputRef.current.value = '';
+      }
     }
   };
 
-  const startProcessing = (file: File) => {
-    setUploadStep('UPLOADING');
-    setIsUploading(true);
-    setUploadProgress(0);
+  const submitNews = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const payload: NewsPost = {
+      id: editingNewsId ?? Date.now().toString(),
+      title: newsForm.title || 'Untitled Story',
+      category: newsForm.category || NEWS_CATEGORIES[0],
+      excerpt: newsForm.excerpt || '',
+      content: newsForm.content || '',
+      image: newsForm.image || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=500&fit=crop',
+      author: newsForm.author || currentUser.name,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      featured: Boolean(newsForm.featured),
+      requiresSubscription: Boolean(newsForm.requiresSubscription)
+    };
 
-    // Step 1: Upload Simulation
-    let progress = 0;
-    const uploadInterval = setInterval(() => {
-      progress += Math.random() * 15;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(uploadInterval);
-        setUploadProgress(100);
-        
-        // Transition to Conversion
-        setTimeout(() => {
-          setUploadStep('CONVERTING');
-          setUploadProgress(0);
-          startConversionSimulation();
-        }, 800);
-      }
-      setUploadProgress(Math.floor(progress));
-    }, 200);
+    if (editingNewsId) {
+      await updateNews(editingNewsId, payload);
+    } else {
+      await addNews(payload);
+    }
+
+    resetNewsForm();
   };
 
-  const startConversionSimulation = () => {
-    let progress = 0;
-    const convertInterval = setInterval(() => {
-      progress += Math.random() * 10;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(convertInterval);
-        setUploadProgress(100);
-        
-        // Transition to Configuration
-        setTimeout(() => {
-          setUploadStep('CONFIGURING');
-          setNewIssue(prev => ({
-            ...prev,
-            title: selectedFile?.name.replace('.pdf', '') || '',
-            issueNumber: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-          }));
-        }, 1000);
-      }
-      setUploadProgress(Math.floor(progress));
-    }, 300);
-  };
-
-  const finalizeUpload = () => {
+  const handleUploadMagazine = () => {
     const mag: MagazineIssue = {
       id: 'm' + Date.now(),
       title: newIssue.title || 'Untitled Issue',
-      issueNumber: newIssue.issueNumber || 'Current',
-      coverImage: 'https://picsum.photos/400/600?random=' + Math.random(),
-      pages: Array(12).fill(0).map((_, i) => `https://picsum.photos/800/1200?random=${200+i}`),
+      issueNumber: newIssue.issueNumber || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      coverImage: newIssue.coverImage || 'https://images.unsplash.com/photo-1504711434969-e33886168d8c?w=400&h=600&fit=crop',
+      pages: newIssue.pages?.length
+        ? newIssue.pages
+        : Array.from({ length: 10 }, (_, index) => `https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=1200&fit=crop&q=${60 + index}`),
       date: new Date().toISOString().split('T')[0],
       priceDigital: newIssue.priceDigital || 0,
       pricePhysical: newIssue.pricePhysical || 499,
+      isFree: Boolean(newIssue.isFree),
       gatedPage: newIssue.gatedPage || 2,
-      isFree: newIssue.isFree || false,
-      blurPaywall: newIssue.blurPaywall || false,
+      blurPaywall: Boolean(newIssue.blurPaywall)
     };
 
-    addMagazine(mag);
-    resetUpload();
-    setActiveTab('magazines');
+    void addMagazine(mag);
+    setNewIssue({
+      title: '',
+      issueNumber: '',
+      coverImage: '',
+      pages: [],
+      priceDigital: 0,
+      pricePhysical: 499,
+      gatedPage: 2,
+      isFree: false,
+      blurPaywall: false
+    });
   };
 
-  const resetUpload = () => {
-    setIsUploading(false);
-    setUploadStep('IDLE');
-    setUploadProgress(0);
-    setSelectedFile(null);
-  };
-
-  const handleUpdateGatedPage = (id: string, value: string) => {
-    const pageNum = parseInt(value, 10);
-    if (!isNaN(pageNum)) updateMagazine(id, { gatedPage: pageNum });
+  const saveAds = async () => {
+    setIsSavingAds(true);
+    await updateAds(editableAds);
+    setIsSavingAds(false);
   };
 
   const renderDashboard = () => (
     <div className="space-y-8">
-      {/* Welcome Header */}
       <div className="bg-gradient-to-r from-[#001f3f] to-[#800000] p-8 rounded-3xl text-white shadow-xl">
-        <h1 className="text-3xl font-black serif mb-2">Welcome back, {currentUser.name}!</h1>
-        <p className="text-blue-100">Master admin dashboard - Monitor your digital magazine empire</p>
+        <h1 className="text-3xl font-black serif mb-2">{t('admin.welcomeBack', { name: currentUser.name })}</h1>
+        <p className="text-blue-100">{t('admin.dashboardBody')}</p>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <Book className="text-[#800000]" size={24} />
-            <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">+12%</span>
-          </div>
-          <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-1">Active Issues</p>
-          <h3 className="text-3xl font-black text-[#001f3f] serif">{magazines.length}</h3>
-        </div>
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <Users className="text-[#001f3f]" size={24} />
-            <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">+8%</span>
-          </div>
-          <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-1">Total Subscribers</p>
-          <h3 className="text-3xl font-black text-[#001f3f] serif">{users.length}</h3>
-        </div>
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <FileText className="text-[#800000]" size={24} />
-            <span className="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-1 rounded-full">+5%</span>
-          </div>
-          <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-1">News Articles</p>
-          <h3 className="text-3xl font-black text-[#001f3f] serif">{news.length}</h3>
-        </div>
-        <div className="bg-[#001f3f] p-6 rounded-3xl text-white shadow-xl">
-          <div className="flex items-center justify-between mb-4">
-            <Settings className="text-blue-300" size={24} />
-            <span className="text-xs font-bold text-green-300 bg-green-200/20 px-2 py-1 rounded-full">99.9%</span>
-          </div>
-          <p className="text-[10px] font-black uppercase text-blue-300 tracking-[0.2em] mb-1">System Health</p>
-          <h3 className="text-3xl font-black serif">Online</h3>
-        </div>
-      </div>
-
-      {/* Charts and Analytics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <h3 className="text-xl font-bold text-[#001f3f] serif mb-6">Subscription Growth</h3>
-          <div className="space-y-4">
-            {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map((month, i) => (
-              <div key={month} className="flex items-center space-x-4">
-                <span className="w-12 text-sm font-bold text-gray-600">{month}</span>
-                <div className="flex-1 bg-gray-100 rounded-full h-3">
-                  <div 
-                    className="bg-gradient-to-r from-[#800000] to-[#001f3f] h-3 rounded-full transition-all duration-500"
-                    style={{ width: `${20 + i * 15}%` }}
-                  ></div>
-                </div>
-                <span className="w-12 text-sm font-bold text-[#001f3f]">{20 + i * 5}</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {stats.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.label} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm min-w-0">
+              <div className="flex items-center justify-between mb-4">
+                <Icon className="text-[#800000]" size={24} />
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{item.label}</span>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <h3 className="text-xl font-bold text-[#001f3f] serif mb-6">Quick Actions</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <button 
-              onClick={() => setActiveTab('magazines')}
-              className="p-4 bg-[#800000] text-white rounded-2xl hover:bg-red-800 transition-all flex flex-col items-center space-y-2"
-            >
-              <FileUp size={24} />
-              <span className="text-xs font-bold uppercase">Upload PDF</span>
-            </button>
-            <button 
-              onClick={() => setActiveTab('news')}
-              className="p-4 bg-[#001f3f] text-white rounded-2xl hover:bg-blue-800 transition-all flex flex-col items-center space-y-2"
-            >
-              <Plus size={24} />
-              <span className="text-xs font-bold uppercase">Add News</span>
-            </button>
-            <button 
-              onClick={() => setActiveTab('users')}
-              className="p-4 bg-gray-800 text-white rounded-2xl hover:bg-gray-700 transition-all flex flex-col items-center space-y-2"
-            >
-              <Users size={24} />
-              <span className="text-xs font-bold uppercase">Manage Users</span>
-            </button>
-            <button 
-              onClick={() => setActiveTab('settings')}
-              className="p-4 bg-green-600 text-white rounded-2xl hover:bg-green-700 transition-all flex flex-col items-center space-y-2"
-            >
-              <Settings size={24} />
-              <span className="text-xs font-bold uppercase">Settings</span>
-            </button>
-          </div>
-        </div>
+              <h3 className="text-3xl font-black text-[#001f3f] serif">{item.value}</h3>
+            </div>
+          );
+        })}
       </div>
+    </div>
+  );
 
-      {/* Recent Activity */}
-      <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-[#001f3f] serif">Recent Activity</h3>
-          <button className="text-xs font-black uppercase tracking-widest text-[#800000]">View All &rarr;</button>
+  const renderNews = () => (
+    <div className="grid grid-cols-1 xl:grid-cols-[420px,minmax(0,1fr)] gap-8 items-start">
+      <form onSubmit={submitNews} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4 xl:sticky xl:top-6">
+        <div>
+          <h2 className="text-2xl font-black text-[#001f3f] serif">{editingNewsId ? t('admin.editStory') : t('admin.publishStory')}</h2>
+          <p className="text-sm text-gray-500 mt-1">{t('admin.newsFormBody')}</p>
         </div>
+        <input value={newsForm.title || ''} onChange={(e) => setNewsForm({ ...newsForm, title: e.target.value })} placeholder={t('admin.storyTitle')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" required />
+        <select value={newsForm.category || NEWS_CATEGORIES[0]} onChange={(e) => setNewsForm({ ...newsForm, category: e.target.value })} className="w-full bg-gray-50 px-4 py-3 rounded-2xl">
+          {NEWS_CATEGORIES.map((category) => <option key={category} value={category}>{translateCategory(t, category)}</option>)}
+        </select>
+        <div className="space-y-3">
+          <div className="flex gap-3">
+            <input value={newsForm.image || ''} onChange={(e) => setNewsForm({ ...newsForm, image: e.target.value })} placeholder={t('admin.imageUrl')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
+            <button type="button" onClick={() => setActiveTab('media')} className="px-4 py-3 rounded-2xl bg-gray-100 text-[#001f3f] font-bold whitespace-nowrap">
+              Media
+            </button>
+          </div>
+          {newsForm.image && (
+            <img src={resolveAssetUrl(newsForm.image)} alt="Story preview" className="h-32 w-full object-cover rounded-2xl border border-gray-100" />
+          )}
+        </div>
+        <input value={newsForm.author || ''} onChange={(e) => setNewsForm({ ...newsForm, author: e.target.value })} placeholder={t('admin.authorName')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
+        <textarea value={newsForm.excerpt || ''} onChange={(e) => setNewsForm({ ...newsForm, excerpt: e.target.value })} placeholder={t('admin.shortExcerpt')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl min-h-[100px]" required />
+        <textarea value={newsForm.content || ''} onChange={(e) => setNewsForm({ ...newsForm, content: e.target.value })} placeholder={t('admin.fullArticleContent')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl min-h-[180px]" required />
+        <label className="flex items-center gap-3 text-sm font-bold text-[#001f3f]">
+          <input type="checkbox" checked={Boolean(newsForm.featured)} onChange={(e) => setNewsForm({ ...newsForm, featured: e.target.checked })} />
+          {t('admin.featureHomepage')}
+        </label>
+        <label className="flex items-center gap-3 text-sm font-bold text-[#001f3f]">
+          <input type="checkbox" checked={Boolean(newsForm.requiresSubscription)} onChange={(e) => setNewsForm({ ...newsForm, requiresSubscription: e.target.checked })} />
+          {t('admin.requireSubscription')}
+        </label>
+        <div className="flex gap-3">
+          <button type="submit" className="flex-1 bg-[#800000] text-white py-3 rounded-2xl font-bold hover:bg-red-800 transition-colors">
+            {editingNewsId ? t('admin.updateStory') : t('admin.publishStory')}
+          </button>
+          {editingNewsId && (
+            <button type="button" onClick={resetNewsForm} className="px-5 py-3 rounded-2xl font-bold bg-gray-100 text-[#001f3f]">{t('common.cancel')}</button>
+          )}
+        </div>
+      </form>
+
+      <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm min-w-0">
+        <h3 className="text-2xl font-black text-[#001f3f] serif mb-6">{t('admin.publishedStories')}</h3>
         <div className="space-y-4">
-          {[
-            { action: 'New magazine uploaded', time: '2 hours ago', type: 'success' },
-            { action: 'User subscription renewed', time: '4 hours ago', type: 'info' },
-            { action: 'News article published', time: '1 day ago', type: 'success' },
-            { action: 'System backup completed', time: '2 days ago', type: 'warning' }
-          ].map((activity, i) => (
-            <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-              <div className="flex items-center space-x-4">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  activity.type === 'success' ? 'bg-green-100 text-green-600' :
-                  activity.type === 'info' ? 'bg-blue-100 text-blue-600' :
-                  'bg-yellow-100 text-yellow-600'
-                }`}>
-                  <CheckCircle size={16} />
+          {news.map((item) => (
+            <div key={item.id} className="border border-gray-100 rounded-3xl p-5 flex flex-col xl:flex-row gap-4 xl:items-center xl:justify-between min-w-0">
+              <div className="flex gap-4 items-start min-w-0">
+                <img src={resolveAssetUrl(item.image)} alt={item.title} className="w-24 h-24 object-cover rounded-2xl bg-gray-100 shrink-0" />
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className="text-[10px] uppercase tracking-widest font-bold text-[#800000]">{translateCategory(t, item.category)}</span>
+                    {item.featured && <span className="text-[10px] uppercase tracking-widest font-bold text-green-600">{t('admin.featured')}</span>}
+                    {item.requiresSubscription && <span className="text-[10px] uppercase tracking-widest font-bold text-[#001f3f]">{t('admin.subscriber')}</span>}
+                  </div>
+                  <h4 className="text-lg font-bold text-[#001f3f] truncate">{item.title}</h4>
+                  <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.excerpt}</p>
+                  <p className="text-xs text-gray-400 mt-2">{item.author} • {item.date}</p>
                 </div>
-                <span className="font-bold text-sm text-[#001f3f]">{activity.action}</span>
               </div>
-              <span className="text-xs text-gray-400 font-bold">{activity.time}</span>
+              <div className="flex gap-3 shrink-0">
+                <button onClick={() => { setEditingNewsId(item.id); setNewsForm(item); }} className="px-4 py-2 rounded-xl bg-gray-100 text-[#001f3f] font-bold">{t('common.edit')}</button>
+                <button onClick={() => void deleteNews(item.id)} className="px-4 py-2 rounded-xl bg-red-50 text-[#800000] font-bold">{t('common.delete')}</button>
+              </div>
             </div>
           ))}
         </div>
@@ -263,288 +301,284 @@ const Admin: React.FC = () => {
   );
 
   const renderMagazines = () => (
-    <div className="space-y-8 animate-in fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="grid grid-cols-1 xl:grid-cols-[420px,minmax(0,1fr)] gap-8 items-start">
+      <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4 xl:sticky xl:top-6">
         <div>
-          <h2 className="text-3xl font-black text-[#001f3f] serif">Flipbook Dashboard</h2>
-          <p className="text-sm text-gray-500 mt-1">Configure your digital press triggers and premium access rules.</p>
+          <h2 className="text-2xl font-black text-[#001f3f] serif">{t('admin.publishIssue')}</h2>
+          <p className="text-sm text-gray-500 mt-1">{t('admin.magazineFormBody')}</p>
         </div>
-        <div className="flex space-x-4">
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            accept=".pdf" 
-            className="hidden" 
-          />
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            className="bg-[#800000] text-white px-8 py-4 rounded-2xl flex items-center space-x-3 hover:bg-red-800 transition-all shadow-xl shadow-red-900/20"
-          >
-            <FileUp size={20} />
-            <span className="font-bold text-sm uppercase tracking-widest">Upload PDF Issue</span>
-          </button>
+        <input type="file" ref={magazinePdfInputRef} accept="application/pdf" className="hidden" onChange={(e) => void handleMagazinePdfUpload(e)} />
+        <button onClick={() => magazinePdfInputRef.current?.click()} className="w-full bg-gray-100 text-[#001f3f] py-3 rounded-2xl font-bold flex items-center justify-center gap-3">
+          <FileUp size={18} /> {t('admin.uploadPdf')}
+        </button>
+        <input value={newIssue.title || ''} onChange={(e) => setNewIssue({ ...newIssue, title: e.target.value })} placeholder={t('admin.issueTitle')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
+        <input value={newIssue.issueNumber || ''} onChange={(e) => setNewIssue({ ...newIssue, issueNumber: e.target.value })} placeholder={t('admin.issueNumber')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
+        <div className="space-y-3">
+          <div className="flex gap-3">
+            <input value={newIssue.coverImage || ''} onChange={(e) => setNewIssue({ ...newIssue, coverImage: e.target.value })} placeholder={t('admin.coverImageUrl')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
+            <button type="button" onClick={() => setActiveTab('media')} className="px-4 py-3 rounded-2xl bg-gray-100 text-[#001f3f] font-bold whitespace-nowrap">
+              Media
+            </button>
+          </div>
+          {newIssue.coverImage && (
+            <img src={resolveAssetUrl(newIssue.coverImage)} alt="Cover preview" className="h-40 w-full object-cover rounded-2xl border border-gray-100" />
+          )}
         </div>
+        <input value={newIssue.pdfUrl || ''} onChange={(e) => setNewIssue({ ...newIssue, pdfUrl: e.target.value })} placeholder="PDF asset URL" className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
+        <textarea value={(newIssue.pages || []).join('\n')} onChange={(e) => setNewIssue({ ...newIssue, pages: e.target.value.split('\n').map((item) => item.trim()).filter(Boolean) })} placeholder={t('admin.pagesHint')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl min-h-[140px]" />
+        {(newIssue.pages || []).length > 0 && (
+          <div className="grid grid-cols-3 gap-2">
+            {(newIssue.pages || []).slice(0, 6).map((page, index) => (
+              <img key={`${page}-${index}`} src={resolveAssetUrl(page)} alt={`Page ${index + 1}`} className="h-24 w-full object-cover rounded-xl border border-gray-100" />
+            ))}
+          </div>
+        )}
+        <div className="grid grid-cols-2 gap-3">
+          <input type="number" value={newIssue.priceDigital || 0} onChange={(e) => setNewIssue({ ...newIssue, priceDigital: Number(e.target.value) })} placeholder={t('admin.digitalPrice')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
+          <input type="number" value={newIssue.pricePhysical || 0} onChange={(e) => setNewIssue({ ...newIssue, pricePhysical: Number(e.target.value) })} placeholder={t('admin.physicalPrice')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <input type="number" value={newIssue.gatedPage || 2} onChange={(e) => setNewIssue({ ...newIssue, gatedPage: Number(e.target.value) })} placeholder={t('admin.gatedPage')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
+          <label className="flex items-center gap-3 bg-gray-50 px-4 py-3 rounded-2xl font-bold text-sm text-[#001f3f]">
+            <input type="checkbox" checked={Boolean(newIssue.isFree)} onChange={(e) => setNewIssue({ ...newIssue, isFree: e.target.checked })} />
+            {t('admin.freeIssue')}
+          </label>
+        </div>
+        <label className="flex items-center gap-3 bg-gray-50 px-4 py-3 rounded-2xl font-bold text-sm text-[#001f3f]">
+          <input type="checkbox" checked={Boolean(newIssue.blurPaywall)} onChange={(e) => setNewIssue({ ...newIssue, blurPaywall: e.target.checked })} />
+          {t('admin.enableBlurPaywall')}
+        </label>
+        <div className="rounded-2xl bg-[#001f3f]/5 px-4 py-4 text-sm text-gray-600">
+          {t('admin.magazineHelper')}
+        </div>
+        <button onClick={handleUploadMagazine} className="w-full bg-[#800000] text-white py-3 rounded-2xl font-bold hover:bg-red-800 transition-colors">{t('admin.publishIssue')}</button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {magazines.map(m => (
-          <div key={m.id} className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm flex flex-col md:flex-row gap-8 group">
+      <div className="space-y-6 min-w-0">
+        {magazines.map((magazine) => (
+          <div key={magazine.id} className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm flex flex-col xl:flex-row gap-8 min-w-0">
             <div className="w-44 shrink-0 relative overflow-hidden rounded-3xl shadow-xl">
-               <img src={m.coverImage} className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700" />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <img src={resolveAssetUrl(magazine.coverImage)} className="w-full h-64 object-cover" alt={magazine.title} />
             </div>
-            
-            <div className="flex-1 flex flex-col justify-between py-2">
+            <div className="flex-1 flex flex-col gap-5 min-w-0">
               <div>
-                <h4 className="text-xl font-bold text-[#001f3f] serif leading-tight">{m.title}</h4>
-                <div className="flex items-center space-x-3 mt-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                <h4 className="text-xl font-bold text-[#001f3f] serif leading-tight">{magazine.title}</h4>
+                <div className="flex items-center gap-3 mt-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
                   <Globe size={14} />
-                  <span>{m.pages.length} Pages</span>
+                  <span>{magazine.pages.length} {t('admin.pages')}</span>
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-4 my-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-gray-50 p-5 rounded-3xl border border-gray-100">
                   <label className="flex items-center text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">
-                    <Lock size={12} className="mr-2" /> Sub Trigger
+                    <Lock size={12} className="mr-2" /> {t('admin.gatedPage')}
                   </label>
-                  <input 
-                    type="number" 
-                    value={m.gatedPage} 
-                    onChange={(e) => handleUpdateGatedPage(m.id, e.target.value)}
-                    className="w-full bg-white px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold text-[#800000] focus:ring-2 focus:ring-[#800000] outline-none"
-                  />
+                  <input type="number" value={magazine.gatedPage || 2} onChange={(e) => void updateMagazine(magazine.id, { gatedPage: Number(e.target.value) })} className="w-full bg-white px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold text-[#800000]" />
                 </div>
-                <div className="bg-gray-50 p-5 rounded-3xl border border-gray-100 flex flex-col justify-between">
-                  <label className="flex items-center text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">
-                    <ImageIcon size={12} className="mr-2" /> Access
-                  </label>
-                  <button 
-                    onClick={() => updateMagazine(m.id, { isFree: !m.isFree })}
-                    className={`w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                      m.isFree ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
-                    }`}
-                  >
-                    {m.isFree ? 'PUBLIC' : 'PREMIUM'}
+                <div className="bg-gray-50 p-5 rounded-3xl border border-gray-100">
+                  <label className="flex items-center text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">{t('admin.digitalAccess')}</label>
+                  <button onClick={() => void updateMagazine(magazine.id, { isFree: !magazine.isFree })} className={`w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${magazine.isFree ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                    {magazine.isFree ? t('common.public') : t('common.premium')}
+                  </button>
+                </div>
+                <div className="bg-gray-50 p-5 rounded-3xl border border-gray-100">
+                  <label className="flex items-center text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">{t('admin.blurPaywall')}</label>
+                  <button onClick={() => void updateMagazine(magazine.id, { blurPaywall: !magazine.blurPaywall })} className={`w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${magazine.blurPaywall ? 'bg-[#001f3f] text-white' : 'bg-white text-[#001f3f] border border-gray-200'}`}>
+                    {magazine.blurPaywall ? t('common.enabled') : t('common.disabled')}
                   </button>
                 </div>
               </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex space-x-2">
-                  <button className="p-3 bg-gray-100 text-[#001f3f] hover:bg-blue-900 hover:text-white rounded-xl transition-all"><Edit size={18} /></button>
-                  <button onClick={() => deleteMagazine(m.id)} className="p-3 bg-red-50 text-[#800000] hover:bg-red-800 hover:text-white rounded-xl transition-all"><Trash2 size={18} /></button>
-                </div>
-                <button className="text-[11px] font-black uppercase tracking-widest text-[#800000] hover:underline">View Analytics</button>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <p className="text-sm text-gray-500">
+                  {t('admin.previewUntil', { page: magazine.gatedPage || 2, price: magazine.pricePhysical })}
+                </p>
+                <button onClick={() => void deleteMagazine(magazine.id)} className="px-4 py-2 rounded-xl bg-red-50 text-[#800000] font-bold flex items-center gap-2 shrink-0">
+                  <Trash2 size={16} /> {t('common.delete')}
+                </button>
               </div>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Upload Overlay */}
-      {isUploading && (
-        <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
-          <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden relative">
-            <button onClick={resetUpload} className="absolute top-8 right-8 text-gray-400 hover:text-red-600 transition-colors">
-              <X size={24} />
-            </button>
-
-            <div className="p-12">
-              {uploadStep === 'UPLOADING' && (
-                <div className="text-center space-y-8 animate-in zoom-in">
-                  <div className="w-24 h-24 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
-                    <Loader2 size={48} className="animate-spin" />
-                  </div>
-                  <div>
-                    <h3 className="text-3xl font-black text-[#001f3f] serif">Uploading Press Copy</h3>
-                    <p className="text-gray-400 mt-2">Transmitting "{selectedFile?.name}" to high-speed storage.</p>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
-                      <div className="h-full bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
-                    </div>
-                    <p className="text-xs font-black text-blue-600 uppercase tracking-widest">{uploadProgress}% Complete</p>
-                  </div>
-                </div>
-              )}
-
-              {uploadStep === 'CONVERTING' && (
-                <div className="text-center space-y-8 animate-in zoom-in">
-                  <div className="w-24 h-24 bg-red-50 text-[#800000] rounded-3xl flex items-center justify-center mx-auto shadow-inner relative">
-                    <Wand2 size={48} className="animate-bounce" />
-                    <div className="absolute inset-0 bg-red-400/20 blur-xl rounded-full" />
-                  </div>
-                  <div>
-                    <h3 className="text-3xl font-black text-[#001f3f] serif">Converting PDF to Press Images</h3>
-                    <p className="text-gray-400 mt-2">Our AI is extracting high-resolution page assets for the 3D Flipbook.</p>
-                  </div>
-                  <div className="space-y-4">
-                     <div className="flex items-center justify-center space-x-3">
-                        <span className={`w-3 h-3 rounded-full ${uploadProgress > 25 ? 'bg-red-500' : 'bg-gray-200'}`} />
-                        <span className={`w-3 h-3 rounded-full ${uploadProgress > 50 ? 'bg-red-500' : 'bg-gray-200'}`} />
-                        <span className={`w-3 h-3 rounded-full ${uploadProgress > 75 ? 'bg-red-500' : 'bg-gray-200'}`} />
-                        <span className={`w-3 h-3 rounded-full ${uploadProgress === 100 ? 'bg-red-500' : 'bg-gray-200'}`} />
-                     </div>
-                     <p className="text-xs font-black text-[#800000] uppercase tracking-widest">Rendering Page {Math.floor(uploadProgress / 8)} / 12</p>
-                  </div>
-                </div>
-              )}
-
-              {uploadStep === 'CONFIGURING' && (
-                <div className="animate-in slide-in-from-bottom-4 duration-500">
-                  <div className="flex items-center space-x-4 mb-10">
-                    <div className="p-3 bg-green-50 text-green-600 rounded-xl">
-                      <CheckCircle size={24} />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-black text-[#001f3f] serif">Conversion Successful</h3>
-                      <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">12 Assets Extracted & Linked</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Issue Title</label>
-                        <input 
-                          type="text" 
-                          value={newIssue.title}
-                          onChange={e => setNewIssue({...newIssue, title: e.target.value})}
-                          className="w-full bg-gray-50 px-5 py-4 rounded-2xl border-0 focus:ring-2 focus:ring-[#800000] outline-none text-sm font-bold"
-                          placeholder="e.g. The AI Revolution"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Issue Date/Volume</label>
-                        <input 
-                          type="text" 
-                          value={newIssue.issueNumber}
-                          onChange={e => setNewIssue({...newIssue, issueNumber: e.target.value})}
-                          className="w-full bg-gray-50 px-5 py-4 rounded-2xl border-0 focus:ring-2 focus:ring-[#800000] outline-none text-sm font-bold"
-                          placeholder="e.g. December 2024"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Subscription Rule</label>
-                        <div className="grid grid-cols-2 gap-3">
-                          <button 
-                            onClick={() => setNewIssue({...newIssue, isFree: true})}
-                            className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${newIssue.isFree ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-100 text-gray-400'}`}
-                          >
-                            Public
-                          </button>
-                          <button 
-                            onClick={() => setNewIssue({...newIssue, isFree: false})}
-                            className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${!newIssue.isFree ? 'bg-amber-600 text-white shadow-lg' : 'bg-gray-100 text-gray-400'}`}
-                          >
-                            Premium
-                          </button>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Trigger Gated Page</label>
-                        <input 
-                          type="number" 
-                          value={newIssue.gatedPage}
-                          onChange={e => setNewIssue({...newIssue, gatedPage: parseInt(e.target.value)})}
-                          className="w-full bg-gray-50 px-5 py-4 rounded-2xl border-0 focus:ring-2 focus:ring-[#800000] outline-none text-sm font-bold"
-                        />
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <input 
-                          type="checkbox" 
-                          id="blurPaywall"
-                          checked={newIssue.blurPaywall}
-                          onChange={e => setNewIssue({...newIssue, blurPaywall: e.target.checked})}
-                          className="w-4 h-4 text-[#800000] bg-gray-100 border-gray-300 rounded focus:ring-[#800000] focus:ring-2"
-                        />
-                        <label htmlFor="blurPaywall" className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Enable Blur Paywall</label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-10 flex items-center space-x-6 p-6 bg-blue-50 rounded-[2rem] border border-blue-100">
-                    <Info className="text-blue-600 shrink-0" size={24} />
-                    <p className="text-[10px] text-blue-800 font-bold leading-relaxed">
-                      Confirming will immediately publish this issue to the live "Magazine" section. 
-                      Ensure metadata matches the printed copy for consistency.
-                    </p>
-                  </div>
-
-                  <button 
-                    onClick={finalizeUpload}
-                    className="w-full bg-[#800000] text-white py-5 rounded-[2rem] font-black uppercase tracking-widest shadow-2xl shadow-red-900/40 hover:bg-red-800 transition-all mt-8"
-                  >
-                    Publish to Digital Press
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 
-  return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-50 -mx-4 -my-8 md:-my-16 overflow-hidden">
-      {/* Admin Sidebar */}
-      <nav className="w-full md:w-72 bg-[#001f3f] text-white p-10 flex flex-col shrink-0">
-        <div className="flex items-center space-x-4 mb-16">
-          <div className="w-12 h-12 bg-[#800000] rounded-2xl flex items-center justify-center text-2xl font-black shadow-lg">VS</div>
-          <h2 className="font-black text-xl serif">Master Panel</h2>
+  const renderAds = () => (
+    <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-black text-[#001f3f] serif">{t('admin.advertisingSlots')}</h2>
+          <p className="text-sm text-gray-500 mt-1">{t('admin.adsBody')}</p>
         </div>
-
-        <div className="flex-1 space-y-4">
-          <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-bold text-sm transition-all ${activeTab === 'dashboard' ? 'bg-[#800000]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <LayoutDashboard size={20} />
-            <span>Overview</span>
-          </button>
-          <button onClick={() => setActiveTab('magazines')} className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-bold text-sm transition-all ${activeTab === 'magazines' ? 'bg-[#800000]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <Book size={20} />
-            <span>Digital Library</span>
-          </button>
-          <button onClick={() => setActiveTab('news')} className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-bold text-sm transition-all ${activeTab === 'news' ? 'bg-[#800000]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <FileText size={20} />
-            <span>News Editor</span>
-          </button>
-          {isMaster && (
-            <button onClick={() => setActiveTab('users')} className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-bold text-sm transition-all ${activeTab === 'users' ? 'bg-[#800000]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-              <Users size={20} />
-              <span>CRM</span>
-            </button>
-          )}
-        </div>
-        
-        <div className="pt-8 mt-8 border-t border-white/10">
-          <button className="flex items-center space-x-4 px-6 py-4 text-gray-400 hover:text-white font-bold text-sm transition-colors">
-            <Settings size={20} />
-            <span>System Config</span>
-          </button>
-        </div>
-      </nav>
-      
-      <main className="flex-1 p-12 overflow-y-auto">
-        {activeTab === 'dashboard' && renderDashboard()}
-        {activeTab === 'magazines' && renderMagazines()}
-        {['news', 'users', 'ads', 'settings'].includes(activeTab) && (
-          <div className="bg-white p-20 rounded-[40px] text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center space-y-6">
-             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300">
-                <FileType size={40} />
-             </div>
-             <div>
-                <h3 className="text-xl font-bold text-[#001f3f] serif">Coming Soon</h3>
-                <p className="text-gray-400 text-sm mt-1">This module is currently being optimized for high-performance press management.</p>
-             </div>
+        <button onClick={() => void saveAds()} className="bg-[#800000] text-white px-5 py-3 rounded-2xl font-bold flex items-center gap-2">
+          <Save size={16} /> {isSavingAds ? t('common.save') : t('admin.saveAds')}
+        </button>
+      </div>
+      <div className="space-y-4">
+        {editableAds.map((ad, index) => (
+          <div key={ad.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-5 rounded-3xl border border-gray-100">
+            <input value={ad.title} onChange={(e) => setEditableAds((prev) => prev.map((item, itemIndex) => itemIndex === index ? { ...item, title: e.target.value } : item))} placeholder={t('admin.adTitle')} className="bg-gray-50 px-4 py-3 rounded-2xl" />
+            <input value={ad.imageUrl} onChange={(e) => setEditableAds((prev) => prev.map((item, itemIndex) => itemIndex === index ? { ...item, imageUrl: e.target.value } : item))} placeholder={t('admin.imageUrl')} className="bg-gray-50 px-4 py-3 rounded-2xl" />
+            <input value={ad.link} onChange={(e) => setEditableAds((prev) => prev.map((item, itemIndex) => itemIndex === index ? { ...item, link: e.target.value } : item))} placeholder={t('admin.destinationUrl')} className="bg-gray-50 px-4 py-3 rounded-2xl" />
+            <select value={ad.position} onChange={(e) => setEditableAds((prev) => prev.map((item, itemIndex) => itemIndex === index ? { ...item, position: e.target.value as typeof ad.position } : item))} className="bg-gray-50 px-4 py-3 rounded-2xl">
+              <option value="SIDEBAR_TOP">{t('admin.sidebarTop')}</option>
+              <option value="SIDEBAR_MID">{t('admin.sidebarMid')}</option>
+              <option value="SIDEBAR_BOTTOM">{t('admin.sidebarBottom')}</option>
+              <option value="HOMEPAGE_BANNER">{t('admin.homepageBanner')}</option>
+            </select>
           </div>
-        )}
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderMedia = () => (
+    <MediaManager
+      onSelectForNewsImage={(item) => {
+        handleStoryImageSelected(item);
+        setActiveTab('news');
+      }}
+      onSelectForMagazineCover={(item) => {
+        handleMagazineCoverSelected(item);
+        setActiveTab('magazines');
+      }}
+      onSelectForMagazinePage={(item) => {
+        handleMagazinePageSelected(item);
+        setActiveTab('magazines');
+      }}
+      onSelectForMagazinePdf={(item) => {
+        handleMagazinePdfSelected(item);
+        setActiveTab('magazines');
+      }}
+    />
+  );
+
+  const renderUsers = () => (
+    <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+      <div>
+        <h2 className="text-2xl font-black text-[#001f3f] serif">{t('admin.userRoles')}</h2>
+        <p className="text-sm text-gray-500 mt-1">{t('admin.userRolesBody')}</p>
+      </div>
+      {users.map((user) => (
+        <div key={user.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 rounded-3xl border border-gray-100">
+          <div>
+            <h4 className="font-bold text-[#001f3f]">{user.name}</h4>
+            <p className="text-sm text-gray-500">{user.email}</p>
+          </div>
+          <select value={user.role} disabled={!isMaster} onChange={(e) => void updateUserRole(user.id, e.target.value as UserRole)} className="bg-gray-50 px-4 py-3 rounded-2xl min-w-[180px]">
+            <option value={UserRole.GENERAL}>{translateRole(t, UserRole.GENERAL)}</option>
+            <option value={UserRole.MAGAZINE}>{translateRole(t, UserRole.MAGAZINE)}</option>
+            <option value={UserRole.ADMIN}>{translateRole(t, UserRole.ADMIN)}</option>
+            <option value={UserRole.SUPER_ADMIN}>{translateRole(t, UserRole.SUPER_ADMIN)}</option>
+          </select>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderSettings = () => (
+    <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+      <h2 className="text-2xl font-black text-[#001f3f] serif">{t('admin.publishingNotes')}</h2>
+      <p className="text-sm text-gray-600">{t('admin.settingsLineOne')}</p>
+      <p className="text-sm text-gray-600">{t('admin.settingsLineTwo')}</p>
+      <p className="text-sm text-gray-600">{t('admin.settingsLineThree')}</p>
+    </div>
+  );
+
+  const navItems = [
+    { key: 'dashboard', label: t('common.overview'), icon: LayoutDashboard },
+    { key: 'magazines', label: t('common.digitalLibrary'), icon: Book },
+    { key: 'news', label: t('common.newsEditor'), icon: FileText },
+    { key: 'media', label: t('common.media'), icon: FolderOpen },
+    { key: 'ads', label: 'Ads', icon: ImageIcon },
+    { key: 'users', label: t('common.crm'), icon: Users },
+    { key: 'settings', label: t('common.settings'), icon: Settings }
+  ].filter((item) => isMaster || item.key !== 'users');
+
+  return (
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 -mx-4 -my-8 md:-my-16 overflow-hidden">
+      <StyledAdminNav className="w-full lg:w-72 bg-[#001f3f] text-white p-6 md:p-8 flex flex-col shrink-0">
+        <div className="flex items-center space-x-4 mb-12">
+          <div className="w-12 h-12 bg-[#800000] rounded-2xl flex items-center justify-center text-2xl font-black shadow-lg">VS</div>
+          <h2 className="font-black text-xl serif">{t('admin.masterPanel')}</h2>
+        </div>
+        <div className="flex-1">
+          <div className="radio-inputs-vertical">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <label key={item.key} className="radio-vertical">
+                  <input
+                    type="radio"
+                    name="admin-nav"
+                    checked={activeTab === item.key}
+                    onChange={() => setActiveTab(item.key as typeof activeTab)}
+                  />
+                  <span className="name-vertical">
+                    <Icon size={18} />
+                    <span>{item.label}</span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      </StyledAdminNav>
+
+      <main className="flex-1 min-w-0 p-6 md:p-10 overflow-y-auto">
+        {activeTab === 'dashboard' && renderDashboard()}
+        {activeTab === 'news' && renderNews()}
+        {activeTab === 'magazines' && renderMagazines()}
+        {activeTab === 'media' && renderMedia()}
+        {activeTab === 'ads' && renderAds()}
+        {activeTab === 'users' && renderUsers()}
+        {activeTab === 'settings' && renderSettings()}
       </main>
     </div>
   );
 };
+
+const StyledAdminNav = styled.nav`
+  .radio-inputs-vertical {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .radio-inputs-vertical input {
+    display: none;
+  }
+
+  .radio-inputs-vertical .radio-vertical .name-vertical {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    color: #e0e0e0;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.15s ease-in-out;
+    position: relative;
+  }
+
+  .radio-inputs-vertical input:checked + .name-vertical {
+    background-color: #800000;
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  .radio-inputs-vertical input + .name-vertical:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+  }
+
+  .radio-inputs-vertical input:checked + .name-vertical:hover {
+    background-color: #800000;
+    color: #ffffff;
+  }
+`;
 
 export default Admin;

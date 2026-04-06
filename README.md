@@ -1,41 +1,143 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="(https://github.com/VineshAcharya2026/VartmaanSarokar/blob/main/image.png)" />
-</div>
+# Vartmaan Sarokaar
 
+A modern Nepali digital news and magazine platform built with React, TypeScript, and Cloudflare.
 
+## 🚀 Production Ready
 
+This project is configured for deployment on Cloudflare's edge infrastructure:
+- **Frontend:** Static site (GitHub Pages / Cloudflare Pages)
+- **Backend:** Cloudflare Workers with D1 Database & R2 Storage
+- **Database:** Cloudflare D1 (SQLite-based edge database)
+- **Media Storage:** Cloudflare R2 (S3-compatible object storage)
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
-
-## Website ChatBot
-
-1. Copy `.env.example` to `.env` and set `OPENAI_API_KEY`.
-2. Install dependencies:
+## Quick Start (Development)
 
 ```bash
+# Install dependencies
 npm install
+
+# Copy environment variables
+cp .env.example .env
+
+# Start development servers
+npm run server:dev  # Backend API (port 5174)
+npm run dev         # Frontend (port 3000)
 ```
 
-3. Start the backend server in one terminal:
+## 📦 Production Deployment
+
+### One-Command Deployment (Windows)
 
 ```bash
-npm run server
+npm run deploy
 ```
 
-4. Start the frontend in another terminal:
+### Manual Deployment Steps
+
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for detailed deployment instructions.
+
+Quick overview:
+1. `npm run db:create` - Create D1 database
+2. `npm run r2:create` - Create R2 bucket  
+3. `npm run db:schema` - Apply database schema
+4. Set secrets: `JWT_SECRET`, `STAFF_PASSWORD`, `OPENAI_API_KEY`
+5. `npm run deploy:workers` - Deploy Workers API
+6. Update `PRODUCTION_API_URL` in `utils/app.ts`
+7. `npm run deploy:pages` - Deploy frontend
+
+## 🏗️ Architecture
+
+### Frontend
+- React 19 + TypeScript
+- Vite 6 with HMR
+- TailwindCSS + styled-components
+- GSAP animations
+- i18next (Nepali/English)
+- react-router-dom v7
+
+### Backend (Cloudflare Workers)
+- Serverless edge functions
+- D1 Database for persistence
+- R2 Bucket for media storage
+- JWT authentication
+- Rate limiting & security headers
+- OpenAI integration for chat
+
+### Database Schema (D1)
+- `users` - Authentication & roles
+- `articles` - News posts
+- `magazines` - Digital magazine issues
+- `ads` - Advertisements
+- `media` - File metadata
+- `subscription_requests` - Purchase requests
+
+## 📁 Project Structure
+
+```
+├── components/          # React components
+├── pages/              # Route pages
+├── server/             # Backend code
+│   ├── workers-entry.ts # Cloudflare Workers entry
+│   ├── d1-store.ts     # D1 database service
+│   └── store.ts        # File-based store (dev)
+├── migrations/         # Database migrations
+├── locales/            # i18n translations
+├── schema.sql          # D1 database schema
+├── wrangler.toml       # Cloudflare config
+└── DEPLOYMENT.md       # Deployment guide
+```
+
+## 🔐 Environment Variables
+
+### Frontend
+```bash
+VITE_API_BASE_URL=https://your-workers-url.workers.dev
+VITE_GOOGLE_CLIENT_ID=your-google-client-id
+```
+
+### Backend Secrets (Cloudflare)
+```bash
+wrangler secret put JWT_SECRET
+wrangler secret put STAFF_PASSWORD
+wrangler secret put OPENAI_API_KEY
+wrangler secret put GOOGLE_CLIENT_ID
+```
+
+## 📝 Available Scripts
 
 ```bash
-npm run dev
+# Development
+npm run dev            # Start frontend dev server
+npm run server:dev     # Start backend dev server
+
+# Building
+npm run build          # Build for production
+npm run typecheck      # Run TypeScript checks
+
+# Database
+npm run db:create      # Create D1 database
+npm run db:schema      # Apply schema
+npm run migrate:d1     # Generate migration SQL
+
+# Deployment
+npm run deploy         # Deploy to production
+npm run deploy:workers # Deploy Workers only
+npm run deploy:pages   # Deploy to Pages
 ```
 
-5. Open `http://localhost:5173/#/chat` to use the ChatBot. Enter a URL (optional) and ask questions.
+## 👥 User Roles
+
+- **GENERAL** - Digital/Physical subscribers
+- **MAGAZINE** - Magazine editors
+- **ADMIN** - Administrators
+- **SUPER_ADMIN** - Full system access
+
+## 🛡️ Security Features
+
+- JWT-based authentication (7-day expiry)
+- bcrypt password hashing
+- Helmet security headers
+- Rate limiting per endpoint
+- CORS configuration
+- Google OAuth integration
 

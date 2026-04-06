@@ -1,0 +1,506 @@
+{
+  "brand": {
+    "lineOne": "Vartmaan",
+    "lineTwo": "Sarokaar"
+  },
+  "roles": {
+    "general": "General",
+    "magazine": "Magazine",
+    "admin": "Admin",
+    "superAdmin": "Super Admin"
+  },
+  "categories": {
+    "nationalNews": "National News",
+    "internationalNews": "International News",
+    "politics": "Politics",
+    "business": "Business",
+    "economy": "Economy",
+    "sports": "Sports",
+    "entertainment": "Entertainment",
+    "technology": "Technology",
+    "health": "Health",
+    "environment": "Environment",
+    "education": "Education"
+  },
+  "ads": {
+    "premiumWatches": {
+      "title": "Premium Watches",
+      "description": "Precision-crafted timepieces for leaders who appreciate timeless design and modern engineering."
+    },
+    "luxuryRealEstate": {
+      "title": "Luxury Real Estate",
+      "description": "Discover premium residences, curated investments, and concierge-led property experiences."
+    },
+    "cloudServices": {
+      "title": "Cloud Computing Services",
+      "description": "Scale faster with reliable infrastructure, security-first tooling, and expert migration support."
+    },
+    "fallbackDescription": "Premium partner content curated for the Vartmaan Sarokaar readership."
+  },
+  "common": {
+    "home": "Home",
+    "aboutUs": "About",
+    "articles": "Stories",
+    "advertisers": "Partners",
+    "mediaGallery": "Photos",
+    "contactUs": "Contact",
+    "digitalMagazine": "Magazine",
+    "signIn": "Sign In",
+    "loading": "Please wait...",
+    "selectAccount": "Choose Account",
+    "masterAdmin": "Admin",
+    "editorLogin": "Editor",
+    "standardUser": "Reader",
+    "dashboardPanel": "Dashboard",
+    "signOut": "Sign Out",
+    "search": "Search",
+    "returnHome": "Back to Home",
+    "close": "Close",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "subscribe": "Subscribe",
+    "readMagazine": "Read Magazine",
+    "explore": "Explore",
+    "newsletter": "Email Updates",
+    "emailAddress": "Email Address",
+    "public": "Public",
+    "premium": "Premium",
+    "enabled": "On",
+    "disabled": "Off",
+    "openAsset": "Open",
+    "uploadMedia": "Upload",
+    "uploading": "Uploading...",
+    "overview": "Overview",
+    "settings": "Settings",
+    "media": "Media",
+    "newsEditor": "News Editor",
+    "digitalLibrary": "Stories",
+    "crm": "Readers"
+  },
+  "ticker": {
+    "newsflash": "Newsflash"
+  },
+  "languageSwitcher": {
+    "buttonLabel": "Change language",
+    "label": "Language",
+    "dropdownTitle": "Choose language",
+    "dropdownSubtitle": "Switch the interface instantly across the app."
+  },
+  "loading": {
+    "experience": "Loading newsroom experience..."
+  },
+  "footer": {
+    "description": "Quality journalism and magazines for curious readers.",
+    "aboutLink": "About Us",
+    "exploreTitle": "Explore",
+    "topSectionsTitle": "Top Sections",
+    "newsletterTitle": "Newsletter",
+    "newsletterDescription": "Get news and magazine updates.",
+    "newsletterErrorEmpty": "Enter your email to subscribe.",
+    "newsletterErrorInvalid": "Enter a valid email address.",
+    "newsletterSuccess": "You are subscribed.",
+    "partnerWithUs": "Partner With Us",
+    "copyright": "© 2026 Vartmaan Sarokaar. All rights reserved.",
+    "tagline": "Clear, honest journalism."
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "message": "The page you requested does not exist or has moved."
+  },
+  "routes": {
+    "contact": {
+      "title": "Talk to Us",
+      "subtitle": "We are here to help. Reach out for any questions, feedback, or partnership opportunities.",
+      "body": "Have questions? Write to contact@vartmaansarokar.in or call us. We will reply within 24 hours.",
+      "heroTitle": "Get in Touch",
+      "heroSubtitle": "We value your feedback and are always happy to hear from our readers",
+      "responseTime": "We respond to all messages within 24 hours",
+      "officeHours": "Monday to Saturday, 9 AM to 7 PM IST"
+    },
+    "advertisers": {
+      "title": "Work With Us",
+      "body": "Want to reach thousands of smart readers? Advertise with Vartmaan Sarokaar. Write to partners@vartmaansarokar.in"
+    },
+    "gallery": {
+      "title": "Photo Stories",
+      "body": "Beautiful photos and visual stories from across the country."
+    }
+  },
+  "contact": {
+    "pageTitle": "Contact Us",
+    "pageSubtitle": "We'd love to hear from you",
+    "sections": {
+      "general": {
+        "title": "General Inquiries",
+        "description": "Questions about our content, subscriptions, or general feedback",
+        "email": "contact@vartmaansarokar.in",
+        "phone": "+91 98765 43210",
+        "response": "We reply within 24 hours"
+      },
+      "subscriptions": {
+        "title": "Subscription Support",
+        "description": "Help with digital access, print delivery, or billing questions",
+        "email": "subscriptions@vartmaansarokar.in",
+        "phone": "+91 98765 43211",
+        "response": "We reply within 12 hours",
+        "digitalHelp": "Digital Access Issues",
+        "printHelp": "Print Magazine Orders",
+        "billingHelp": "Payment & Billing"
+      },
+      "advertising": {
+        "title": "Advertising & Partnerships",
+        "description": "Reach our engaged audience with your brand or message",
+        "email": "partners@vartmaansarokar.in",
+        "phone": "+91 98765 43212",
+        "response": "We reply within 48 hours",
+        "audience": "Reach 50,000+ engaged readers",
+        "formats": "Digital, print, and custom campaigns",
+        "pricing": "Starting from ₹25,000 per month"
+      },
+      "editorial": {
+        "title": "Editorial & Press",
+        "description": "Media inquiries, press releases, or story pitches",
+        "email": "editor@vartmaansarokar.in",
+        "phone": "+91 98765 43213",
+        "response": "We reply within 48 hours"
+      },
+      "technical": {
+        "title": "Technical Support",
+        "description": "Website issues, app problems, or technical questions",
+        "email": "tech@vartmaansarokar.in",
+        "phone": "+91 98765 43214",
+        "response": "We reply within 24 hours"
+      }
+    },
+    "office": {
+      "title": "Our Office",
+      "address": "Vaanee Creations Pvt. Ltd.\n123 Knowledge Street\nConnaught Place\nNew Delhi - 110001\nIndia",
+      "hours": {
+        "title": "Office Hours",
+        "weekdays": "Monday to Saturday: 9:00 AM - 7:00 PM IST",
+        "sunday": "Sunday: Closed",
+        "holidays": "Closed on national holidays"
+      },
+      "location": "Located in the heart of Delhi's business district"
+    },
+    "social": {
+      "title": "Follow Us",
+      "description": "Stay connected and get the latest updates",
+      "whatsapp": {
+        "title": "WhatsApp Updates",
+        "description": "Get breaking news and magazine highlights",
+        "number": "+91 98765 43215",
+        "action": "Send 'JOIN' to get updates"
+      },
+      "newsletter": {
+        "title": "Email Newsletter",
+        "description": "Weekly roundup of our best stories",
+        "action": "Subscribe for free updates"
+      }
+    },
+    "form": {
+      "title": "Send us a Message",
+      "subtitle": "Fill out the form below and we'll get back to you soon",
+      "name": "Your Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number (Optional)",
+      "subject": "Subject",
+      "subjectOptions": {
+        "general": "General Inquiry",
+        "subscription": "Subscription Help",
+        "advertising": "Advertising",
+        "editorial": "Editorial",
+        "technical": "Technical Support",
+        "feedback": "Feedback",
+        "other": "Other"
+      },
+      "message": "Your Message",
+      "messagePlaceholder": "Tell us how we can help you...",
+      "submit": "Send Message",
+      "sending": "Sending...",
+      "success": "Thank you! We'll get back to you within 24 hours.",
+      "error": "Something went wrong. Please try again or call us directly."
+    },
+    "subscriptionDetails": {
+      "title": "Subscription Information",
+      "digital": {
+        "title": "Digital Access",
+        "price": "Free",
+        "badge": "Always Free",
+        "features": [
+          "Unlimited access to all articles",
+          "Full magazine archive",
+          "Mobile and desktop access",
+          "Ad-free reading experience",
+          "Download articles for offline reading"
+        ],
+        "cta": "Get Digital Access"
+      },
+      "print": {
+        "title": "Print Magazine",
+        "price": "₹499 per month",
+        "badge": "Premium",
+        "features": [
+          "Monthly print magazine delivered to your home",
+          "Premium quality printing",
+          "Free digital access included",
+          "Exclusive subscriber-only content",
+          "Priority customer support"
+        ],
+        "cta": "Subscribe to Print",
+        "note": "Recurring monthly billing"
+      },
+      "payment": {
+        "title": "Payment Methods",
+        "methods": [
+          "UPI (Google Pay, PhonePe, Paytm)",
+          "Credit/Debit Cards",
+          "Net Banking",
+          "Bank Transfer",
+          "Cash on Delivery for print"
+        ],
+        "security": "All payments are secure and encrypted"
+      },
+      "support": {
+        "title": "Need Help?",
+        "contact": "Call us at +91 98765 43211",
+        "email": "subscriptions@vartmaansarokar.in",
+        "hours": "Available 9 AM to 7 PM IST"
+      }
+    }
+  },
+  "home": {
+    "heroContext": "News with depth and perspective",
+    "readFullArticle": "Read Full Story",
+    "featuredCoverage": "Top Stories This Week",
+    "emptyTitle": "No featured stories yet",
+    "emptyBody": "Featured stories will appear here once they are published.",
+    "featuredTitle": "This Week’s Top Stories",
+    "allArticles": "All Stories",
+    "noArticlesTitle": "No stories published yet",
+    "noArticlesBody": "Use the admin dashboard to publish your first story and it will appear here.",
+    "premiumEdition": "Premium Issue",
+    "magazineIntro": "Our magazine brings you deep dives, photo essays, and insider analysis. Read stories that matter.",
+    "flipbookFeature": "Easy to read flipbook",
+    "visualEssays": "Beautiful photos and visuals",
+    "exploreIssue": "Read This Issue",
+    "editorsChoice": "Editor’s Picks",
+    "noMagazine": "No magazine is available yet. Publish one from the dashboard to show it here."
+  },
+  "about": {
+    "badge": "About The Publication",
+    "heroTitle": "Journalism that stays with the reader long after the headline.",
+    "heroBody": "Vartmaan Sarokaar is a monthly publication by Vaanee Creations Pvt. Ltd. focused on depth, clarity, and public relevance. We aim to inform with rigor, inspire with ideas, and strengthen civic imagination through thoughtful editorial work.",
+    "tagCurrentAffairs": "Current Affairs",
+    "tagCulture": "Culture & Society",
+    "tagIdeas": "Ideas & Leadership",
+    "missionTitle": "Mission",
+    "missionBody": "To publish work that helps readers understand the forces shaping public life.",
+    "audienceTitle": "Audience",
+    "audienceBody": "Readers who value context, perspective, and substance over noise.",
+    "quote": "We see publishing as a platform for dialogue, responsibility, and a more informed tomorrow.",
+    "whoWeAreBadge": "Who We Are",
+    "whoWeAreTitle": "Built for readers who want insight, not just information.",
+    "whoWeAreP1": "Our editorial identity is rooted in relevance. We cover the pressing questions of politics, economy, society, culture, innovation, and leadership with a tone that is analytical, responsible, and accessible.",
+    "whoWeAreP2": "A special part of our mission is to engage younger readers with stories that sharpen awareness and encourage participation in public life. Every issue is curated not only to document the moment, but to help readers think beyond it.",
+    "whoWeAreP3": "We believe meaningful journalism should leave people clearer, more curious, and better equipped to interpret the world around them.",
+    "visionTitle": "Our Vision",
+    "visionLead": "To create a publication where public-interest journalism, thoughtful reflection, and future-facing ideas meet in one credible space.",
+    "visionBody": "By blending knowledge with perspective, we want to encourage a generation of readers that is informed, responsible, and motivated to contribute to a better social future.",
+    "coverTitle": "What We Cover",
+    "coverBody": "We explore the systems, people, and ideas that influence how India thinks, changes, and moves forward.",
+    "pillar1Title": "Public Affairs",
+    "pillar1Body": "Sharp reporting on policy, governance, and national conversations that shape civic life.",
+    "pillar2Title": "Society & Culture",
+    "pillar2Body": "Stories that reflect the emotional, social, and cultural currents moving through India today.",
+    "pillar3Title": "Ideas & Leadership",
+    "pillar3Body": "Profiles, essays, and forward-looking analysis that help readers imagine what comes next.",
+    "teamTitle": "Editorial Team",
+    "teamBody": "The people shaping the voice, direction, and long-term vision of the publication.",
+    "publisher": "Publisher",
+    "editor": "Editor",
+    "digitalHead": "Head of Digital Strategy",
+    "adminHead": "Head of Administration & Strategic Affairs",
+    "publishedByTitle": "Published by Vaanee Creations Pvt. Ltd.",
+    "publishedByBody": "Our work is guided by a commitment to credible storytelling, editorial responsibility, and a long-term relationship with readers who care about substance.",
+    "exploreMagazine": "Explore The Magazine"
+  },
+  "magazine": {
+    "title": "Magazine",
+    "subtitle": "Flip through our magazine online. Easy to read on any device.",
+    "emptyBody": "No magazine yet. Publish one from the dashboard.",
+    "edition": "Issue",
+    "digitalPrice": "Read Free",
+    "physicalPrice": "₹499/Month",
+    "highResolution": "Easy to read online",
+    "editorialDepth": "Full stories",
+    "premiumAccess": "Full access",
+    "previousIssues": "Past Issues",
+    "digitalSubscription": "Read Magazine Online — Free for Everyone",
+    "digitalSubscriptionBody": "All magazine issues available free. No subscription needed. Read on any device — phone, tablet, or desktop.",
+    "perIssue": "per issue",
+    "claimDigitalAccess": "Read Free Now",
+    "physicalSubscription": "Get Printed Magazine",
+    "physicalSubscriptionBody": "Premium quality printed magazine delivered to your home every month for ₹499. Includes free digital access.",
+    "subscribePrint": "Subscribe for ₹499/Month"
+  },
+  "category": {
+    "label": "Topic",
+    "summary": "{{count}} stories about {{category}}.",
+    "byAuthor": "by {{author}}",
+    "emptyTitle": "No stories in this topic",
+    "emptyCta": "Browse other topics"
+  },
+  "newsDetail": {
+    "notFoundTitle": "Story Not Found",
+    "backToHome": "Back to Home",
+    "backToFeed": "Back to Stories",
+    "subscriberStory": "For Our Readers",
+    "byAuthor": "by {{author}}",
+    "minRead": "{{count}} min read",
+    "broaderImpact": "What This Means",
+    "lockedBadge": "For Subscribers",
+    "lockedTitle": "Subscribe to read this",
+    "lockedBody": "This story is for our subscribers. Get free online access to read this and all stories.",
+    "openSubscriptionForm": "Subscribe Now",
+    "relatedStories": "More Stories",
+    "sampleParagraphOne": "The full story continues with more reporting, details, and expert views.",
+    "sampleParagraphTwo": "This story connects local events to bigger changes in society, economy, and government."
+  },
+  "sidebar": {
+    "sponsored": "Sponsored",
+    "learnMore": "Read More",
+    "newsletterBody": "Get the latest stories and magazine highlights every week. Join thousands of readers who trust us.",
+    "yourEmail": "Your Email Address",
+    "subscribeNow": "Send Me Updates"
+  },
+  "subscription": {
+    "digitalActivated": "Digital access is ready — all articles are free for everyone!",
+    "requestReceived": "Request received",
+    "digitalSuccess": "You now have digital access. Enjoy reading!",
+    "physicalSuccess": "We received your payment proof. We will confirm your print order soon. Monthly recurring charge of ₹499.",
+    "unlockTitle": "Choose your access",
+    "unlockBody": "Digital is free for all readers. Subscribe to print magazine for ₹499/month.",
+    "digital": "Read Online (Free)",
+    "physicalCopy": "Get Print (₹499/Month)",
+    "free": "Free for Everyone",
+    "physicalCardBody": "Subscribe to print magazine for ₹499/month. Monthly recurring billing. Upload payment proof to confirm.",
+    "fullName": "Full Name",
+    "emailAddress": "Email Address",
+    "phoneNumber": "Phone or WhatsApp",
+    "uploadPaymentScreenshot": "Upload payment proof",
+    "clickToUpload": "Click here to upload the proof",
+    "digitalNotePlaceholder": "Add a note if you want (optional)...",
+    "physicalNotePlaceholder": "Enter your delivery address...",
+    "submitting": "Submitting...",
+    "activateDigital": "Get Digital Access (Free)",
+    "submitPhysical": "Subscribe to Print (₹499/Month)",
+    "info": "Digital is free for all readers. Subscribe to print magazine for ₹499/month with free digital access included.",
+    "validationError": "Please enter all required details.",
+    "invalidEmail": "Please enter a valid email.",
+    "readError": "Could not read the file.",
+    "physicalError": "Unable to send the request.",
+    "genericError": "Something went wrong."
+  },
+  "auth": {
+    "membership": "Choose Your Access",
+    "popupTitle": "Read Free or Get Print",
+    "digitalAccess": "Read Online — Free",
+    "digitalPitch": "All articles and magazines are free to read online. Access everything on your phone, tablet, or computer. No credit card needed.",
+    "physicalCopy": "Get Print Magazine",
+    "physicalPitch": "Subscribe to the printed magazine for ₹499/month. Includes free digital access. Monthly recurring billing.",
+    "subscribeDigitalTitle": "Get Free Digital Access",
+    "subscribePhysicalTitle": "Subscribe to Print (₹499/Month)",
+    "digitalReading": "Free Digital Access",
+    "magazineFormats": "Choose Your Access",
+    "loginLabel": "Sign in",
+    "loginTitle": "Log in to your account",
+    "password": "Password",
+    "staffPasswordHint": "Enter your staff email and password to access the admin panel.",
+    "googleConfigHint": "Google sign-in will be available once we set it up.",
+    "staffAccountsHint": "Staff can sign in from the footer shortcuts."
+  },
+  "flipbook": {
+    "issueProgress": "Issue Progress",
+    "page": "Page",
+    "zoomIn": "Zoom in",
+    "fullscreen": "Fullscreen",
+    "digitalLabel": "Free access to all magazine issues for everyone. Subscribe to print for ₹499/month."
+  },
+  "chat": {
+    "title": "Ask Us Anything",
+    "subtitle": "Tell us a website URL and ask anything about it. We'll get you the answer.",
+    "websitePlaceholder": "https://example.com",
+    "fetch": "Fetch",
+    "emptyState": "No messages yet. Ask a question to start.",
+    "inputPlaceholder": "Ask me about the website...",
+    "thinking": "Thinking...",
+    "send": "Send",
+    "fetchingContent": "Fetching page content...",
+    "titlePrefix": "Title:",
+    "textPrefix": "Page text (trimmed):",
+    "noResponse": "We did not get a response. Please try again.",
+    "failedToScrape": "Could not read the website. Please check the URL:",
+    "errorContactingServer": "Something went wrong. Please try again:"
+  },
+  "admin": {
+    "welcomeBack": "Welcome back, {{name}}",
+    "dashboardBody": "Publish stories, upload magazines, manage readers, and run ads from here.",
+    "activeIssues": "Active Issues",
+    "newsArticles": "News Articles",
+    "subscribers": "Subscribers",
+    "activeAds": "Active Ads",
+    "editStory": "Edit Story",
+    "publishStory": "Publish Story",
+    "newsFormBody": "Publish a story. Add a photo, title, excerpt, and full story. You can gate it for premium readers.",
+    "storyTitle": "Story title",
+    "imageUrl": "Photo URL",
+    "authorName": "Your name or author name",
+    "shortExcerpt": "Brief summary (one or two sentences)",
+    "fullArticleContent": "Full story text",
+    "featureHomepage": "Show on homepage",
+    "requireSubscription": "Premium readers only",
+    "updateStory": "Save Story",
+    "publishedStories": "Published Stories",
+    "featured": "Featured",
+    "subscriber": "Subscriber",
+    "publishIssue": "Publish Issue",
+    "magazineFormBody": "Upload a magazine issue. Add title, issue number, cover photo, and PDF pages. Set prices for online and print.",
+    "uploadPdf": "Upload PDF",
+    "issueTitle": "Issue title",
+    "issueNumber": "Issue number / month",
+    "coverImageUrl": "Cover image URL",
+    "pagesHint": "One page image URL per line",
+    "digitalPrice": "Price for online (₹)",
+    "physicalPrice": "Price for print (₹)",
+    "gatedPage": "Gated page",
+    "freeIssue": "Free issue",
+    "enableBlurPaywall": "Enable blur paywall",
+    "magazineHelper": "Online reading can be free or require subscription. Print copies need payment proof before delivery.",
+    "pages": "Pages",
+    "digitalAccess": "Online Access",
+    "blurPaywall": "Blur Paywall",
+    "previewUntil": "Preview until page {{page}} • Digital reading is free • Print magazine ₹499/month",
+    "mediaLibrary": "Media Library",
+    "mediaBody": "Upload article images, PDFs, audio, and reusable assets for stories and magazines.",
+    "noMedia": "No uploaded media yet. Use the upload button to create a reusable media library.",
+    "advertisingSlots": "Advertising Slots",
+    "adsBody": "Edit sponsor creatives and destinations used in the sidebar.",
+    "saveAds": "Save Ads",
+    "adTitle": "Ad title",
+    "destinationUrl": "Destination URL",
+    "sidebarTop": "Sidebar Top",
+    "sidebarMid": "Sidebar Mid",
+    "sidebarBottom": "Sidebar Bottom",
+    "homepageBanner": "Homepage Banner",
+    "userRoles": "User Roles",
+    "userRolesBody": "Control who can access the admin panel and premium previews.",
+    "publishingNotes": "Publishing Notes",
+    "settingsLineOne": "MongoDB stores all user data.",
+    "settingsLineTwo": "Auth routes are available at /api/auth/signup, /api/auth/login, and /api/auth/me.",
+    "settingsLineThree": "Protected uploads and media routes are available at /api/uploads and /api/media.",
+    "masterPanel": "Master Panel"
+  }
+}

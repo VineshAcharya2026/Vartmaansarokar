@@ -1,150 +1,190 @@
-
-import React from 'react';
-import { BookOpen, Target, Globe, Users, Award, ShieldCheck } from 'lucide-react';
+import React, { useLayoutEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import gsap from 'gsap';
+import { BookOpen, Target, Globe, Users, Award, ShieldCheck, ArrowRight, Newspaper, Mail, MapPin } from 'lucide-react';
+import { APP_BASE } from '../utils/app';
 
 const About: React.FC = () => {
+  const { t } = useTranslation();
+  const pageRef = useRef<HTMLDivElement | null>(null);
+
   const team = [
-    { name: "Chhaya Rani", role: "Publisher", initial: "CR" },
-    { name: "Rahul ‘Neil’", role: "Editor", initial: "RN" },
-    { name: "Sarthak Pandey", role: "Head of Digital Strategy", initial: "SP" },
-    { name: "Tarun Munjal", role: "Head of Administration & Strategic Affairs", initial: "TM" }
+    { name: 'Chhaya Rani', role: t('about.publisher'), initial: 'CR' },
+    { name: 'Rahul Neil', role: t('about.editor'), initial: 'RN' },
+    { name: 'Sarthak Pandey', role: t('about.digitalHead'), initial: 'SP' },
+    { name: 'Tarun Munjal', role: t('about.adminHead'), initial: 'TM' }
   ];
 
-  return (
-    <div className="space-y-20 pb-20 animate-in fade-in duration-700">
-      {/* Hero Section - Realigned to Logo Identity */}
-      <section className="text-center space-y-4 pt-10">
-        <div className="flex flex-col items-center justify-center mb-6">
-           {/* Visual representation of the logo's pyramid/pen nib */}
-           <div className="w-20 h-20 bg-[#000080] rounded-2xl flex items-center justify-center text-white font-black text-4xl shadow-2xl mb-6 transform -rotate-3">
-              VS
-           </div>
-           <h1 className="text-5xl md:text-7xl font-black text-[#000080] leading-none">वर्तमान</h1>
-           <h1 className="text-5xl md:text-7xl font-black text-[#800000] leading-none mt-2">सरोकार</h1>
-        </div>
-        <p className="text-xl md:text-3xl text-[#800000] font-bold serif italic mt-8">
-          अतीत से सीख कर उज्जवल भविष्य की ओर
-        </p>
-        <div className="w-24 h-1.5 bg-[#800000] mx-auto rounded-full mt-10" />
-      </section>
+  const pillars = [
+    { title: t('about.pillar1Title'), description: t('about.pillar1Body'), icon: Globe, accent: 'bg-[#001f3f]/8 text-[#001f3f]' },
+    { title: t('about.pillar2Title'), description: t('about.pillar2Body'), icon: Users, accent: 'bg-[#800000]/8 text-[#800000]' },
+    { title: t('about.pillar3Title'), description: t('about.pillar3Body'), icon: Award, accent: 'bg-[#001f3f]/8 text-[#001f3f]' }
+  ];
 
-      {/* Who We Are */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        <div className="space-y-6">
-          <h2 className="text-3xl font-bold text-[#001f3f] serif flex items-center">
-            <span className="w-1.5 h-8 bg-[#800000] mr-4 rounded-full" />
-            Who We Are
-          </h2>
-          <div className="text-gray-600 leading-relaxed space-y-4 text-lg">
-            <p>
-              <strong>वर्तमान सरोकार (Vartmaan Sarokaar)</strong> is a monthly magazine published by <strong>Vaanee Creations Pvt. Ltd.</strong> with a vision to inform, inspire, and influence. The magazine is dedicated to presenting sharp insights on current affairs and thought-provoking stories that go beyond the headlines.
+  useLayoutEffect(() => {
+    if (!pageRef.current) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo('[data-about-reveal]', { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.75, stagger: 0.08, ease: 'power3.out' });
+    }, pageRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div ref={pageRef} className="space-y-14 pb-16">
+
+      {/* ─── SECTION 1 · Hero ─── */}
+      <section data-about-reveal className="rounded-2xl border border-gray-200 bg-white px-6 py-10 md:px-12 md:py-14 shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr,0.9fr] gap-10 items-center">
+
+          {/* Left: brand intro */}
+          <div className="space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-md border border-[#800000]/15 bg-[#800000]/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-[#800000]">
+              <Newspaper size={13} />
+              {t('about.badge')}
+            </div>
+
+            <div className="flex items-center gap-4">
+              <img src={`${APP_BASE}logo.png`} alt="Vartmaan Sarokar logo" className="h-12 w-12 rounded-lg border border-gray-200 bg-white p-1.5 shadow-sm" />
+              <div>
+                <p className="text-sm font-extrabold uppercase tracking-[0.25em] text-[#001f3f]">{t('brand.lineOne')}</p>
+                <p className="text-sm font-extrabold uppercase tracking-[0.25em] text-[#800000]">{t('brand.lineTwo')}</p>
+              </div>
+            </div>
+
+            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-[#001f3f] serif leading-tight">
+              {t('about.heroTitle')}
+            </h1>
+            <p className="max-w-xl text-base text-gray-600 leading-relaxed">
+              {t('about.heroBody')}
             </p>
-            <p>
-              At the heart of our work lies a special focus on empowering the youth of India. We bring them stories that matter—covering politics, economy, society, culture, innovation, leadership, and more. 
-            </p>
-            <p>
-              Each issue is carefully curated to not only highlight the pressing issues of our times but also to spark ideas and meaningful conversations that shape the future of our nation.
-            </p>
+
+            <div className="flex flex-wrap gap-2 pt-1">
+              <span className="rounded-md bg-[#001f3f] px-3.5 py-2 text-xs font-bold text-white shadow-sm">{t('about.tagCurrentAffairs')}</span>
+              <span className="rounded-md border border-gray-200 bg-white px-3.5 py-2 text-xs font-bold text-[#001f3f] shadow-sm">{t('about.tagCulture')}</span>
+              <span className="rounded-md border border-gray-200 bg-white px-3.5 py-2 text-xs font-bold text-[#001f3f] shadow-sm">{t('about.tagIdeas')}</span>
+            </div>
+          </div>
+
+          {/* Right: mission / audience / quote card */}
+          <div className="rounded-xl border border-gray-200 bg-[#fafafa] p-5 md:p-7 shadow-sm">
+            <div className="grid grid-cols-2 gap-4 mb-5">
+              <div className="rounded-lg bg-white p-4 border border-gray-100 shadow-sm">
+                <p className="text-[10px] uppercase tracking-[0.22em] font-bold text-[#800000] mb-1.5">{t('about.missionTitle')}</p>
+                <p className="text-sm text-[#001f3f] font-semibold leading-relaxed">{t('about.missionBody')}</p>
+              </div>
+              <div className="rounded-lg bg-white p-4 border border-gray-100 shadow-sm">
+                <p className="text-[10px] uppercase tracking-[0.22em] font-bold text-[#001f3f] mb-1.5">{t('about.audienceTitle')}</p>
+                <p className="text-sm text-[#001f3f] font-semibold leading-relaxed">{t('about.audienceBody')}</p>
+              </div>
+            </div>
+            <div className="rounded-lg bg-[#001f3f] px-5 py-6 text-white">
+              <Target className="mb-3 text-[#800000] opacity-70" size={24} />
+              <p className="text-lg md:text-xl font-bold serif leading-relaxed">
+                {t('about.quote')}
+              </p>
+            </div>
           </div>
         </div>
-        <div className="relative">
-          <div className="absolute inset-0 bg-[#800000]/5 -rotate-3 rounded-3xl" />
-          <img 
-            src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=1000" 
-            alt="Journalism" 
-            className="rounded-3xl shadow-2xl relative z-10 w-full h-[400px] object-cover"
+      </section>
+
+      {/* ─── SECTION 2 · Who We Are ─── */}
+      <section data-about-reveal className="grid grid-cols-1 lg:grid-cols-[0.95fr,1.05fr] gap-10 items-center">
+        <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+          <img
+            src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=1200"
+            alt="Editorial newsroom"
+            className="h-[380px] w-full object-cover"
           />
         </div>
-      </section>
 
-      {/* Vision Section */}
-      <section className="bg-[#001f3f] text-white rounded-[40px] p-10 md:p-20 relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#800000]/20 rounded-full blur-[100px] -mr-48 -mt-48" />
-        <div className="relative z-10 text-center max-w-4xl mx-auto space-y-8">
-          <Target className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-4xl md:text-5xl font-bold serif">Our Vision</h2>
-          <p className="text-xl md:text-2xl text-gray-300 leading-relaxed font-light">
-            "Vartmaan Sarokaar is more than just a magazine—it is a platform for dialogue and discovery, where voices are heard, perspectives are shared, and new possibilities are imagined."
-          </p>
-          <div className="w-20 h-1 bg-red-400/30 mx-auto" />
-          <p className="text-gray-400 text-lg italic">
-            अतीत से सीख कर उज्जवल भविष्य की ओर - By blending knowledge with inspiration, we aim to encourage the young generation to remain aware, responsible, and motivated to build a better tomorrow.
-          </p>
-        </div>
-      </section>
-
-      {/* What We Cover */}
-      <section className="space-y-12">
-        <div className="text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#001f3f] serif">What We Cover</h2>
-          <p className="text-gray-500 mt-4">Exploring the dimensions of progress and heritage.</p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              title: "Politics & Economy",
-              desc: "In-depth analysis of political landscapes and economic trends shaping our nation.",
-              icon: Globe,
-              color: "bg-blue-50 text-blue-600"
-            },
-            {
-              title: "Society & Culture",
-              desc: "Stories that reflect the diverse tapestry of Indian society and its rich cultural heritage.",
-              icon: Users,
-              color: "bg-red-50 text-red-600"
-            },
-            {
-              title: "Innovation & Leadership",
-              desc: "Inspiring narratives of innovation and leaders who are making a difference.",
-              icon: Award,
-              color: "bg-amber-50 text-amber-600"
-            }
-          ].map((item, idx) => (
-            <div key={idx} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
-              <div className={`w-14 h-14 rounded-2xl ${item.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                <item.icon size={28} />
-              </div>
-              <h3 className="text-xl font-bold text-[#001f3f] mb-4 serif">{item.title}</h3>
-              <p className="text-gray-500 leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Our Team */}
-      <section className="space-y-12">
-        <div className="text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#001f3f] serif">Our Team</h2>
-          <p className="text-gray-500 mt-4">The passionate people behind Vartmaan Sarokaar</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {team.map((member, idx) => (
-            <div key={idx} className="bg-white p-8 rounded-3xl border border-gray-100 text-center shadow-sm hover:shadow-md transition-all">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#800000] to-[#000080] rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6 shadow-lg">
-                {member.initial}
-              </div>
-              <h4 className="text-xl font-bold text-[#001f3f] serif">{member.name}</h4>
-              <p className="text-sm text-[#800000] font-bold mt-2 uppercase tracking-widest">{member.role}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Trust Badge */}
-      <section className="bg-gray-50 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 border border-dashed border-gray-200">
-        <div className="flex items-center space-x-6">
-          <ShieldCheck className="w-12 h-12 text-[#800000]" />
-          <div>
-            <h4 className="text-xl font-bold text-[#001f3f] serif">Vaanee Creations Pvt. Ltd.</h4>
-            <p className="text-gray-500 text-sm">Commitment to authentic storytelling and responsible journalism since our inception.</p>
+        <div className="space-y-5">
+          <div className="inline-flex items-center gap-2 rounded-md bg-[#001f3f]/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-[#001f3f]">
+            <BookOpen size={13} />
+            {t('about.whoWeAreBadge')}
+          </div>
+          <h2 className="text-2xl md:text-3xl font-black text-[#001f3f] serif tracking-tight">
+            {t('about.whoWeAreTitle')}
+          </h2>
+          <div className="space-y-3 text-gray-600 text-[15px] leading-relaxed">
+            <p>{t('about.whoWeAreP1')}</p>
+            <p>{t('about.whoWeAreP2')}</p>
+            <p>{t('about.whoWeAreP3')}</p>
           </div>
         </div>
-        <button className="bg-[#000080] text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-950 transition-colors shrink-0 shadow-lg">
-          Join Our Platform
-        </button>
       </section>
+
+      {/* ─── SECTION 3 · Vision ─── */}
+      <section data-about-reveal className="rounded-2xl bg-[#001f3f] text-white px-6 py-10 md:px-12 md:py-14 shadow-sm">
+        <div className="max-w-3xl mx-auto text-center space-y-5">
+          <Target className="mx-auto text-[#800000]" size={30} />
+          <h2 className="text-2xl md:text-4xl font-black serif tracking-tight">{t('about.visionTitle')}</h2>
+          <p className="text-lg md:text-xl text-gray-300 leading-relaxed">{t('about.visionLead')}</p>
+          <p className="text-sm md:text-base text-gray-400 leading-relaxed max-w-2xl mx-auto">{t('about.visionBody')}</p>
+        </div>
+      </section>
+
+      {/* ─── SECTION 4 · What We Cover (Pillars) ─── */}
+      <section data-about-reveal className="space-y-7">
+        <div className="max-w-2xl">
+          <h2 className="text-2xl md:text-3xl font-black text-[#001f3f] serif tracking-tight">{t('about.coverTitle')}</h2>
+          <p className="text-gray-500 mt-2 text-[15px]">{t('about.coverBody')}</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {pillars.map((pillar) => (
+            <article key={pillar.title} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-lg ${pillar.accent}`}>
+                <pillar.icon size={22} />
+              </div>
+              <h3 className="text-lg font-bold text-[#001f3f] serif mb-2">{pillar.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{pillar.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── SECTION 5 · Team ─── */}
+      <section data-about-reveal className="space-y-7">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-black text-[#001f3f] serif tracking-tight">{t('about.teamTitle')}</h2>
+          <p className="text-gray-500 mt-2 text-[15px]">{t('about.teamBody')}</p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {team.map((member, index) => (
+            <div key={member.name} className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm hover:shadow-md transition-shadow">
+              <div
+                className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-lg text-xl font-black text-white shadow-sm"
+                style={{ backgroundColor: index % 2 === 0 ? '#001f3f' : '#800000' }}
+              >
+                {member.initial}
+              </div>
+              <h4 className="text-base font-bold text-[#001f3f] serif">{member.name}</h4>
+              <p className="mt-1.5 text-[10px] uppercase tracking-[0.2em] font-bold text-[#800000]">{member.role}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── SECTION 6 · Published By / CTA ─── */}
+      <section data-about-reveal className="rounded-xl border border-gray-200 bg-white p-6 md:p-8 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+        <div className="flex items-start gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#800000]/8 text-[#800000]">
+            <ShieldCheck size={22} />
+          </div>
+          <div className="max-w-2xl">
+            <h4 className="text-xl font-bold text-[#001f3f] serif">{t('about.publishedByTitle')}</h4>
+            <p className="text-gray-500 mt-1.5 text-sm leading-relaxed">{t('about.publishedByBody')}</p>
+          </div>
+        </div>
+        <Link to="/magazine" className="inline-flex items-center gap-2 rounded-lg bg-[#001f3f] px-5 py-3 text-sm font-bold text-white hover:bg-[#002b57] transition-colors shadow-sm">
+          {t('about.exploreMagazine')}
+          <ArrowRight size={15} />
+        </Link>
+      </section>
+
     </div>
   );
 };

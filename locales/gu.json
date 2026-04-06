@@ -1,0 +1,506 @@
+{
+  "brand": {
+    "lineOne": "વર્તમાન",
+    "lineTwo": "સરોકાર"
+  },
+  "roles": {
+    "general": "સામાન્ય",
+    "magazine": "મેગેઝિન",
+    "admin": "એડમિન",
+    "superAdmin": "સુપર એડમિન"
+  },
+  "categories": {
+    "nationalNews": "રાષ્ટ્રીય સમાચાર",
+    "internationalNews": "આંતરરાષ્ટ્રીય સમાચાર",
+    "politics": "રાજકારણ",
+    "business": "વ્યાપાર",
+    "economy": "અર્થતંત્ર",
+    "sports": "રમતગમત",
+    "entertainment": "મનોરંજન",
+    "technology": "ટેકનોલોજી",
+    "health": "આરોગ્ય",
+    "environment": "પર્યાવરણ",
+    "education": "શિક્ષણ"
+  },
+  "ads": {
+    "premiumWatches": {
+      "title": "પ્રીમિયમ ઘડિયાળો",
+      "description": "ચોક્કસ ઘડિયાળો."
+    },
+    "luxuryRealEstate": {
+      "title": "લક્ઝરી રિયલ એસ્ટેટ",
+      "description": "પ્રીમિયમ આવાસ."
+    },
+    "cloudServices": {
+      "title": "ક્લાઉડ સેવાઓ",
+      "description": "ઝડપથી વૃદ્ધિ કરો."
+    },
+    "fallbackDescription": "પ્રીમિયમ પાર્ટનર કન્ટેન્ટ."
+  },
+  "common": {
+    "home": "હોમ",
+    "aboutUs": "અમારા વિશે",
+    "articles": "લેખો",
+    "advertisers": "ભાગીદારો",
+    "mediaGallery": "ફોટા",
+    "contactUs": "સંપર્ક",
+    "digitalMagazine": "મેગેઝિન",
+    "signIn": "સાઇન ઇન",
+    "loading": "રાહ જુઓ...",
+    "selectAccount": "એકાઉન્ટ પસંદ કરો",
+    "masterAdmin": "એડમિન",
+    "editorLogin": "સંપાદક",
+    "standardUser": "વાચક",
+    "dashboardPanel": "ડેશબોર્ડ",
+    "signOut": "સાઇન આઉટ",
+    "search": "શોધો",
+    "returnHome": "હોમ પર પાછા",
+    "close": "બંધ",
+    "cancel": "રદ",
+    "delete": "કાઢો",
+    "edit": "સંપાદિત",
+    "save": "સાચવો",
+    "subscribe": "સબ્સ્ક્રાઇબ",
+    "readMagazine": "મેગેઝિન વાંચો",
+    "explore": "શોધો",
+    "newsletter": "ઈમેઇલ અપડેટ",
+    "emailAddress": "ઈમેઇલ",
+    "public": "સાર્વજનિક",
+    "premium": "પ્રીમિયમ",
+    "enabled": "ચાલુ",
+    "disabled": "બંધ",
+    "openAsset": "ખોલો",
+    "uploadMedia": "અપલોડ",
+    "uploading": "અપલોડ થઈ રહ્યું...",
+    "overview": "સારાંશ",
+    "settings": "સેટિંગ્સ",
+    "media": "મીડિયા",
+    "newsEditor": "સમાચાર સંપાદક",
+    "digitalLibrary": "વાર્તાઓ",
+    "crm": "વાચકો"
+  },
+  "ticker": {
+    "newsflash": "ન્યૂઝફ્લેશ"
+  },
+  "languageSwitcher": {
+    "buttonLabel": "ભાષા બદલો",
+    "label": "ભાષા",
+    "dropdownTitle": "ભાષા પસંદ કરો",
+    "dropdownSubtitle": "સમગ્ર એપમાં ભાષા તરત બદલો."
+  },
+  "loading": {
+    "experience": "ન્યૂઝરૂમ લોડ થઈ રહ્યો છે..."
+  },
+  "footer": {
+    "description": "જિજ્ઞાસુ વાચકો માટે ગુણવત્તાયુક્ત પત્રકારત્વ અને મેગેઝિન.",
+    "aboutLink": "અમારા વિશે",
+    "exploreTitle": "શોધો",
+    "topSectionsTitle": "મુખ્ય વિભાગો",
+    "newsletterTitle": "ન્યૂઝલેટર",
+    "newsletterDescription": "સમાચાર અને મેગેઝિન અપડેટ મેળવો.",
+    "newsletterErrorEmpty": "સબ્સ્ક્રાઇબ માટે ઈમેઇલ આપો.",
+    "newsletterErrorInvalid": "માન્ય ઈમેઇલ આપો.",
+    "newsletterSuccess": "સબ્સ્ક્રાઇબ થયું.",
+    "partnerWithUs": "ભાગીદારી કરો",
+    "copyright": "© 2026 વર્તમાન સરોકાર. બધા હક્કો આરક્ષિત.",
+    "tagline": "સ્પષ્ટ, પ્રામાણિક પત્રકારત્વ."
+  },
+  "notFound": {
+    "title": "પેજ મળ્યું નથી",
+    "message": "પેજ અસ્તિત્વમાં નથી."
+  },
+  "routes": {
+    "contact": {
+      "title": "અમારી સાથે વાત કરો",
+      "subtitle": "અમે મદદ કરવા અહીં છીએ.",
+      "body": "પ્રશ્નો? contact@vartmaansarokar.in પર લખો.",
+      "heroTitle": "સંપર્ક કરો",
+      "heroSubtitle": "અમે તમારા પ્રતિભાવની કદર કરીએ છીએ",
+      "responseTime": "24 કલાકમાં જવાબ",
+      "officeHours": "સોમવાર-શનિવાર, સવારે 9 - સાંજે 7 IST"
+    },
+    "advertisers": {
+      "title": "અમારી સાથે કામ કરો",
+      "body": "વાચકો સુધી પહોંચો? partners@vartmaansarokar.in"
+    },
+    "gallery": {
+      "title": "ફોટો વાર્તાઓ",
+      "body": "દેશભરમાંથી સુંદર ફોટા અને વિઝ્યુઅલ વાર્તાઓ."
+    }
+  },
+  "contact": {
+    "pageTitle": "અમારો સંપર્ક કરો",
+    "pageSubtitle": "અમે તમારી પાસેથી સાંભળવા માંગીએ છીએ",
+    "sections": {
+      "general": {
+        "title": "સામાન્ય પૂછપરછ",
+        "description": "કન્ટેન્ટ, સબ્સ્ક્રિપ્શન વિશે પ્રશ્નો",
+        "email": "contact@vartmaansarokar.in",
+        "phone": "+91 98765 43210",
+        "response": "24 કલાકમાં જવાબ"
+      },
+      "subscriptions": {
+        "title": "સબ્સ્ક્રિપ્શન સહાય",
+        "description": "ડિજિટલ એક્સેસ, પ્રિન્ટ ડિલિવરી",
+        "email": "subscriptions@vartmaansarokar.in",
+        "phone": "+91 98765 43211",
+        "response": "12 કલાકમાં જવાબ",
+        "digitalHelp": "ડિજિટલ એક્સેસ",
+        "printHelp": "પ્રિન્ટ મેગેઝિન",
+        "billingHelp": "ચુકવણી અને બિલિંગ"
+      },
+      "advertising": {
+        "title": "જાહેરાત અને ભાગીદારી",
+        "description": "બ્રાન્ડ સાથે વાચકો સુધી પહોંચો",
+        "email": "partners@vartmaansarokar.in",
+        "phone": "+91 98765 43212",
+        "response": "48 કલાકમાં જવાબ",
+        "audience": "50,000+ વાચકો",
+        "formats": "ડિજિટલ, પ્રિન્ટ, કસ્ટમ",
+        "pricing": "₹25,000/મહિનાથી"
+      },
+      "editorial": {
+        "title": "સંપાદકીય અને પ્રેસ",
+        "description": "મીડિયા પૂછપરછ, પ્રેસ રિલીઝ",
+        "email": "editor@vartmaansarokar.in",
+        "phone": "+91 98765 43213",
+        "response": "48 કલાકમાં જવાબ"
+      },
+      "technical": {
+        "title": "ટેકનિકલ સહાય",
+        "description": "વેબસાઇટ, એપ સમસ્યાઓ",
+        "email": "tech@vartmaansarokar.in",
+        "phone": "+91 98765 43214",
+        "response": "24 કલાકમાં જવાબ"
+      }
+    },
+    "office": {
+      "title": "અમારી ઓફિસ",
+      "address": "વાણી ક્રિએશન્સ પ્રા. લિ.\n123 નોલેજ સ્ટ્રીટ\nકનોટ પ્લેસ\nનવી દિલ્હી - 110001\nભારત",
+      "hours": {
+        "title": "ઓફિસ સમય",
+        "weekdays": "સોમ-શનિ: સવારે 9:00 - સાંજે 7:00 IST",
+        "sunday": "રવિવાર: બંધ",
+        "holidays": "રાષ્ટ્રીય રજાઓ પર બંધ"
+      },
+      "location": "દિલ્હીના વ્યાપાર જિલ્લામાં"
+    },
+    "social": {
+      "title": "અમને ફોલો કરો",
+      "description": "જોડાયેલા રહો",
+      "whatsapp": {
+        "title": "વૉટ્સએપ અપડેટ",
+        "description": "બ્રેકિંગ ન્યૂઝ અને હાઇલાઇટ્સ",
+        "number": "+91 98765 43215",
+        "action": "'JOIN' મોકલો"
+      },
+      "newsletter": {
+        "title": "ઈમેઇલ ન્યૂઝલેટર",
+        "description": "શ્રેષ્ઠ વાર્તાઓનો સાપ્તાહિક સારાંશ",
+        "action": "મફત સબ્સ્ક્રાઇબ"
+      }
+    },
+    "form": {
+      "title": "સંદેશ મોકલો",
+      "subtitle": "ફોર્મ ભરો",
+      "name": "પૂરું નામ",
+      "email": "ઈમેઇલ",
+      "phone": "ફોન (વૈકલ્પિક)",
+      "subject": "વિષય",
+      "subjectOptions": {
+        "general": "સામાન્ય",
+        "subscription": "સબ્સ્ક્રિપ્શન",
+        "advertising": "જાહેરાત",
+        "editorial": "સંપાદકીય",
+        "technical": "ટેકનિકલ",
+        "feedback": "પ્રતિભાવ",
+        "other": "અન્ય"
+      },
+      "message": "સંદેશ",
+      "messagePlaceholder": "કેવી મદદ કરી શકીએ...",
+      "submit": "મોકલો",
+      "sending": "મોકલાઈ રહ્યું...",
+      "success": "આભાર! 24 કલાકમાં સંપર્ક કરીશું.",
+      "error": "ભૂલ થઈ. ફરી પ્રયત્ન કરો."
+    },
+    "subscriptionDetails": {
+      "title": "સબ્સ્ક્રિપ્શન માહિતી",
+      "digital": {
+        "title": "ડિજિટલ એક્સેસ",
+        "price": "મફત",
+        "badge": "હંમેશા મફત",
+        "features": [
+          "અમર્યાદિત લેખ એક્સેસ",
+          "સંપૂર્ણ મેગેઝિન આર્કાઇવ",
+          "મોબાઇલ અને ડેસ્કટોપ",
+          "જાહેરાત-મુક્ત વાંચન",
+          "ઓફલાઇન ડાઉનલોડ"
+        ],
+        "cta": "ડિજિટલ એક્સેસ"
+      },
+      "print": {
+        "title": "પ્રિન્ટ મેગેઝિન",
+        "price": "₹499/મહિના",
+        "badge": "પ્રીમિયમ",
+        "features": [
+          "માસિક ઘરે ડિલિવરી",
+          "પ્રીમિયમ છાપકામ",
+          "ડિજિટલ સમાવિષ્ટ",
+          "વિશિષ્ટ કન્ટેન્ટ",
+          "પ્રાથમિકતા સહાય"
+        ],
+        "cta": "પ્રિન્ટ સબ્સ્ક્રાઇબ",
+        "note": "માસિક બિલિંગ"
+      },
+      "payment": {
+        "title": "ચુકવણી પદ્ધતિઓ",
+        "methods": [
+          "UPI",
+          "ક્રેડિટ/ડેબિટ કાર્ડ",
+          "નેટ બેંકિંગ",
+          "બેંક ટ્રાન્સફર",
+          "કેશ ઓન ડિલિવરી"
+        ],
+        "security": "બધી ચુકવણીઓ સુરક્ષિત"
+      },
+      "support": {
+        "title": "મદદ?",
+        "contact": "+91 98765 43211",
+        "email": "subscriptions@vartmaansarokar.in",
+        "hours": "સવારે 9 - સાંજે 7 IST"
+      }
+    }
+  },
+  "home": {
+    "heroContext": "ઊંડાણ સાથે સમાચાર",
+    "readFullArticle": "પૂરી વાર્તા વાંચો",
+    "featuredCoverage": "ટોચની વાર્તાઓ",
+    "emptyTitle": "હજુ વાર્તા નથી",
+    "emptyBody": "પ્રકાશિત થયા પછી દેખાશે.",
+    "featuredTitle": "ટોચની વાર્તાઓ",
+    "allArticles": "બધી વાર્તાઓ",
+    "noArticlesTitle": "હજુ પ્રકાશિત નથી",
+    "noArticlesBody": "એડમિન ડેશબોર્ડમાંથી પ્રકાશિત કરો.",
+    "premiumEdition": "પ્રીમિયમ આવૃત્તિ",
+    "magazineIntro": "ઊંડા વિશ્લેષણ અને નિષ્ણાત અભિપ્રાય.",
+    "flipbookFeature": "ફ્લિપબુક",
+    "visualEssays": "ફોટા અને વિઝ્યુઅલ",
+    "exploreIssue": "આ અંક વાંચો",
+    "editorsChoice": "સંપાદકની પસંદ",
+    "noMagazine": "હજુ મેગેઝિન ઉપલબ્ધ નથી."
+  },
+  "about": {
+    "badge": "પ્રકાશન વિશે",
+    "heroTitle": "હેડલાઇન પછી પણ વાચક સાથે રહેતું પત્રકારત્વ.",
+    "heroBody": "ઊંડાણ, સ્પષ્ટતા અને જાહેર પ્રાસંગિકતા પર કેન્દ્રિત માસિક પ્રકાશન.",
+    "tagCurrentAffairs": "સમકાલીન બાબતો",
+    "tagCulture": "સંસ્કૃતિ અને સમાજ",
+    "tagIdeas": "વિચારો અને નેતૃત્વ",
+    "missionTitle": "ધ્યેય",
+    "missionBody": "જાહેર જીવનની શક્તિઓ સમજાવવી.",
+    "audienceTitle": "વાચકો",
+    "audienceBody": "સંદર્ભ અને સાર મૂલ્ય આપતા વાચકો.",
+    "quote": "સંવાદ અને જવાબદારીનું મંચ.",
+    "whoWeAreBadge": "અમે કોણ છીએ",
+    "whoWeAreTitle": "સમજણ ઇચ્છતા વાચકો માટે.",
+    "whoWeAreP1": "પ્રાસંગિકતામાં મૂળ.",
+    "whoWeAreP2": "યુવા વાચકોને જાગૃતિ સાથે જોડવા.",
+    "whoWeAreP3": "અર્થપૂર્ણ પત્રકારત્વ લોકોને સ્પષ્ટ બનાવે.",
+    "visionTitle": "અમારી દૃષ્ટિ",
+    "visionLead": "જાહેર હિતનું પત્રકારત્વ.",
+    "visionBody": "માહિતગાર વાચકોની પેઢીને પ્રોત્સાહન.",
+    "coverTitle": "અમે શું કવર કરીએ છીએ",
+    "coverBody": "ભારતની વિચારસરણી પ્રભાવિત કરતા વિષયો.",
+    "pillar1Title": "જાહેર બાબતો",
+    "pillar1Body": "નીતિ અને શાસન.",
+    "pillar2Title": "સમાજ અને સંસ્કૃતિ",
+    "pillar2Body": "સામાજિક સાંસ્કૃતિક ધારાઓ.",
+    "pillar3Title": "વિચારો અને નેતૃત્વ",
+    "pillar3Body": "પ્રોફાઇલ અને વિશ્લેષણ.",
+    "teamTitle": "સંપાદકીય ટીમ",
+    "teamBody": "પ્રકાશનનો અવાજ આકાર આપતા લોકો.",
+    "publisher": "પ્રકાશક",
+    "editor": "સંપાદક",
+    "digitalHead": "ડિજિટલ વ્યૂહ વડા",
+    "adminHead": "વહીવટ વડા",
+    "publishedByTitle": "વાણી ક્રિએશન્સ દ્વારા પ્રકાશિત",
+    "publishedByBody": "વિશ્વસનીય કથન દ્વારા માર્ગદર્શિત.",
+    "exploreMagazine": "મેગેઝિન જુઓ"
+  },
+  "magazine": {
+    "title": "મેગેઝિન",
+    "subtitle": "ઓનલાઇન વાંચો.",
+    "emptyBody": "હજુ મેગેઝિન નથી.",
+    "edition": "અંક",
+    "digitalPrice": "મફત",
+    "physicalPrice": "₹499/મહિના",
+    "highResolution": "સરળ વાંચન",
+    "editorialDepth": "સંપૂર્ણ વાર્તાઓ",
+    "premiumAccess": "પૂર્ણ એક્સેસ",
+    "previousIssues": "અગાઉના અંક",
+    "digitalSubscription": "ઓનલાઇન મફત",
+    "digitalSubscriptionBody": "બધા અંક મફત.",
+    "perIssue": "પ્રતિ અંક",
+    "claimDigitalAccess": "મફત વાંચો",
+    "physicalSubscription": "પ્રિન્ટ મેળવો",
+    "physicalSubscriptionBody": "₹499 ઘરે ડિલિવરી.",
+    "subscribePrint": "₹499/મહિના"
+  },
+  "category": {
+    "label": "વિષય",
+    "summary": "{{category}} — {{count}} વાર્તાઓ.",
+    "byAuthor": "{{author}} દ્વારા",
+    "emptyTitle": "વાર્તા નથી",
+    "emptyCta": "અન્ય વિષયો"
+  },
+  "newsDetail": {
+    "notFoundTitle": "વાર્તા મળી નથી",
+    "backToHome": "હોમ",
+    "backToFeed": "વાર્તાઓ",
+    "subscriberStory": "વાચકો માટે",
+    "byAuthor": "{{author}} દ્વારા",
+    "minRead": "{{count}} મિનિટ",
+    "broaderImpact": "આનો અર્થ",
+    "lockedBadge": "સભ્યો માટે",
+    "lockedTitle": "સબ્સ્ક્રાઇબ કરો",
+    "lockedBody": "મફત ઓનલાઇન એક્સેસ મેળવો.",
+    "openSubscriptionForm": "સબ્સ્ક્રાઇબ",
+    "relatedStories": "વધુ વાર્તાઓ",
+    "sampleParagraphOne": "વધુ રિપોર્ટિંગ અને નિષ્ણાત અભિપ્રાય.",
+    "sampleParagraphTwo": "સ્થાનિક ઘટનાઓ મોટા ફેરફારો સાથે જોડાય છે."
+  },
+  "sidebar": {
+    "sponsored": "સ્પોન્સર્ડ",
+    "learnMore": "વધુ વાંચો",
+    "newsletterBody": "સાપ્તાહિક અપડેટ.",
+    "yourEmail": "ઈમેઇલ",
+    "subscribeNow": "અપડેટ મોકલો"
+  },
+  "subscription": {
+    "digitalActivated": "ડિજિટલ એક્સેસ તૈયાર!",
+    "requestReceived": "વિનંતી મળી",
+    "digitalSuccess": "ડિજિટલ એક્સેસ મળ્યો!",
+    "physicalSuccess": "ચુકવણી પુરાવો મળ્યો.",
+    "unlockTitle": "એક્સેસ પસંદ કરો",
+    "unlockBody": "ડિજિટલ મફત. પ્રિન્ટ ₹499.",
+    "digital": "ઓનલાઇન (મફત)",
+    "physicalCopy": "પ્રિન્ટ (₹499)",
+    "free": "મફત",
+    "physicalCardBody": "₹499/મહિના. પુરાવો અપલોડ.",
+    "fullName": "નામ",
+    "emailAddress": "ઈમેઇલ",
+    "phoneNumber": "ફોન",
+    "uploadPaymentScreenshot": "પુરાવો અપલોડ",
+    "clickToUpload": "ક્લિક કરો",
+    "digitalNotePlaceholder": "નોંધ...",
+    "physicalNotePlaceholder": "સરનામું...",
+    "submitting": "સબમિટ...",
+    "activateDigital": "ડિજિટલ (મફત)",
+    "submitPhysical": "પ્રિન્ટ (₹499)",
+    "info": "ડિજિટલ મફત. પ્રિન્ટ ₹499.",
+    "validationError": "વિગતો આપો.",
+    "invalidEmail": "માન્ય ઈમેઇલ.",
+    "readError": "ફાઇલ વાંચી શકાઈ નહીં.",
+    "physicalError": "વિનંતી નિષ્ફળ.",
+    "genericError": "ભૂલ થઈ."
+  },
+  "auth": {
+    "membership": "એક્સેસ પસંદ કરો",
+    "popupTitle": "મફત વાંચો અથવા પ્રિન્ટ",
+    "digitalAccess": "ઓનલાઇન — મફત",
+    "digitalPitch": "બધું મફત. કાર્ડ જરૂરી નથી.",
+    "physicalCopy": "પ્રિન્ટ મેળવો",
+    "physicalPitch": "₹499/મહિના.",
+    "subscribeDigitalTitle": "મફત ડિજિટલ",
+    "subscribePhysicalTitle": "પ્રિન્ટ (₹499)",
+    "digitalReading": "મફત ડિજિટલ",
+    "magazineFormats": "એક્સેસ પસંદ કરો",
+    "loginLabel": "સાઇન ઇન",
+    "loginTitle": "લોગ ઇન",
+    "password": "પાસવર્ડ",
+    "staffPasswordHint": "સ્ટાફ ઈમેઇલ અને પાસવર્ડ.",
+    "googleConfigHint": "Google સેટઅપ પછી.",
+    "staffAccountsHint": "ફૂટર શોર્ટકટ."
+  },
+  "flipbook": {
+    "issueProgress": "અંક પ્રગતિ",
+    "page": "પૃષ્ઠ",
+    "zoomIn": "મોટું",
+    "fullscreen": "પૂર્ણ સ્ક્રીન",
+    "digitalLabel": "બધા અંક મફત. પ્રિન્ટ ₹499."
+  },
+  "chat": {
+    "title": "પૂછો",
+    "subtitle": "URL આપો અને પૂછો.",
+    "websitePlaceholder": "https://example.com",
+    "fetch": "મેળવો",
+    "emptyState": "સંદેશ નથી.",
+    "inputPlaceholder": "પૂછો...",
+    "thinking": "વિચારે છે...",
+    "send": "મોકલો",
+    "fetchingContent": "લોડ...",
+    "titlePrefix": "શીર્ષક:",
+    "textPrefix": "ટેક્સ્ટ:",
+    "noResponse": "પ્રતિસાદ નથી.",
+    "failedToScrape": "વાંચી શકાયું નથી:",
+    "errorContactingServer": "ભૂલ:"
+  },
+  "admin": {
+    "welcomeBack": "સ્વાગત, {{name}}",
+    "dashboardBody": "વાર્તાઓ પ્રકાશિત કરો, મેગેઝિન અપલોડ કરો.",
+    "activeIssues": "સક્રિય અંક",
+    "newsArticles": "લેખો",
+    "subscribers": "સભ્યો",
+    "activeAds": "જાહેરાતો",
+    "editStory": "સંપાદિત",
+    "publishStory": "પ્રકાશિત",
+    "newsFormBody": "વાર્તા પ્રકાશિત કરો.",
+    "storyTitle": "શીર્ષક",
+    "imageUrl": "ફોટો URL",
+    "authorName": "લેખક",
+    "shortExcerpt": "સારાંશ",
+    "fullArticleContent": "પૂરી વાર્તા",
+    "featureHomepage": "હોમપેજ",
+    "requireSubscription": "પ્રીમિયમ",
+    "updateStory": "સાચવો",
+    "publishedStories": "પ્રકાશિત",
+    "featured": "ફીચર્ડ",
+    "subscriber": "સભ્ય",
+    "publishIssue": "અંક પ્રકાશિત",
+    "magazineFormBody": "અંક અપલોડ.",
+    "uploadPdf": "PDF",
+    "issueTitle": "શીર્ષક",
+    "issueNumber": "નંબર",
+    "coverImageUrl": "કવર URL",
+    "pagesHint": "URL પ્રતિ લાઇન",
+    "digitalPrice": "ઓનલાઇન ₹",
+    "physicalPrice": "પ્રિન્ટ ₹",
+    "gatedPage": "ગેટેડ",
+    "freeIssue": "મફત",
+    "enableBlurPaywall": "બ્લર",
+    "magazineHelper": "ઓનલાઇન મફત.",
+    "pages": "પૃષ્ઠો",
+    "digitalAccess": "ઓનલાઇન",
+    "blurPaywall": "બ્લર",
+    "previewUntil": "પૃષ્ઠ {{page}} સુધી",
+    "mediaLibrary": "મીડિયા",
+    "mediaBody": "અપલોડ.",
+    "noMedia": "મીડિયા નથી.",
+    "advertisingSlots": "જાહેરાત",
+    "adsBody": "સંપાદિત.",
+    "saveAds": "સાચવો",
+    "adTitle": "શીર્ષક",
+    "destinationUrl": "URL",
+    "sidebarTop": "ટોચ",
+    "sidebarMid": "મધ્ય",
+    "sidebarBottom": "તળ",
+    "homepageBanner": "બેનર",
+    "userRoles": "ભૂમિકાઓ",
+    "userRolesBody": "એક્સેસ નિયંત્રણ.",
+    "publishingNotes": "નોંધ",
+    "settingsLineOne": "MongoDB ડેટા.",
+    "settingsLineTwo": "ઓથ /api/auth/*.",
+    "settingsLineThree": "મીડિયા /api/media.",
+    "masterPanel": "માસ્ટર પેનલ"
+  }
+}

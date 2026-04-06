@@ -11,6 +11,11 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+server/data/
+uploads/
+.codex-*.log
+.codex-*.json
 
 # Editor directories and files
 .vscode/*

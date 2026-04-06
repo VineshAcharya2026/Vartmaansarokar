@@ -1,0 +1,506 @@
+{
+  "brand": {
+    "lineOne": "ਵਰਤਮਾਨ",
+    "lineTwo": "ਸਰੋਕਾਰ"
+  },
+  "roles": {
+    "general": "ਆਮ",
+    "magazine": "ਮੈਗਜ਼ੀਨ",
+    "admin": "ਐਡਮਿਨ",
+    "superAdmin": "ਸੁਪਰ ਐਡਮਿਨ"
+  },
+  "categories": {
+    "nationalNews": "ਰਾਸ਼ਟਰੀ ਖ਼ਬਰਾਂ",
+    "internationalNews": "ਅੰਤਰਰਾਸ਼ਟਰੀ ਖ਼ਬਰਾਂ",
+    "politics": "ਰਾਜਨੀਤੀ",
+    "business": "ਵਪਾਰ",
+    "economy": "ਅਰਥਚਾਰਾ",
+    "sports": "ਖੇਡਾਂ",
+    "entertainment": "ਮਨੋਰੰਜਨ",
+    "technology": "ਤਕਨਾਲੋਜੀ",
+    "health": "ਸਿਹਤ",
+    "environment": "ਵਾਤਾਵਰਣ",
+    "education": "ਸਿੱਖਿਆ"
+  },
+  "ads": {
+    "premiumWatches": {
+      "title": "ਪ੍ਰੀਮੀਅਮ ਘੜੀਆਂ",
+      "description": "ਸਹੀ ਘੜੀਆਂ।"
+    },
+    "luxuryRealEstate": {
+      "title": "ਲਗਜ਼ਰੀ ਰੀਅਲ ਅਸਟੇਟ",
+      "description": "ਪ੍ਰੀਮੀਅਮ ਨਿਵਾਸ।"
+    },
+    "cloudServices": {
+      "title": "ਕਲਾਊਡ ਸੇਵਾਵਾਂ",
+      "description": "ਤੇਜ਼ੀ ਨਾਲ ਵਧੋ।"
+    },
+    "fallbackDescription": "ਪ੍ਰੀਮੀਅਮ ਪਾਰਟਨਰ ਸਮੱਗਰੀ।"
+  },
+  "common": {
+    "home": "ਹੋਮ",
+    "aboutUs": "ਸਾਡੇ ਬਾਰੇ",
+    "articles": "ਲੇਖ",
+    "advertisers": "ਭਾਈਵਾਲ",
+    "mediaGallery": "ਫੋਟੋਆਂ",
+    "contactUs": "ਸੰਪਰਕ",
+    "digitalMagazine": "ਮੈਗਜ਼ੀਨ",
+    "signIn": "ਸਾਈਨ ਇਨ",
+    "loading": "ਉਡੀਕ ਕਰੋ...",
+    "selectAccount": "ਖਾਤਾ ਚੁਣੋ",
+    "masterAdmin": "ਐਡਮਿਨ",
+    "editorLogin": "ਸੰਪਾਦਕ",
+    "standardUser": "ਪਾਠਕ",
+    "dashboardPanel": "ਡੈਸ਼ਬੋਰਡ",
+    "signOut": "ਸਾਈਨ ਆਊਟ",
+    "search": "ਖੋਜੋ",
+    "returnHome": "ਹੋਮ ਤੇ ਵਾਪਸ",
+    "close": "ਬੰਦ",
+    "cancel": "ਰੱਦ",
+    "delete": "ਮਿਟਾਓ",
+    "edit": "ਸੋਧੋ",
+    "save": "ਸੰਭਾਲੋ",
+    "subscribe": "ਸਬਸਕ੍ਰਾਈਬ",
+    "readMagazine": "ਮੈਗਜ਼ੀਨ ਪੜ੍ਹੋ",
+    "explore": "ਖੋਜੋ",
+    "newsletter": "ਈਮੇਲ ਅਪਡੇਟ",
+    "emailAddress": "ਈਮੇਲ",
+    "public": "ਸਰਵਜਨਕ",
+    "premium": "ਪ੍ਰੀਮੀਅਮ",
+    "enabled": "ਚਾਲੂ",
+    "disabled": "ਬੰਦ",
+    "openAsset": "ਖੋਲੋ",
+    "uploadMedia": "ਅਪਲੋਡ",
+    "uploading": "ਅਪਲੋਡ ਹੋ ਰਿਹਾ...",
+    "overview": "ਸਾਰ",
+    "settings": "ਸੈਟਿੰਗਾਂ",
+    "media": "ਮੀਡੀਆ",
+    "newsEditor": "ਖ਼ਬਰ ਸੰਪਾਦਕ",
+    "digitalLibrary": "ਕਹਾਣੀਆਂ",
+    "crm": "ਪਾਠਕ"
+  },
+  "ticker": {
+    "newsflash": "ਨਿਊਜ਼ਫਲੈਸ਼"
+  },
+  "languageSwitcher": {
+    "buttonLabel": "ਭਾਸ਼ਾ ਬਦਲੋ",
+    "label": "ਭਾਸ਼ਾ",
+    "dropdownTitle": "ਭਾਸ਼ਾ ਚੁਣੋ",
+    "dropdownSubtitle": "ਪੂਰੀ ਐਪ ਵਿੱਚ ਭਾਸ਼ਾ ਤੁਰੰਤ ਬਦਲੋ।"
+  },
+  "loading": {
+    "experience": "ਨਿਊਜ਼ਰੂਮ ਲੋਡ ਹੋ ਰਿਹਾ..."
+  },
+  "footer": {
+    "description": "ਉਤਸੁਕ ਪਾਠਕਾਂ ਲਈ ਗੁਣਵੱਤਾ ਪੱਤਰਕਾਰੀ ਅਤੇ ਮੈਗਜ਼ੀਨ।",
+    "aboutLink": "ਸਾਡੇ ਬਾਰੇ",
+    "exploreTitle": "ਖੋਜੋ",
+    "topSectionsTitle": "ਮੁੱਖ ਭਾਗ",
+    "newsletterTitle": "ਨਿਊਜ਼ਲੈਟਰ",
+    "newsletterDescription": "ਖ਼ਬਰਾਂ ਅਤੇ ਮੈਗਜ਼ੀਨ ਅਪਡੇਟ ਪ੍ਰਾਪਤ ਕਰੋ।",
+    "newsletterErrorEmpty": "ਸਬਸਕ੍ਰਾਈਬ ਲਈ ਈਮੇਲ ਦਿਓ।",
+    "newsletterErrorInvalid": "ਸਹੀ ਈਮੇਲ ਦਿਓ।",
+    "newsletterSuccess": "ਸਬਸਕ੍ਰਾਈਬ ਹੋ ਗਿਆ।",
+    "partnerWithUs": "ਭਾਈਵਾਲ ਬਣੋ",
+    "copyright": "© 2026 ਵਰਤਮਾਨ ਸਰੋਕਾਰ। ਸਾਰੇ ਹੱਕ ਰਾਖਵੇਂ।",
+    "tagline": "ਸਪੱਸ਼ਟ, ਇਮਾਨਦਾਰ ਪੱਤਰਕਾਰੀ।"
+  },
+  "notFound": {
+    "title": "ਪੰਨਾ ਨਹੀਂ ਮਿਲਿਆ",
+    "message": "ਇਹ ਪੰਨਾ ਮੌਜੂਦ ਨਹੀਂ।"
+  },
+  "routes": {
+    "contact": {
+      "title": "ਸਾਡੇ ਨਾਲ ਗੱਲ ਕਰੋ",
+      "subtitle": "ਅਸੀਂ ਮਦਦ ਲਈ ਇੱਥੇ ਹਾਂ।",
+      "body": "ਸਵਾਲ? contact@vartmaansarokar.in ਤੇ ਲਿਖੋ।",
+      "heroTitle": "ਸੰਪਰਕ ਕਰੋ",
+      "heroSubtitle": "ਅਸੀਂ ਤੁਹਾਡੀ ਰਾਏ ਦੀ ਕਦਰ ਕਰਦੇ ਹਾਂ",
+      "responseTime": "24 ਘੰਟਿਆਂ ਵਿੱਚ ਜਵਾਬ",
+      "officeHours": "ਸੋਮ-ਸ਼ਨੀ, ਸਵੇਰੇ 9 - ਸ਼ਾਮ 7 IST"
+    },
+    "advertisers": {
+      "title": "ਸਾਡੇ ਨਾਲ ਕੰਮ ਕਰੋ",
+      "body": "ਹਜ਼ਾਰਾਂ ਪਾਠਕਾਂ ਤੱਕ ਪਹੁੰਚੋ? partners@vartmaansarokar.in"
+    },
+    "gallery": {
+      "title": "ਫੋਟੋ ਕਹਾਣੀਆਂ",
+      "body": "ਦੇਸ਼ ਭਰ ਤੋਂ ਸੁੰਦਰ ਫੋਟੋਆਂ ਅਤੇ ਵਿਜ਼ੂਅਲ ਕਹਾਣੀਆਂ।"
+    }
+  },
+  "contact": {
+    "pageTitle": "ਸਾਡੇ ਨਾਲ ਸੰਪਰਕ ਕਰੋ",
+    "pageSubtitle": "ਅਸੀਂ ਤੁਹਾਡੀ ਗੱਲ ਸੁਣਨਾ ਚਾਹੁੰਦੇ ਹਾਂ",
+    "sections": {
+      "general": {
+        "title": "ਆਮ ਪੁੱਛਗਿੱਛ",
+        "description": "ਸਮੱਗਰੀ, ਸਬਸਕ੍ਰਿਪਸ਼ਨ ਬਾਰੇ ਸਵਾਲ",
+        "email": "contact@vartmaansarokar.in",
+        "phone": "+91 98765 43210",
+        "response": "24 ਘੰਟਿਆਂ ਵਿੱਚ ਜਵਾਬ"
+      },
+      "subscriptions": {
+        "title": "ਸਬਸਕ੍ਰਿਪਸ਼ਨ ਮਦਦ",
+        "description": "ਡਿਜੀਟਲ ਪਹੁੰਚ, ਪ੍ਰਿੰਟ ਡਿਲੀਵਰੀ",
+        "email": "subscriptions@vartmaansarokar.in",
+        "phone": "+91 98765 43211",
+        "response": "12 ਘੰਟਿਆਂ ਵਿੱਚ ਜਵਾਬ",
+        "digitalHelp": "ਡਿਜੀਟਲ ਪਹੁੰਚ",
+        "printHelp": "ਪ੍ਰਿੰਟ ਮੈਗਜ਼ੀਨ",
+        "billingHelp": "ਭੁਗਤਾਨ ਅਤੇ ਬਿਲਿੰਗ"
+      },
+      "advertising": {
+        "title": "ਇਸ਼ਤਿਹਾਰ ਅਤੇ ਭਾਈਵਾਲੀ",
+        "description": "ਆਪਣੇ ਬ੍ਰਾਂਡ ਨਾਲ ਪਾਠਕਾਂ ਤੱਕ ਪਹੁੰਚੋ",
+        "email": "partners@vartmaansarokar.in",
+        "phone": "+91 98765 43212",
+        "response": "48 ਘੰਟਿਆਂ ਵਿੱਚ ਜਵਾਬ",
+        "audience": "50,000+ ਪਾਠਕ",
+        "formats": "ਡਿਜੀਟਲ, ਪ੍ਰਿੰਟ, ਕਸਟਮ",
+        "pricing": "₹25,000/ਮਹੀਨਾ ਤੋਂ"
+      },
+      "editorial": {
+        "title": "ਸੰਪਾਦਕੀ ਅਤੇ ਪ੍ਰੈਸ",
+        "description": "ਮੀਡੀਆ ਪੁੱਛਗਿੱਛ, ਪ੍ਰੈਸ ਰਿਲੀਜ਼",
+        "email": "editor@vartmaansarokar.in",
+        "phone": "+91 98765 43213",
+        "response": "48 ਘੰਟਿਆਂ ਵਿੱਚ"
+      },
+      "technical": {
+        "title": "ਤਕਨੀਕੀ ਮਦਦ",
+        "description": "ਵੈੱਬਸਾਈਟ, ਐਪ ਸਮੱਸਿਆਵਾਂ",
+        "email": "tech@vartmaansarokar.in",
+        "phone": "+91 98765 43214",
+        "response": "24 ਘੰਟਿਆਂ ਵਿੱਚ"
+      }
+    },
+    "office": {
+      "title": "ਸਾਡਾ ਦਫ਼ਤਰ",
+      "address": "ਵਾਣੀ ਕ੍ਰਿਏਸ਼ਨਜ਼ ਪ੍ਰਾ. ਲਿ.\n123 ਨਾਲੇਜ ਸਟ੍ਰੀਟ\nਕਨਾਟ ਪਲੇਸ\nਨਵੀਂ ਦਿੱਲੀ - 110001\nਭਾਰਤ",
+      "hours": {
+        "title": "ਦਫ਼ਤਰ ਸਮਾਂ",
+        "weekdays": "ਸੋਮ-ਸ਼ਨੀ: ਸਵੇਰੇ 9:00 - ਸ਼ਾਮ 7:00 IST",
+        "sunday": "ਐਤਵਾਰ: ਬੰਦ",
+        "holidays": "ਰਾਸ਼ਟਰੀ ਛੁੱਟੀਆਂ ਤੇ ਬੰਦ"
+      },
+      "location": "ਦਿੱਲੀ ਦੇ ਵਪਾਰਕ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ"
+    },
+    "social": {
+      "title": "ਸਾਨੂੰ ਫਾਲੋ ਕਰੋ",
+      "description": "ਜੁੜੇ ਰਹੋ",
+      "whatsapp": {
+        "title": "ਵਟਸਐਪ ਅਪਡੇਟ",
+        "description": "ਬ੍ਰੇਕਿੰਗ ਨਿਊਜ਼ ਅਤੇ ਹਾਈਲਾਈਟਸ",
+        "number": "+91 98765 43215",
+        "action": "'JOIN' ਭੇਜੋ"
+      },
+      "newsletter": {
+        "title": "ਈਮੇਲ ਨਿਊਜ਼ਲੈਟਰ",
+        "description": "ਹਫ਼ਤਾਵਾਰੀ ਸਾਰ",
+        "action": "ਮੁਫ਼ਤ ਸਬਸਕ੍ਰਾਈਬ"
+      }
+    },
+    "form": {
+      "title": "ਸੁਨੇਹਾ ਭੇਜੋ",
+      "subtitle": "ਫਾਰਮ ਭਰੋ",
+      "name": "ਪੂਰਾ ਨਾਮ",
+      "email": "ਈਮੇਲ",
+      "phone": "ਫ਼ੋਨ (ਵਿਕਲਪਿਕ)",
+      "subject": "ਵਿਸ਼ਾ",
+      "subjectOptions": {
+        "general": "ਆਮ",
+        "subscription": "ਸਬਸਕ੍ਰਿਪਸ਼ਨ",
+        "advertising": "ਇਸ਼ਤਿਹਾਰ",
+        "editorial": "ਸੰਪਾਦਕੀ",
+        "technical": "ਤਕਨੀਕੀ",
+        "feedback": "ਰਾਏ",
+        "other": "ਹੋਰ"
+      },
+      "message": "ਸੁਨੇਹਾ",
+      "messagePlaceholder": "ਅਸੀਂ ਕਿਵੇਂ ਮਦਦ ਕਰੀਏ...",
+      "submit": "ਭੇਜੋ",
+      "sending": "ਭੇਜ ਰਿਹਾ...",
+      "success": "ਧੰਨਵਾਦ! 24 ਘੰਟਿਆਂ ਵਿੱਚ ਸੰਪਰਕ ਕਰਾਂਗੇ।",
+      "error": "ਗਲਤੀ ਹੋਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+    },
+    "subscriptionDetails": {
+      "title": "ਸਬਸਕ੍ਰਿਪਸ਼ਨ ਜਾਣਕਾਰੀ",
+      "digital": {
+        "title": "ਡਿਜੀਟਲ ਪਹੁੰਚ",
+        "price": "ਮੁਫ਼ਤ",
+        "badge": "ਹਮੇਸ਼ਾ ਮੁਫ਼ਤ",
+        "features": [
+          "ਅਸੀਮਤ ਲੇਖ ਪਹੁੰਚ",
+          "ਪੂਰਾ ਮੈਗਜ਼ੀਨ ਆਰਕਾਈਵ",
+          "ਮੋਬਾਈਲ ਅਤੇ ਡੈਸਕਟੌਪ",
+          "ਇਸ਼ਤਿਹਾਰ-ਮੁਕਤ ਪੜ੍ਹਨਾ",
+          "ਔਫਲਾਈਨ ਡਾਊਨਲੋਡ"
+        ],
+        "cta": "ਡਿਜੀਟਲ ਪਹੁੰਚ"
+      },
+      "print": {
+        "title": "ਪ੍ਰਿੰਟ ਮੈਗਜ਼ੀਨ",
+        "price": "₹499/ਮਹੀਨਾ",
+        "badge": "ਪ੍ਰੀਮੀਅਮ",
+        "features": [
+          "ਮਾਸਿਕ ਘਰ ਡਿਲੀਵਰੀ",
+          "ਪ੍ਰੀਮੀਅਮ ਛਪਾਈ",
+          "ਡਿਜੀਟਲ ਸ਼ਾਮਲ",
+          "ਵਿਸ਼ੇਸ਼ ਸਮੱਗਰੀ",
+          "ਪ੍ਰਾਥਮਿਕਤਾ ਮਦਦ"
+        ],
+        "cta": "ਪ੍ਰਿੰਟ ਸਬਸਕ੍ਰਾਈਬ",
+        "note": "ਮਾਸਿਕ ਬਿਲਿੰਗ"
+      },
+      "payment": {
+        "title": "ਭੁਗਤਾਨ ਤਰੀਕੇ",
+        "methods": [
+          "UPI",
+          "ਕ੍ਰੈਡਿਟ/ਡੈਬਿਟ ਕਾਰਡ",
+          "ਨੈੱਟ ਬੈਂਕਿੰਗ",
+          "ਬੈਂਕ ਟ੍ਰਾਂਸਫ਼ਰ",
+          "ਕੈਸ਼ ਆਨ ਡਿਲੀਵਰੀ"
+        ],
+        "security": "ਸਾਰੇ ਭੁਗਤਾਨ ਸੁਰੱਖਿਅਤ"
+      },
+      "support": {
+        "title": "ਮਦਦ?",
+        "contact": "+91 98765 43211",
+        "email": "subscriptions@vartmaansarokar.in",
+        "hours": "ਸਵੇਰੇ 9 - ਸ਼ਾਮ 7 IST"
+      }
+    }
+  },
+  "home": {
+    "heroContext": "ਡੂੰਘਾਈ ਨਾਲ ਖ਼ਬਰਾਂ",
+    "readFullArticle": "ਪੂਰੀ ਕਹਾਣੀ ਪੜ੍ਹੋ",
+    "featuredCoverage": "ਮੁੱਖ ਕਹਾਣੀਆਂ",
+    "emptyTitle": "ਅਜੇ ਕੋਈ ਕਹਾਣੀ ਨਹੀਂ",
+    "emptyBody": "ਪ੍ਰਕਾਸ਼ਿਤ ਹੋਣ ਤੇ ਦਿਖਾਈ ਦੇਵੇਗੀ।",
+    "featuredTitle": "ਮੁੱਖ ਕਹਾਣੀਆਂ",
+    "allArticles": "ਸਾਰੀਆਂ ਕਹਾਣੀਆਂ",
+    "noArticlesTitle": "ਅਜੇ ਕੋਈ ਕਹਾਣੀ ਨਹੀਂ",
+    "noArticlesBody": "ਐਡਮਿਨ ਡੈਸ਼ਬੋਰਡ ਤੋਂ ਪ੍ਰਕਾਸ਼ਿਤ ਕਰੋ।",
+    "premiumEdition": "ਪ੍ਰੀਮੀਅਮ ਐਡੀਸ਼ਨ",
+    "magazineIntro": "ਡੂੰਘੇ ਵਿਸ਼ਲੇਸ਼ਣ ਅਤੇ ਮਾਹਿਰ ਵਿਚਾਰ।",
+    "flipbookFeature": "ਫਲਿੱਪਬੁੱਕ",
+    "visualEssays": "ਫੋਟੋ ਅਤੇ ਵਿਜ਼ੂਅਲ",
+    "exploreIssue": "ਇਹ ਅੰਕ ਪੜ੍ਹੋ",
+    "editorsChoice": "ਸੰਪਾਦਕ ਦੀ ਪਸੰਦ",
+    "noMagazine": "ਅਜੇ ਕੋਈ ਮੈਗਜ਼ੀਨ ਨਹੀਂ।"
+  },
+  "about": {
+    "badge": "ਪ੍ਰਕਾਸ਼ਨ ਬਾਰੇ",
+    "heroTitle": "ਹੈੱਡਲਾਈਨ ਤੋਂ ਅੱਗੇ ਦੀ ਪੱਤਰਕਾਰੀ।",
+    "heroBody": "ਡੂੰਘਾਈ ਅਤੇ ਸਪੱਸ਼ਟਤਾ ਤੇ ਕੇਂਦ੍ਰਿਤ ਮਾਸਿਕ ਪ੍ਰਕਾਸ਼ਨ।",
+    "tagCurrentAffairs": "ਮੌਜੂਦਾ ਮਾਮਲੇ",
+    "tagCulture": "ਸੱਭਿਆਚਾਰ ਅਤੇ ਸਮਾਜ",
+    "tagIdeas": "ਵਿਚਾਰ ਅਤੇ ਅਗਵਾਈ",
+    "missionTitle": "ਮਿਸ਼ਨ",
+    "missionBody": "ਜਨਤਕ ਜੀਵਨ ਨੂੰ ਸਮਝਣ ਵਿੱਚ ਮਦਦ।",
+    "audienceTitle": "ਪਾਠਕ",
+    "audienceBody": "ਸੰਦਰਭ ਅਤੇ ਸਾਰ ਨੂੰ ਮਹੱਤਵ ਦੇਣ ਵਾਲੇ ਪਾਠਕ।",
+    "quote": "ਸੰਵਾਦ ਅਤੇ ਜ਼ਿੰਮੇਵਾਰੀ ਦਾ ਮੰਚ।",
+    "whoWeAreBadge": "ਅਸੀਂ ਕੌਣ ਹਾਂ",
+    "whoWeAreTitle": "ਸਮਝ ਚਾਹੁਣ ਵਾਲੇ ਪਾਠਕਾਂ ਲਈ।",
+    "whoWeAreP1": "ਪ੍ਰਾਸੰਗਿਕਤਾ ਵਿੱਚ ਜੜ੍ਹਾਂ।",
+    "whoWeAreP2": "ਨੌਜਵਾਨ ਪਾਠਕਾਂ ਨੂੰ ਜੋੜਨਾ।",
+    "whoWeAreP3": "ਅਰਥਪੂਰਨ ਪੱਤਰਕਾਰੀ।",
+    "visionTitle": "ਸਾਡੀ ਦ੍ਰਿਸ਼ਟੀ",
+    "visionLead": "ਜਨਹਿੱਤ ਪੱਤਰਕਾਰੀ।",
+    "visionBody": "ਜਾਣਕਾਰ ਪਾਠਕਾਂ ਦੀ ਪੀੜ੍ਹੀ।",
+    "coverTitle": "ਅਸੀਂ ਕੀ ਕਵਰ ਕਰਦੇ ਹਾਂ",
+    "coverBody": "ਭਾਰਤ ਦੀ ਸੋਚ ਨੂੰ ਪ੍ਰਭਾਵਿਤ ਕਰਨ ਵਾਲੇ ਵਿਸ਼ੇ।",
+    "pillar1Title": "ਜਨਤਕ ਮਾਮਲੇ",
+    "pillar1Body": "ਨੀਤੀ ਅਤੇ ਸ਼ਾਸਨ।",
+    "pillar2Title": "ਸਮਾਜ ਅਤੇ ਸੱਭਿਆਚਾਰ",
+    "pillar2Body": "ਸਮਾਜਿਕ ਧਾਰਾਵਾਂ।",
+    "pillar3Title": "ਵਿਚਾਰ ਅਤੇ ਅਗਵਾਈ",
+    "pillar3Body": "ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਵਿਸ਼ਲੇਸ਼ਣ।",
+    "teamTitle": "ਸੰਪਾਦਕੀ ਟੀਮ",
+    "teamBody": "ਪ੍ਰਕਾਸ਼ਨ ਦੀ ਆਵਾਜ਼।",
+    "publisher": "ਪ੍ਰਕਾਸ਼ਕ",
+    "editor": "ਸੰਪਾਦਕ",
+    "digitalHead": "ਡਿਜੀਟਲ ਮੁਖੀ",
+    "adminHead": "ਪ੍ਰਸ਼ਾਸਨ ਮੁਖੀ",
+    "publishedByTitle": "ਵਾਣੀ ਕ੍ਰਿਏਸ਼ਨਜ਼ ਦੁਆਰਾ ਪ੍ਰਕਾਸ਼ਿਤ",
+    "publishedByBody": "ਭਰੋਸੇਯੋਗ ਕਹਾਣੀ ਸੁਣਾਉਣ ਤੋਂ ਪ੍ਰੇਰਿਤ।",
+    "exploreMagazine": "ਮੈਗਜ਼ੀਨ ਦੇਖੋ"
+  },
+  "magazine": {
+    "title": "ਮੈਗਜ਼ੀਨ",
+    "subtitle": "ਆਨਲਾਈਨ ਪੜ੍ਹੋ।",
+    "emptyBody": "ਅਜੇ ਕੋਈ ਮੈਗਜ਼ੀਨ ਨਹੀਂ।",
+    "edition": "ਅੰਕ",
+    "digitalPrice": "ਮੁਫ਼ਤ",
+    "physicalPrice": "₹499/ਮਹੀਨਾ",
+    "highResolution": "ਸੌਖਾ ਪੜ੍ਹਨਾ",
+    "editorialDepth": "ਪੂਰੀਆਂ ਕਹਾਣੀਆਂ",
+    "premiumAccess": "ਪੂਰੀ ਪਹੁੰਚ",
+    "previousIssues": "ਪਿਛਲੇ ਅੰਕ",
+    "digitalSubscription": "ਆਨਲਾਈਨ ਮੁਫ਼ਤ",
+    "digitalSubscriptionBody": "ਸਾਰੇ ਅੰਕ ਮੁਫ਼ਤ।",
+    "perIssue": "ਪ੍ਰਤੀ ਅੰਕ",
+    "claimDigitalAccess": "ਮੁਫ਼ਤ ਪੜ੍ਹੋ",
+    "physicalSubscription": "ਪ੍ਰਿੰਟ ਲਵੋ",
+    "physicalSubscriptionBody": "₹499 ਵਿੱਚ ਘਰ ਡਿਲੀਵਰੀ।",
+    "subscribePrint": "₹499/ਮਹੀਨਾ"
+  },
+  "category": {
+    "label": "ਵਿਸ਼ਾ",
+    "summary": "{{category}} — {{count}} ਕਹਾਣੀਆਂ।",
+    "byAuthor": "{{author}} ਦੁਆਰਾ",
+    "emptyTitle": "ਕੋਈ ਕਹਾਣੀ ਨਹੀਂ",
+    "emptyCta": "ਹੋਰ ਵਿਸ਼ੇ ਦੇਖੋ"
+  },
+  "newsDetail": {
+    "notFoundTitle": "ਕਹਾਣੀ ਨਹੀਂ ਮਿਲੀ",
+    "backToHome": "ਹੋਮ",
+    "backToFeed": "ਕਹਾਣੀਆਂ",
+    "subscriberStory": "ਪਾਠਕਾਂ ਲਈ",
+    "byAuthor": "{{author}} ਦੁਆਰਾ",
+    "minRead": "{{count}} ਮਿੰਟ",
+    "broaderImpact": "ਇਸ ਦਾ ਮਤਲਬ",
+    "lockedBadge": "ਮੈਂਬਰਾਂ ਲਈ",
+    "lockedTitle": "ਸਬਸਕ੍ਰਾਈਬ ਕਰੋ",
+    "lockedBody": "ਮੁਫ਼ਤ ਆਨਲਾਈਨ ਪਹੁੰਚ ਲਵੋ।",
+    "openSubscriptionForm": "ਸਬਸਕ੍ਰਾਈਬ",
+    "relatedStories": "ਹੋਰ ਕਹਾਣੀਆਂ",
+    "sampleParagraphOne": "ਹੋਰ ਰਿਪੋਰਟਿੰਗ ਅਤੇ ਮਾਹਿਰ ਵਿਚਾਰ।",
+    "sampleParagraphTwo": "ਸਥਾਨਕ ਘਟਨਾਵਾਂ ਵੱਡੇ ਬਦਲਾਅ ਨਾਲ ਜੁੜਦੀਆਂ ਹਨ।"
+  },
+  "sidebar": {
+    "sponsored": "ਸਪਾਂਸਰਡ",
+    "learnMore": "ਹੋਰ ਪੜ੍ਹੋ",
+    "newsletterBody": "ਹਫ਼ਤਾਵਾਰੀ ਅਪਡੇਟ।",
+    "yourEmail": "ਈਮੇਲ",
+    "subscribeNow": "ਅਪਡੇਟ ਭੇਜੋ"
+  },
+  "subscription": {
+    "digitalActivated": "ਡਿਜੀਟਲ ਪਹੁੰਚ ਤਿਆਰ!",
+    "requestReceived": "ਬੇਨਤੀ ਮਿਲੀ",
+    "digitalSuccess": "ਡਿਜੀਟਲ ਪਹੁੰਚ ਮਿਲੀ!",
+    "physicalSuccess": "ਭੁਗਤਾਨ ਸਬੂਤ ਮਿਲਿਆ।",
+    "unlockTitle": "ਪਹੁੰਚ ਚੁਣੋ",
+    "unlockBody": "ਡਿਜੀਟਲ ਮੁਫ਼ਤ। ਪ੍ਰਿੰਟ ₹499।",
+    "digital": "ਆਨਲਾਈਨ (ਮੁਫ਼ਤ)",
+    "physicalCopy": "ਪ੍ਰਿੰਟ (₹499)",
+    "free": "ਮੁਫ਼ਤ",
+    "physicalCardBody": "₹499/ਮਹੀਨਾ। ਸਬੂਤ ਅਪਲੋਡ।",
+    "fullName": "ਨਾਮ",
+    "emailAddress": "ਈਮੇਲ",
+    "phoneNumber": "ਫ਼ੋਨ",
+    "uploadPaymentScreenshot": "ਸਬੂਤ ਅਪਲੋਡ",
+    "clickToUpload": "ਕਲਿੱਕ ਕਰੋ",
+    "digitalNotePlaceholder": "ਨੋਟ...",
+    "physicalNotePlaceholder": "ਪਤਾ...",
+    "submitting": "ਭੇਜ ਰਿਹਾ...",
+    "activateDigital": "ਡਿਜੀਟਲ (ਮੁਫ਼ਤ)",
+    "submitPhysical": "ਪ੍ਰਿੰਟ (₹499)",
+    "info": "ਡਿਜੀਟਲ ਮੁਫ਼ਤ। ਪ੍ਰਿੰਟ ₹499।",
+    "validationError": "ਵੇਰਵੇ ਦਿਓ।",
+    "invalidEmail": "ਸਹੀ ਈਮੇਲ।",
+    "readError": "ਫਾਈਲ ਨਹੀਂ ਪੜ੍ਹੀ।",
+    "physicalError": "ਬੇਨਤੀ ਫੇਲ੍ਹ।",
+    "genericError": "ਗਲਤੀ ਹੋਈ।"
+  },
+  "auth": {
+    "membership": "ਪਹੁੰਚ ਚੁਣੋ",
+    "popupTitle": "ਮੁਫ਼ਤ ਪੜ੍ਹੋ ਜਾਂ ਪ੍ਰਿੰਟ",
+    "digitalAccess": "ਆਨਲਾਈਨ — ਮੁਫ਼ਤ",
+    "digitalPitch": "ਸਭ ਮੁਫ਼ਤ। ਕਾਰਡ ਨਹੀਂ ਚਾਹੀਦਾ।",
+    "physicalCopy": "ਪ੍ਰਿੰਟ ਲਵੋ",
+    "physicalPitch": "₹499/ਮਹੀਨਾ।",
+    "subscribeDigitalTitle": "ਮੁਫ਼ਤ ਡਿਜੀਟਲ",
+    "subscribePhysicalTitle": "ਪ੍ਰਿੰਟ (₹499)",
+    "digitalReading": "ਮੁਫ਼ਤ ਡਿਜੀਟਲ",
+    "magazineFormats": "ਪਹੁੰਚ ਚੁਣੋ",
+    "loginLabel": "ਸਾਈਨ ਇਨ",
+    "loginTitle": "ਲੌਗ ਇਨ",
+    "password": "ਪਾਸਵਰਡ",
+    "staffPasswordHint": "ਸਟਾਫ਼ ਈਮੇਲ ਅਤੇ ਪਾਸਵਰਡ।",
+    "googleConfigHint": "Google ਸੈੱਟਅੱਪ ਤੋਂ ਬਾਅਦ।",
+    "staffAccountsHint": "ਫੁੱਟਰ ਸ਼ਾਰਟਕੱਟ।"
+  },
+  "flipbook": {
+    "issueProgress": "ਅੰਕ ਤਰੱਕੀ",
+    "page": "ਪੰਨਾ",
+    "zoomIn": "ਵੱਡਾ",
+    "fullscreen": "ਪੂਰੀ ਸਕ੍ਰੀਨ",
+    "digitalLabel": "ਸਾਰੇ ਅੰਕ ਮੁਫ਼ਤ। ਪ੍ਰਿੰਟ ₹499।"
+  },
+  "chat": {
+    "title": "ਪੁੱਛੋ",
+    "subtitle": "URL ਦਿਓ ਅਤੇ ਪੁੱਛੋ।",
+    "websitePlaceholder": "https://example.com",
+    "fetch": "ਲਿਆਓ",
+    "emptyState": "ਕੋਈ ਸੁਨੇਹਾ ਨਹੀਂ।",
+    "inputPlaceholder": "ਪੁੱਛੋ...",
+    "thinking": "ਸੋਚ ਰਿਹਾ...",
+    "send": "ਭੇਜੋ",
+    "fetchingContent": "ਲੋਡ...",
+    "titlePrefix": "ਸਿਰਲੇਖ:",
+    "textPrefix": "ਟੈਕਸਟ:",
+    "noResponse": "ਜਵਾਬ ਨਹੀਂ।",
+    "failedToScrape": "ਪੜ੍ਹ ਨਹੀਂ ਸਕਿਆ:",
+    "errorContactingServer": "ਗਲਤੀ:"
+  },
+  "admin": {
+    "welcomeBack": "ਸੁਆਗਤ, {{name}}",
+    "dashboardBody": "ਕਹਾਣੀਆਂ ਪ੍ਰਕਾਸ਼ਿਤ ਕਰੋ, ਮੈਗਜ਼ੀਨ ਅਪਲੋਡ ਕਰੋ।",
+    "activeIssues": "ਸਕ੍ਰਿਯ ਅੰਕ",
+    "newsArticles": "ਲੇਖ",
+    "subscribers": "ਮੈਂਬਰ",
+    "activeAds": "ਇਸ਼ਤਿਹਾਰ",
+    "editStory": "ਸੋਧੋ",
+    "publishStory": "ਪ੍ਰਕਾਸ਼ਿਤ",
+    "newsFormBody": "ਕਹਾਣੀ ਪ੍ਰਕਾਸ਼ਿਤ ਕਰੋ।",
+    "storyTitle": "ਸਿਰਲੇਖ",
+    "imageUrl": "ਫੋਟੋ URL",
+    "authorName": "ਲੇਖਕ",
+    "shortExcerpt": "ਸਾਰ",
+    "fullArticleContent": "ਪੂਰੀ ਕਹਾਣੀ",
+    "featureHomepage": "ਹੋਮਪੇਜ",
+    "requireSubscription": "ਪ੍ਰੀਮੀਅਮ",
+    "updateStory": "ਸੰਭਾਲੋ",
+    "publishedStories": "ਪ੍ਰਕਾਸ਼ਿਤ",
+    "featured": "ਫੀਚਰਡ",
+    "subscriber": "ਮੈਂਬਰ",
+    "publishIssue": "ਅੰਕ ਪ੍ਰਕਾਸ਼ਿਤ",
+    "magazineFormBody": "ਅੰਕ ਅਪਲੋਡ।",
+    "uploadPdf": "PDF",
+    "issueTitle": "ਸਿਰਲੇਖ",
+    "issueNumber": "ਨੰਬਰ",
+    "coverImageUrl": "ਕਵਰ URL",
+    "pagesHint": "URL ਪ੍ਰਤੀ ਲਾਈਨ",
+    "digitalPrice": "ਆਨਲਾਈਨ ₹",
+    "physicalPrice": "ਪ੍ਰਿੰਟ ₹",
+    "gatedPage": "ਗੇਟਿਡ",
+    "freeIssue": "ਮੁਫ਼ਤ",
+    "enableBlurPaywall": "ਬਲਰ",
+    "magazineHelper": "ਆਨਲਾਈਨ ਮੁਫ਼ਤ।",
+    "pages": "ਪੰਨੇ",
+    "digitalAccess": "ਆਨਲਾਈਨ",
+    "blurPaywall": "ਬਲਰ",
+    "previewUntil": "ਪੰਨਾ {{page}} ਤੱਕ",
+    "mediaLibrary": "ਮੀਡੀਆ",
+    "mediaBody": "ਅਪਲੋਡ ਕਰੋ।",
+    "noMedia": "ਕੋਈ ਮੀਡੀਆ ਨਹੀਂ।",
+    "advertisingSlots": "ਇਸ਼ਤਿਹਾਰ",
+    "adsBody": "ਸੋਧੋ।",
+    "saveAds": "ਸੰਭਾਲੋ",
+    "adTitle": "ਸਿਰਲੇਖ",
+    "destinationUrl": "URL",
+    "sidebarTop": "ਉੱਪਰ",
+    "sidebarMid": "ਵਿਚਕਾਰ",
+    "sidebarBottom": "ਹੇਠਾਂ",
+    "homepageBanner": "ਬੈਨਰ",
+    "userRoles": "ਭੂਮਿਕਾਵਾਂ",
+    "userRolesBody": "ਪਹੁੰਚ ਕੰਟਰੋਲ।",
+    "publishingNotes": "ਨੋਟ",
+    "settingsLineOne": "MongoDB ਡੇਟਾ।",
+    "settingsLineTwo": "ਔਥ /api/auth/*.",
+    "settingsLineThree": "ਮੀਡੀਆ /api/media.",
+    "masterPanel": "ਮਾਸਟਰ ਪੈਨਲ"
+  }
+}

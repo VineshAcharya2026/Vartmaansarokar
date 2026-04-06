@@ -1,0 +1,506 @@
+{
+  "brand": {
+    "lineOne": "ବର୍ତ୍ତମାନ",
+    "lineTwo": "ସରୋକାର"
+  },
+  "roles": {
+    "general": "ସାଧାରଣ",
+    "magazine": "ମ୍ୟାଗାଜିନ",
+    "admin": "ଆଡମିନ",
+    "superAdmin": "ସୁପର ଆଡମିନ"
+  },
+  "categories": {
+    "nationalNews": "ଜାତୀୟ ସମାଚାର",
+    "internationalNews": "ଆନ୍ତର୍ଜାତିକ ସମାଚାର",
+    "politics": "ରାଜନୀତି",
+    "business": "ବ୍ୟବସାୟ",
+    "economy": "ଅର୍ଥନୀତି",
+    "sports": "କ୍ରୀଡ଼ା",
+    "entertainment": "ମନୋରଞ୍ଜନ",
+    "technology": "ପ୍ରଯୁକ୍ତି",
+    "health": "ସ୍ୱାସ୍ଥ୍ୟ",
+    "environment": "ପରିବେଶ",
+    "education": "ଶିକ୍ଷା"
+  },
+  "ads": {
+    "premiumWatches": {
+      "title": "ପ୍ରିମିୟମ ଘଣ୍ଟା",
+      "description": "ସଠିକ ଘଣ୍ଟା।"
+    },
+    "luxuryRealEstate": {
+      "title": "ଲକ୍ଜରୀ ରିଏଲ ଏଷ୍ଟେଟ",
+      "description": "ପ୍ରିମିୟମ ନିବାସ।"
+    },
+    "cloudServices": {
+      "title": "କ୍ଲାଉଡ ସେବା",
+      "description": "ଶୀଘ୍ର ବୃଦ୍ଧି।"
+    },
+    "fallbackDescription": "ପ୍ରିମିୟମ ସହଭାଗୀ ବିଷୟବସ୍ତୁ।"
+  },
+  "common": {
+    "home": "ହୋମ",
+    "aboutUs": "ଆମ ବିଷୟରେ",
+    "articles": "ଲେଖା",
+    "advertisers": "ସହଭାଗୀ",
+    "mediaGallery": "ଫଟୋ",
+    "contactUs": "ଯୋଗାଯୋଗ",
+    "digitalMagazine": "ମ୍ୟାଗାଜିନ",
+    "signIn": "ସାଇନ ଇନ",
+    "loading": "ଅପେକ୍ଷା କରନ୍ତୁ...",
+    "selectAccount": "ଆକାଉଣ୍ଟ ବାଛନ୍ତୁ",
+    "masterAdmin": "ଆଡମିନ",
+    "editorLogin": "ସମ୍ପାଦକ",
+    "standardUser": "ପାଠକ",
+    "dashboardPanel": "ଡ୍ୟାସବୋର୍ଡ",
+    "signOut": "ସାଇନ ଆଉଟ",
+    "search": "ଖୋଜନ୍ତୁ",
+    "returnHome": "ହୋମକୁ ଫେରନ୍ତୁ",
+    "close": "ବନ୍ଦ",
+    "cancel": "ବାତିଲ",
+    "delete": "ବିଲୋପ",
+    "edit": "ସମ୍ପାଦନା",
+    "save": "ସଞ୍ଚୟ",
+    "subscribe": "ସବସ୍କ୍ରାଇବ",
+    "readMagazine": "ମ୍ୟାଗାଜିନ ପଢ଼ନ୍ତୁ",
+    "explore": "ଅନ୍ୱେଷଣ",
+    "newsletter": "ଇମେଲ ଅପଡେଟ",
+    "emailAddress": "ଇମେଲ",
+    "public": "ସାର୍ବଜନୀନ",
+    "premium": "ପ୍ରିମିୟମ",
+    "enabled": "ଚାଲୁ",
+    "disabled": "ବନ୍ଦ",
+    "openAsset": "ଖୋଲନ୍ତୁ",
+    "uploadMedia": "ଅପଲୋଡ",
+    "uploading": "ଅପଲୋଡ ହେଉଛି...",
+    "overview": "ସାରାଂଶ",
+    "settings": "ସେଟିଂସ",
+    "media": "ମିଡ଼ିଆ",
+    "newsEditor": "ସମାଚାର ସମ୍ପାଦକ",
+    "digitalLibrary": "କାହାଣୀ",
+    "crm": "ପାଠକ"
+  },
+  "ticker": {
+    "newsflash": "ନ୍ୟୁଜଫ୍ଲାସ"
+  },
+  "languageSwitcher": {
+    "buttonLabel": "ଭାଷା ବଦଳାନ୍ତୁ",
+    "label": "ଭାଷା",
+    "dropdownTitle": "ଭାଷା ବାଛନ୍ତୁ",
+    "dropdownSubtitle": "ସମ୍ପୂର୍ଣ୍ଣ ଆପରେ ଭାଷା ତୁରନ୍ତ ବଦଳାନ୍ତୁ।"
+  },
+  "loading": {
+    "experience": "ନ୍ୟୁଜରୁମ ଲୋଡ ହେଉଛି..."
+  },
+  "footer": {
+    "description": "ଜିଜ୍ଞାସୁ ପାଠକଙ୍କ ପାଇଁ ଗୁଣବତ୍ତା ସାମ୍ବାଦିକତା ଏବଂ ମ୍ୟାଗାଜିନ।",
+    "aboutLink": "ଆମ ବିଷୟରେ",
+    "exploreTitle": "ଅନ୍ୱେଷଣ",
+    "topSectionsTitle": "ମୁଖ୍ୟ ବିଭାଗ",
+    "newsletterTitle": "ନ୍ୟୁଜଲେଟର",
+    "newsletterDescription": "ସମାଚାର ଅପଡେଟ ପାଆନ୍ତୁ।",
+    "newsletterErrorEmpty": "ଇମେଲ ଦିଅନ୍ତୁ।",
+    "newsletterErrorInvalid": "ସଠିକ ଇମେଲ ଦିଅନ୍ତୁ।",
+    "newsletterSuccess": "ସବସ୍କ୍ରାଇବ ହୋଇଛି।",
+    "partnerWithUs": "ସହଭାଗୀ ହୁଅନ୍ତୁ",
+    "copyright": "© 2026 ବର୍ତ୍ତମାନ ସରୋକାର। ସମସ୍ତ ଅଧିକାର ସଂରକ୍ଷିତ।",
+    "tagline": "ସ୍ପଷ୍ଟ, ସତ୍ୟନିଷ୍ଠ ସାମ୍ବାଦିକତା।"
+  },
+  "notFound": {
+    "title": "ପୃଷ୍ଠା ମିଳିଲା ନାହିଁ",
+    "message": "ଏହି ପୃଷ୍ଠା ଅସ୍ତିତ୍ୱରେ ନାହିଁ।"
+  },
+  "routes": {
+    "contact": {
+      "title": "ଆମ ସହ କଥା ହୁଅନ୍ତୁ",
+      "subtitle": "ଆମେ ସାହାଯ୍ୟ ପାଇଁ ଏଠାରେ ଅଛୁ।",
+      "body": "ପ୍ରଶ୍ନ? contact@vartmaansarokar.in ରେ ଲେଖନ୍ତୁ।",
+      "heroTitle": "ଯୋଗାଯୋଗ",
+      "heroSubtitle": "ଆମେ ଆପଣଙ୍କ ମତାମତକୁ ମୂଲ୍ୟ ଦେଉ",
+      "responseTime": "24 ଘଣ୍ଟାରେ ଉତ୍ତର",
+      "officeHours": "ସୋମ-ଶନି, ସକାଳ 9 - ସନ୍ଧ୍ୟା 7 IST"
+    },
+    "advertisers": {
+      "title": "ଆମ ସହ କାମ କରନ୍ତୁ",
+      "body": "ହଜାରେ ପାଠକଙ୍କୁ ପହଞ୍ଚନ୍ତୁ? partners@vartmaansarokar.in"
+    },
+    "gallery": {
+      "title": "ଫଟୋ କାହାଣୀ",
+      "body": "ଦେଶରୁ ସୁନ୍ଦର ଫଟୋ ଏବଂ ଭିଜୁଆଲ କାହାଣୀ।"
+    }
+  },
+  "contact": {
+    "pageTitle": "ଆମ ସହ ଯୋଗାଯୋଗ",
+    "pageSubtitle": "ଆମେ ଆପଣଙ୍କଠାରୁ ଶୁଣିବାକୁ ଚାହୁଁ",
+    "sections": {
+      "general": {
+        "title": "ସାଧାରଣ ଜିଜ୍ଞାସା",
+        "description": "ବିଷୟବସ୍ତୁ, ସବସ୍କ୍ରିପସନ ବିଷୟରେ ପ୍ରଶ୍ନ",
+        "email": "contact@vartmaansarokar.in",
+        "phone": "+91 98765 43210",
+        "response": "24 ଘଣ୍ଟାରେ ଉତ୍ତର"
+      },
+      "subscriptions": {
+        "title": "ସବସ୍କ୍ରିପସନ ସାହାଯ୍ୟ",
+        "description": "ଡିଜିଟାଲ, ପ୍ରିଣ୍ଟ ଡେଲିଭରି",
+        "email": "subscriptions@vartmaansarokar.in",
+        "phone": "+91 98765 43211",
+        "response": "12 ଘଣ୍ଟାରେ ଉତ୍ତର",
+        "digitalHelp": "ଡିଜିଟାଲ ସମସ୍ୟା",
+        "printHelp": "ପ୍ରିଣ୍ଟ ଅର୍ଡର",
+        "billingHelp": "ଦେୟ ଏବଂ ବିଲିଂ"
+      },
+      "advertising": {
+        "title": "ବିଜ୍ଞାପନ ଏବଂ ସହଭାଗିତା",
+        "description": "ଆପଣଙ୍କ ବ୍ରାଣ୍ଡ ସହ ପାଠକଙ୍କୁ ପହଞ୍ଚନ୍ତୁ",
+        "email": "partners@vartmaansarokar.in",
+        "phone": "+91 98765 43212",
+        "response": "48 ଘଣ୍ଟାରେ ଉତ୍ତର",
+        "audience": "50,000+ ପାଠକ",
+        "formats": "ଡିଜିଟାଲ, ପ୍ରିଣ୍ଟ, କଷ୍ଟମ",
+        "pricing": "₹25,000/ମାସରୁ"
+      },
+      "editorial": {
+        "title": "ସମ୍ପାଦକୀୟ ଏବଂ ପ୍ରେସ",
+        "description": "ମିଡ଼ିଆ ଜିଜ୍ଞାସା, ପ୍ରେସ ରିଲିଜ",
+        "email": "editor@vartmaansarokar.in",
+        "phone": "+91 98765 43213",
+        "response": "48 ଘଣ୍ଟାରେ"
+      },
+      "technical": {
+        "title": "ପ୍ରଯୁକ୍ତି ସାହାଯ୍ୟ",
+        "description": "ୱେବସାଇଟ, ଆପ ସମସ୍ୟା",
+        "email": "tech@vartmaansarokar.in",
+        "phone": "+91 98765 43214",
+        "response": "24 ଘଣ୍ଟାରେ"
+      }
+    },
+    "office": {
+      "title": "ଆମ କାର୍ଯ୍ୟାଳୟ",
+      "address": "ବାଣୀ କ୍ରିଏସନ୍ସ ପ୍ରା. ଲି.\n123 ନଲେଜ ଷ୍ଟ୍ରୀଟ\nକନଟ ପ୍ଲେସ\nନୂଆ ଦିଲ୍ଲୀ - 110001\nଭାରତ",
+      "hours": {
+        "title": "କାର୍ଯ୍ୟାଳୟ ସମୟ",
+        "weekdays": "ସୋମ-ଶନି: ସକାଳ 9:00 - ସନ୍ଧ୍ୟା 7:00 IST",
+        "sunday": "ରବିବାର: ବନ୍ଦ",
+        "holidays": "ଜାତୀୟ ଛୁଟିରେ ବନ୍ଦ"
+      },
+      "location": "ଦିଲ୍ଲୀ ବାଣିଜ୍ୟ ଜିଲ୍ଲାରେ"
+    },
+    "social": {
+      "title": "ଫଲୋ କରନ୍ତୁ",
+      "description": "ସଂଯୁକ୍ତ ରୁହନ୍ତୁ",
+      "whatsapp": {
+        "title": "ୱାଟ୍ସଆପ ଅପଡେଟ",
+        "description": "ବ୍ରେକିଂ ନ୍ୟୁଜ ଏବଂ ହାଇଲାଇଟ",
+        "number": "+91 98765 43215",
+        "action": "'JOIN' ପଠାନ୍ତୁ"
+      },
+      "newsletter": {
+        "title": "ଇମେଲ ନ୍ୟୁଜଲେଟର",
+        "description": "ସାପ୍ତାହିକ ସାରାଂଶ",
+        "action": "ମାଗଣା ସବସ୍କ୍ରାଇବ"
+      }
+    },
+    "form": {
+      "title": "ସନ୍ଦେଶ ପଠାନ୍ତୁ",
+      "subtitle": "ଫର୍ମ ପୂରଣ କରନ୍ତୁ",
+      "name": "ପୂରା ନାମ",
+      "email": "ଇମେଲ",
+      "phone": "ଫୋନ (ଐଚ୍ଛିକ)",
+      "subject": "ବିଷୟ",
+      "subjectOptions": {
+        "general": "ସାଧାରଣ",
+        "subscription": "ସବସ୍କ୍ରିପସନ",
+        "advertising": "ବିଜ୍ଞାପନ",
+        "editorial": "ସମ୍ପାଦକୀୟ",
+        "technical": "ପ୍ରଯୁକ୍ତି",
+        "feedback": "ମତାମତ",
+        "other": "ଅନ୍ୟ"
+      },
+      "message": "ସନ୍ଦେଶ",
+      "messagePlaceholder": "ଆମେ କିପରି ସାହାଯ୍ୟ କରିବା...",
+      "submit": "ପଠାନ୍ତୁ",
+      "sending": "ପଠାଉଛି...",
+      "success": "ଧନ୍ୟବାଦ! 24 ଘଣ୍ଟାରେ ଯୋଗାଯୋଗ କରିବା।",
+      "error": "ତ୍ରୁଟି। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"
+    },
+    "subscriptionDetails": {
+      "title": "ସବସ୍କ୍ରିପସନ ସୂଚନା",
+      "digital": {
+        "title": "ଡିଜିଟାଲ ଆକ୍ସେସ",
+        "price": "ମାଗଣା",
+        "badge": "ସର୍ବଦା ମାଗଣା",
+        "features": [
+          "ସବୁ ଲେଖାରେ ଅସୀମିତ ଆକ୍ସେସ",
+          "ସମ୍ପୂର୍ଣ୍ଣ ଆର୍କାଇଭ",
+          "ମୋବାଇଲ ଏବଂ ଡେସ୍କଟପ",
+          "ବିଜ୍ଞାପନମୁକ୍ତ ପଢ଼ିବା",
+          "ଅଫଲାଇନ ଡାଉନଲୋଡ"
+        ],
+        "cta": "ଡିଜିଟାଲ ଆକ୍ସେସ"
+      },
+      "print": {
+        "title": "ପ୍ରିଣ୍ଟ ମ୍ୟାଗାଜିନ",
+        "price": "₹499/ମାସ",
+        "badge": "ପ୍ରିମିୟମ",
+        "features": [
+          "ମାସିକ ଘରେ ଡେଲିଭରି",
+          "ପ୍ରିମିୟମ ମୁଦ୍ରଣ",
+          "ଡିଜିଟାଲ ଅନ୍ତର୍ଭୁକ୍ତ",
+          "ବିଶେଷ ବିଷୟବସ୍ତୁ",
+          "ପ୍ରାଥମିକତା ସାହାଯ୍ୟ"
+        ],
+        "cta": "ପ୍ରିଣ୍ଟ ସବସ୍କ୍ରାଇବ",
+        "note": "ମାସିକ ବିଲିଂ"
+      },
+      "payment": {
+        "title": "ଦେୟ ପଦ୍ଧତି",
+        "methods": [
+          "UPI",
+          "କ୍ରେଡିଟ/ଡେବିଟ କାର୍ଡ",
+          "ନେଟ ବ୍ୟାଙ୍କିଂ",
+          "ବ୍ୟାଙ୍କ ଟ୍ରାନ୍ସଫର",
+          "କ୍ୟାସ ଅନ ଡେଲିଭରି"
+        ],
+        "security": "ସବୁ ଦେୟ ସୁରକ୍ଷିତ"
+      },
+      "support": {
+        "title": "ସାହାଯ୍ୟ?",
+        "contact": "+91 98765 43211",
+        "email": "subscriptions@vartmaansarokar.in",
+        "hours": "ସକାଳ 9 - ସନ୍ଧ୍ୟା 7 IST"
+      }
+    }
+  },
+  "home": {
+    "heroContext": "ଗଭୀରତା ସହ ସମାଚାର",
+    "readFullArticle": "ସମ୍ପୂର୍ଣ୍ଣ କାହାଣୀ ପଢ଼ନ୍ତୁ",
+    "featuredCoverage": "ଏହି ସପ୍ତାହର ମୁଖ୍ୟ କାହାଣୀ",
+    "emptyTitle": "ଏପର୍ଯ୍ୟନ୍ତ କାହାଣୀ ନାହିଁ",
+    "emptyBody": "ପ୍ରକାଶ ପରେ ଏଠାରେ ଦେଖାଯିବ।",
+    "featuredTitle": "ମୁଖ୍ୟ କାହାଣୀ",
+    "allArticles": "ସବୁ କାହାଣୀ",
+    "noArticlesTitle": "ଏପର୍ଯ୍ୟନ୍ତ ପ୍ରକାଶ ହୋଇନାହିଁ",
+    "noArticlesBody": "ଆଡମିନ ଡ୍ୟାସବୋର୍ଡରୁ ପ୍ରକାଶ କରନ୍ତୁ।",
+    "premiumEdition": "ପ୍ରିମିୟମ ସଂସ୍କରଣ",
+    "magazineIntro": "ଗଭୀର ବିଶ୍ଳେଷଣ ଏବଂ ବିଶେଷଜ୍ଞ ମତ।",
+    "flipbookFeature": "ଫ୍ଲିପବୁକ",
+    "visualEssays": "ଫଟୋ ଏବଂ ଭିଜୁଆଲ",
+    "exploreIssue": "ଏହି ସଂଖ୍ୟା ପଢ଼ନ୍ତୁ",
+    "editorsChoice": "ସମ୍ପାଦକଙ୍କ ପସନ୍ଦ",
+    "noMagazine": "ଏପର୍ଯ୍ୟନ୍ତ ମ୍ୟାଗାଜିନ ଉପಲବ୍ଧ ନାହିଁ।"
+  },
+  "about": {
+    "badge": "ପ୍ରକାଶନ ବିଷୟରେ",
+    "heroTitle": "ଶୀର୍ଷକ ପରେ ମଧ୍ୟ ପାଠକଙ୍କ ସହ ଥାଉ ସାମ୍ବାଦିକତା।",
+    "heroBody": "ଗଭୀରତା, ସ୍ପଷ୍ଟତା ଏବଂ ସାର୍ବଜନୀନ ପ୍ରାସଙ୍ଗିକତା ଉପରେ କେନ୍ଦ୍ରିତ ମାସିକ ପ୍ରକାଶନ।",
+    "tagCurrentAffairs": "ସାମ୍ପ୍ରତିକ ବିଷୟ",
+    "tagCulture": "ସଂସ୍କୃତି ଏବଂ ସମାଜ",
+    "tagIdeas": "ଧାରଣା ଏବଂ ନେତୃତ୍ୱ",
+    "missionTitle": "ଲକ୍ଷ୍ୟ",
+    "missionBody": "ସାର୍ବଜନୀନ ଜୀବନକୁ ରୂପ ଦେଉଥିବା ଶକ୍ତିଗୁଡ଼ିକୁ ବୁଝିବାରେ ସାହାଯ୍ୟ।",
+    "audienceTitle": "ପାଠକ",
+    "audienceBody": "ସନ୍ଦର୍ଭ ଏବଂ ସାରକୁ ମୂଲ୍ୟ ଦେଉଥିବା ପାଠକ।",
+    "quote": "ସଂଳାପ ଏବଂ ଦାୟିତ୍ୱର ମଞ୍ଚ।",
+    "whoWeAreBadge": "ଆମେ କିଏ",
+    "whoWeAreTitle": "ବୁଝାମଣା ଚାହୁଁଥିବା ପାଠକଙ୍କ ପାଇଁ।",
+    "whoWeAreP1": "ପ୍ରାସଙ୍ଗିକତାରେ ମୂଳ।",
+    "whoWeAreP2": "ଯୁବ ପାଠକଙ୍କୁ ସଚେତନ କାହାଣୀ ସହ ଯୋଡ଼ିବା।",
+    "whoWeAreP3": "ଅର୍ଥପୂର୍ଣ୍ଣ ସାମ୍ବାଦିକତା ଲୋକଙ୍କୁ ସ୍ପଷ୍ଟ କରିବା ଉଚିତ।",
+    "visionTitle": "ଆମର ଦୃଷ୍ଟି",
+    "visionLead": "ଜନହିତ ସାମ୍ବାଦିକତା।",
+    "visionBody": "ସୂଚିତ ପାଠକଙ୍କ ପିଢ଼ିକୁ ପ୍ରୋତ୍ସାହନ।",
+    "coverTitle": "ଆମେ କ'ଣ କଭର କରୁ",
+    "coverBody": "ଭାରତର ଚିନ୍ତାଧାରାକୁ ପ୍ରଭାବିତ କରୁଥିବା ବିଷୟ।",
+    "pillar1Title": "ସାର୍ବଜନୀନ ବିଷୟ",
+    "pillar1Body": "ନୀତି ଏବଂ ଶାସନ।",
+    "pillar2Title": "ସମାଜ ଏବଂ ସଂସ୍କୃତି",
+    "pillar2Body": "ସାମାଜିକ ସାଂସ୍କୃତିକ ଧାରା।",
+    "pillar3Title": "ଧାରଣା ଏବଂ ନେତୃତ୍ୱ",
+    "pillar3Body": "ପ୍ରୋଫାଇଲ ଏବଂ ବିଶ୍ଳେଷଣ।",
+    "teamTitle": "ସମ୍ପାଦକୀୟ ଦଳ",
+    "teamBody": "ପ୍ରକାଶନର ସ୍ୱର ଗଠନ କରୁଥିବା ବ୍ୟକ୍ତି।",
+    "publisher": "ପ୍ରକାଶକ",
+    "editor": "ସମ୍ପାଦକ",
+    "digitalHead": "ଡିଜିଟାଲ ମୁଖ୍ୟ",
+    "adminHead": "ପ୍ରଶାସନ ମୁଖ୍ୟ",
+    "publishedByTitle": "ବାଣୀ କ୍ରିଏସନ୍ସ ଦ୍ୱାରା ପ୍ରକାଶିତ",
+    "publishedByBody": "ବିଶ୍ୱସନୀୟ କାହାଣୀ କହିବାରୁ ନିର୍ଦ୍ଦେଶିତ।",
+    "exploreMagazine": "ମ୍ୟାଗାଜିନ ଦେଖନ୍ତୁ"
+  },
+  "magazine": {
+    "title": "ମ୍ୟାଗାଜିନ",
+    "subtitle": "ଅନଲାଇନରେ ପଢ଼ନ୍ତୁ।",
+    "emptyBody": "ଏପର୍ଯ୍ୟନ୍ତ ମ୍ୟାଗାଜିନ ନାହିଁ।",
+    "edition": "ସଂଖ୍ୟା",
+    "digitalPrice": "ମାଗଣା",
+    "physicalPrice": "₹499/ମାସ",
+    "highResolution": "ସହଜ ପଢ଼ିବା",
+    "editorialDepth": "ସମ୍ପୂର୍ଣ୍ଣ କାହାଣୀ",
+    "premiumAccess": "ସମ୍ପୂର୍ଣ୍ଣ ଆକ୍ସେସ",
+    "previousIssues": "ପୂର୍ବ ସଂଖ୍ୟା",
+    "digitalSubscription": "ଅନଲାଇନ ମାଗଣା",
+    "digitalSubscriptionBody": "ସବୁ ସଂଖ୍ୟା ମାଗଣା।",
+    "perIssue": "ସଂଖ୍ୟା ପ୍ରତି",
+    "claimDigitalAccess": "ମାଗଣାରେ ପଢ଼ନ୍ତୁ",
+    "physicalSubscription": "ପ୍ରିଣ୍ଟ ପାଆନ୍ତୁ",
+    "physicalSubscriptionBody": "₹499 ରେ ଘରେ ଡେଲିଭରି।",
+    "subscribePrint": "₹499/ମାସ"
+  },
+  "category": {
+    "label": "ବିଷୟ",
+    "summary": "{{category}} — {{count}} କାହାଣୀ।",
+    "byAuthor": "{{author}} ଦ୍ୱାରା",
+    "emptyTitle": "କାହାଣୀ ନାହିଁ",
+    "emptyCta": "ଅନ୍ୟ ବିଷୟ ଦେଖନ୍ତୁ"
+  },
+  "newsDetail": {
+    "notFoundTitle": "କାହାଣୀ ମିଳିଲା ନାହିଁ",
+    "backToHome": "ହୋମ",
+    "backToFeed": "କାହାଣୀ",
+    "subscriberStory": "ପାଠକଙ୍କ ପାଇଁ",
+    "byAuthor": "{{author}} ଦ୍ୱାରା",
+    "minRead": "{{count}} ମିନିଟ",
+    "broaderImpact": "ଏହାର ଅର୍ଥ",
+    "lockedBadge": "ସଦସ୍ୟଙ୍କ ପାଇଁ",
+    "lockedTitle": "ପଢ଼ିବାକୁ ସବସ୍କ୍ରାଇବ",
+    "lockedBody": "ମାଗଣା ଅନଲାଇନ ଆକ୍ସେସ ପାଆନ୍ତୁ।",
+    "openSubscriptionForm": "ସବସ୍କ୍ରାଇବ",
+    "relatedStories": "ଅଧିକ କାହାଣୀ",
+    "sampleParagraphOne": "ଅଧିକ ରିପୋର୍ଟିଂ ଏବଂ ବିଶେଷଜ୍ଞ ମତ।",
+    "sampleParagraphTwo": "ସ୍ଥାନୀୟ ଘଟଣା ବଡ଼ ପରିବର୍ତ୍ତନ ସହ ଯୁକ୍ତ।"
+  },
+  "sidebar": {
+    "sponsored": "ସ୍ପନ୍ସର୍ଡ",
+    "learnMore": "ଅଧିକ ପଢ଼ନ୍ତୁ",
+    "newsletterBody": "ସାପ୍ତାହିକ ଅପଡେଟ।",
+    "yourEmail": "ଇମେଲ",
+    "subscribeNow": "ଅପଡେଟ ପଠାନ୍ତୁ"
+  },
+  "subscription": {
+    "digitalActivated": "ଡିଜିଟାଲ ସିଦ୍ଧ!",
+    "requestReceived": "ଅନୁରୋଧ ମିଳିଲା",
+    "digitalSuccess": "ଡିଜିଟାଲ ଆକ୍ସେସ ମିଳିଲା!",
+    "physicalSuccess": "ଦେୟ ପ୍ରମାଣ ମିଳିଲା।",
+    "unlockTitle": "ଆକ୍ସେସ ବାଛନ୍ତୁ",
+    "unlockBody": "ଡିଜିଟାଲ ମାଗଣା। ପ୍ରିଣ୍ଟ ₹499।",
+    "digital": "ଅନଲାଇନ (ମାଗଣା)",
+    "physicalCopy": "ପ୍ରିଣ୍ଟ (₹499)",
+    "free": "ମାଗଣା",
+    "physicalCardBody": "₹499/ମାସ। ପ୍ରମାଣ ଅପଲୋଡ।",
+    "fullName": "ନାମ",
+    "emailAddress": "ଇମେଲ",
+    "phoneNumber": "ଫୋନ",
+    "uploadPaymentScreenshot": "ପ୍ରମାଣ ଅପଲୋଡ",
+    "clickToUpload": "କ୍ଲିକ",
+    "digitalNotePlaceholder": "ଟିପ୍ପଣୀ...",
+    "physicalNotePlaceholder": "ଠିକଣା...",
+    "submitting": "ଦାଖଲ ହେଉଛି...",
+    "activateDigital": "ଡିଜିଟାଲ (ମାଗଣା)",
+    "submitPhysical": "ପ୍ରିଣ୍ଟ (₹499)",
+    "info": "ଡିଜିଟାଲ ମାଗଣା।",
+    "validationError": "ବିବରଣୀ ଦିଅନ୍ତୁ।",
+    "invalidEmail": "ସଠିକ ଇମେଲ।",
+    "readError": "ଫାଇଲ ପଢ଼ିହେଲା ନାହିଁ।",
+    "physicalError": "ଅନୁରୋଧ ବିଫଳ।",
+    "genericError": "ତ୍ରୁଟି ଘଟିଲା।"
+  },
+  "auth": {
+    "membership": "ଆକ୍ସେସ ବାଛନ୍ତୁ",
+    "popupTitle": "ମାଗଣା ପଢ଼ନ୍ତୁ ବା ପ୍ରିଣ୍ଟ",
+    "digitalAccess": "ଅନଲାଇନ — ମାଗଣା",
+    "digitalPitch": "ସବୁ ମାଗଣା। କାର୍ଡ ଆବଶ୍ୟକ ନାହିଁ।",
+    "physicalCopy": "ପ୍ରିଣ୍ଟ ପାଆନ୍ତୁ",
+    "physicalPitch": "₹499/ମାସ।",
+    "subscribeDigitalTitle": "ମାଗଣା ଡିଜିଟାଲ",
+    "subscribePhysicalTitle": "ପ୍ରିଣ୍ଟ (₹499)",
+    "digitalReading": "ମାଗଣା ଡିଜିଟାଲ",
+    "magazineFormats": "ଆକ୍ସେସ ବାଛନ୍ତୁ",
+    "loginLabel": "ସାଇନ ଇନ",
+    "loginTitle": "ଲଗଇନ",
+    "password": "ପାସୱାର୍ଡ",
+    "staffPasswordHint": "ଷ୍ଟାଫ ଇମେଲ ଏବଂ ପାସୱାର୍ଡ।",
+    "googleConfigHint": "Google ସେଟଅପ ପରେ।",
+    "staffAccountsHint": "ଫୁଟର ସର୍ଟକଟ।"
+  },
+  "flipbook": {
+    "issueProgress": "ସଂଖ୍ୟା ଅଗ୍ରଗତି",
+    "page": "ପୃଷ୍ଠା",
+    "zoomIn": "ବଡ଼",
+    "fullscreen": "ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ",
+    "digitalLabel": "ସବୁ ସଂଖ୍ୟା ମାଗଣା। ପ୍ରିଣ୍ଟ ₹499।"
+  },
+  "chat": {
+    "title": "ପଚାରନ୍ତୁ",
+    "subtitle": "URL ଦିଅନ୍ତୁ ଏବଂ ପଚାରନ୍ତୁ।",
+    "websitePlaceholder": "https://example.com",
+    "fetch": "ଆଣନ୍ତୁ",
+    "emptyState": "ସନ୍ଦେଶ ନାହିଁ।",
+    "inputPlaceholder": "ପଚାରନ୍ତୁ...",
+    "thinking": "ଚିନ୍ତା କରୁଛି...",
+    "send": "ପଠାନ୍ତୁ",
+    "fetchingContent": "ଲୋଡ...",
+    "titlePrefix": "ଶୀର୍ଷକ:",
+    "textPrefix": "ଟେକ୍ସଟ:",
+    "noResponse": "ଉତ୍ତର ନାହିଁ।",
+    "failedToScrape": "ପଢ଼ିହେଲା ନାହିଁ:",
+    "errorContactingServer": "ତ୍ରୁଟି:"
+  },
+  "admin": {
+    "welcomeBack": "ସ୍ୱାଗତ, {{name}}",
+    "dashboardBody": "କାହାଣୀ ପ୍ରକାଶ, ମ୍ୟାଗାଜିନ ଅପଲୋଡ।",
+    "activeIssues": "ସକ୍ରିୟ ସଂଖ୍ୟା",
+    "newsArticles": "ଲେଖା",
+    "subscribers": "ସଦସ୍ୟ",
+    "activeAds": "ବିଜ୍ଞାପନ",
+    "editStory": "ସମ୍ପାଦନା",
+    "publishStory": "ପ୍ରକାଶ",
+    "newsFormBody": "କାହାଣୀ ପ୍ରକାଶ।",
+    "storyTitle": "ଶୀର୍ଷକ",
+    "imageUrl": "ଫଟୋ URL",
+    "authorName": "ଲେଖକ",
+    "shortExcerpt": "ସାରାଂଶ",
+    "fullArticleContent": "ସମ୍ପୂର୍ଣ୍ଣ କାହାଣୀ",
+    "featureHomepage": "ହୋମପେଜ",
+    "requireSubscription": "ପ୍ରିମିୟମ",
+    "updateStory": "ସଞ୍ଚୟ",
+    "publishedStories": "ପ୍ରକାଶିତ",
+    "featured": "ଫିଚର୍ଡ",
+    "subscriber": "ସଦସ୍ୟ",
+    "publishIssue": "ସଂଖ୍ୟା ପ୍ରକାଶ",
+    "magazineFormBody": "ସଂଖ୍ୟା ଅପଲୋଡ।",
+    "uploadPdf": "PDF",
+    "issueTitle": "ଶୀର୍ଷକ",
+    "issueNumber": "ନମ୍ବର",
+    "coverImageUrl": "କଭର URL",
+    "pagesHint": "URL ପ୍ରତି ଧାଡ଼ି",
+    "digitalPrice": "ଅନଲାଇନ ₹",
+    "physicalPrice": "ପ୍ରିଣ୍ଟ ₹",
+    "gatedPage": "ଗେଟେଡ",
+    "freeIssue": "ମାଗଣା",
+    "enableBlurPaywall": "ବ୍ଲର",
+    "magazineHelper": "ଅନଲାଇନ ମାଗଣା।",
+    "pages": "ପୃଷ୍ଠା",
+    "digitalAccess": "ଅନଲାଇନ",
+    "blurPaywall": "ବ୍ଲର",
+    "previewUntil": "ପୃଷ୍ଠା {{page}} ଯାଏଁ",
+    "mediaLibrary": "ମିଡ଼ିଆ",
+    "mediaBody": "ଅପଲୋଡ।",
+    "noMedia": "ମିଡ଼ିଆ ନାହିଁ।",
+    "advertisingSlots": "ବିଜ୍ଞାପନ",
+    "adsBody": "ସମ୍ପାଦନା।",
+    "saveAds": "ସଞ୍ଚୟ",
+    "adTitle": "ଶୀର୍ଷକ",
+    "destinationUrl": "URL",
+    "sidebarTop": "ଉପରେ",
+    "sidebarMid": "ମଧ୍ୟ",
+    "sidebarBottom": "ତଳେ",
+    "homepageBanner": "ବ୍ୟାନର",
+    "userRoles": "ଭୂମିକା",
+    "userRolesBody": "ଆକ୍ସେସ ନିୟନ୍ତ୍ରଣ।",
+    "publishingNotes": "ଟିପ୍ପଣୀ",
+    "settingsLineOne": "MongoDB ଡାଟା।",
+    "settingsLineTwo": "ଆଥ /api/auth/*.",
+    "settingsLineThree": "ମିଡ଼ିଆ /api/media.",
+    "masterPanel": "ମାଷ୍ଟର ପ୍ୟାନେଲ"
+  }
+}

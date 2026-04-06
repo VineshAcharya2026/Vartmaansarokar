@@ -1,0 +1,506 @@
+{
+  "brand": {
+    "lineOne": "വർത്തമാൻ",
+    "lineTwo": "സരോകാർ"
+  },
+  "roles": {
+    "general": "സാധാരണ",
+    "magazine": "മാഗസിൻ",
+    "admin": "അഡ്മിൻ",
+    "superAdmin": "സൂപ്പർ അഡ്മിൻ"
+  },
+  "categories": {
+    "nationalNews": "ദേശീയ വാർത്തകൾ",
+    "internationalNews": "അന്താരാഷ്ട്ര വാർത്തകൾ",
+    "politics": "രാഷ്ട്രീയം",
+    "business": "ബിസിനസ്",
+    "economy": "സമ്പദ്‌വ്യവസ്ഥ",
+    "sports": "കായികം",
+    "entertainment": "വിനോദം",
+    "technology": "സാങ്കേതികവിദ്യ",
+    "health": "ആരോഗ്യം",
+    "environment": "പരിസ്ഥിതി",
+    "education": "വിദ്യാഭ്യാസം"
+  },
+  "ads": {
+    "premiumWatches": {
+      "title": "പ്രീമിയം വാച്ചുകൾ",
+      "description": "കൃത്യ വാച്ചുകൾ."
+    },
+    "luxuryRealEstate": {
+      "title": "ലക്ഷ്വറി റിയൽ എസ്റ്റേറ്റ്",
+      "description": "പ്രീമിയം വാസസ്ഥലങ്ങൾ."
+    },
+    "cloudServices": {
+      "title": "ക്ലൗഡ് സേവനങ്ങൾ",
+      "description": "വേഗത്തിൽ വളരുക."
+    },
+    "fallbackDescription": "പ്രീമിയം പങ്കാളി ഉള്ളടക്കം."
+  },
+  "common": {
+    "home": "ഹോം",
+    "aboutUs": "ഞങ്ങളെ കുറിച്ച്",
+    "articles": "ലേഖനങ്ങൾ",
+    "advertisers": "പങ്കാളികൾ",
+    "mediaGallery": "ഫോട്ടോകൾ",
+    "contactUs": "ബന്ധപ്പെടുക",
+    "digitalMagazine": "മാഗസിൻ",
+    "signIn": "സൈൻ ഇൻ",
+    "loading": "ദയവായി കാത്തിരിക്കുക...",
+    "selectAccount": "അക്കൗണ്ട് തിരഞ്ഞെടുക്കുക",
+    "masterAdmin": "അഡ്മിൻ",
+    "editorLogin": "എഡിറ്റർ",
+    "standardUser": "വായനക്കാരൻ",
+    "dashboardPanel": "ഡാഷ്‌ബോർഡ്",
+    "signOut": "സൈൻ ഔട്ട്",
+    "search": "തിരയുക",
+    "returnHome": "ഹോമിലേക്ക്",
+    "close": "അടയ്ക്കുക",
+    "cancel": "റദ്ദാക്കുക",
+    "delete": "ഇല്ലാതാക്കുക",
+    "edit": "എഡിറ്റ്",
+    "save": "സേവ്",
+    "subscribe": "സബ്‌സ്ക്രൈബ്",
+    "readMagazine": "മാഗസിൻ വായിക്കുക",
+    "explore": "പര്യവേക്ഷണം",
+    "newsletter": "ഇമെയിൽ അപ്‌ഡേറ്റ്",
+    "emailAddress": "ഇമെയിൽ",
+    "public": "പൊതു",
+    "premium": "പ്രീമിയം",
+    "enabled": "ഓൺ",
+    "disabled": "ഓഫ്",
+    "openAsset": "തുറക്കുക",
+    "uploadMedia": "അപ്‌ലോഡ്",
+    "uploading": "അപ്‌ലോഡ് ചെയ്യുന്നു...",
+    "overview": "അവലോകനം",
+    "settings": "ക്രമീകരണങ്ങൾ",
+    "media": "മീഡിയ",
+    "newsEditor": "വാർത്താ എഡിറ്റർ",
+    "digitalLibrary": "കഥകൾ",
+    "crm": "വായനക്കാർ"
+  },
+  "ticker": {
+    "newsflash": "ന്യൂസ്‌ഫ്ലാഷ്"
+  },
+  "languageSwitcher": {
+    "buttonLabel": "ഭാഷ മാറ്റുക",
+    "label": "ഭാഷ",
+    "dropdownTitle": "ഭാഷ തിരഞ്ഞെടുക്കുക",
+    "dropdownSubtitle": "ആപ്പിലുടനീളം ഭാഷ ഉടൻ മാറ്റുക."
+  },
+  "loading": {
+    "experience": "ന്യൂസ്‌റൂം ലോഡ് ചെയ്യുന്നു..."
+  },
+  "footer": {
+    "description": "ജിജ്ഞാസുള്ള വായനക്കാർക്കുള്ള ഗുണനിലവാരമുള്ള പത്രപ്രവർത്തനം.",
+    "aboutLink": "ഞങ്ങളെ കുറിച്ച്",
+    "exploreTitle": "പര്യവേക്ഷണം",
+    "topSectionsTitle": "പ്രധാന വിഭാഗങ്ങൾ",
+    "newsletterTitle": "ന്യൂസ്‌ലെറ്റർ",
+    "newsletterDescription": "വാർത്ത അപ്‌ഡേറ്റ് ലഭിക്കുക.",
+    "newsletterErrorEmpty": "ഇമെയിൽ നൽകുക.",
+    "newsletterErrorInvalid": "സാധുവായ ഇമെയിൽ.",
+    "newsletterSuccess": "സബ്‌സ്ക്രൈബ് ചെയ്തു.",
+    "partnerWithUs": "പങ്കാളികളാകുക",
+    "copyright": "© 2026 വർത്തമാൻ സരോകാർ.",
+    "tagline": "വ്യക്തമായ, സത്യസന്ധ പത്രപ്രവർത്തനം."
+  },
+  "notFound": {
+    "title": "പേജ് കണ്ടെത്തിയില്ല",
+    "message": "ഈ പേജ് നിലവിലില്ല."
+  },
+  "routes": {
+    "contact": {
+      "title": "Talk to Us",
+      "subtitle": "We are here to help. Reach out for any questions, feedback, or partnership opportunities.",
+      "body": "Have questions? Write to contact@vartmaansarokar.in or call us. We will reply within 24 hours.",
+      "heroTitle": "Get in Touch",
+      "heroSubtitle": "We value your feedback and are always happy to hear from our readers",
+      "responseTime": "We respond to all messages within 24 hours",
+      "officeHours": "Monday to Saturday, 9 AM to 7 PM IST"
+    },
+    "advertisers": {
+      "title": "Work With Us",
+      "body": "Want to reach thousands of smart readers? Advertise with Vartmaan Sarokaar. Write to partners@vartmaansarokar.in"
+    },
+    "gallery": {
+      "title": "Photo Stories",
+      "body": "Beautiful photos and visual stories from across the country."
+    }
+  },
+  "contact": {
+    "pageTitle": "Contact Us",
+    "pageSubtitle": "We'd love to hear from you",
+    "sections": {
+      "general": {
+        "title": "General Inquiries",
+        "description": "Questions about our content, subscriptions, or general feedback",
+        "email": "contact@vartmaansarokar.in",
+        "phone": "+91 98765 43210",
+        "response": "We reply within 24 hours"
+      },
+      "subscriptions": {
+        "title": "Subscription Support",
+        "description": "Help with digital access, print delivery, or billing questions",
+        "email": "subscriptions@vartmaansarokar.in",
+        "phone": "+91 98765 43211",
+        "response": "We reply within 12 hours",
+        "digitalHelp": "Digital Access Issues",
+        "printHelp": "Print Magazine Orders",
+        "billingHelp": "Payment & Billing"
+      },
+      "advertising": {
+        "title": "Advertising & Partnerships",
+        "description": "Reach our engaged audience with your brand or message",
+        "email": "partners@vartmaansarokar.in",
+        "phone": "+91 98765 43212",
+        "response": "We reply within 48 hours",
+        "audience": "Reach 50,000+ engaged readers",
+        "formats": "Digital, print, and custom campaigns",
+        "pricing": "Starting from ₹25,000 per month"
+      },
+      "editorial": {
+        "title": "Editorial & Press",
+        "description": "Media inquiries, press releases, or story pitches",
+        "email": "editor@vartmaansarokar.in",
+        "phone": "+91 98765 43213",
+        "response": "We reply within 48 hours"
+      },
+      "technical": {
+        "title": "Technical Support",
+        "description": "Website issues, app problems, or technical questions",
+        "email": "tech@vartmaansarokar.in",
+        "phone": "+91 98765 43214",
+        "response": "We reply within 24 hours"
+      }
+    },
+    "office": {
+      "title": "Our Office",
+      "address": "Vaanee Creations Pvt. Ltd.\n123 Knowledge Street\nConnaught Place\nNew Delhi - 110001\nIndia",
+      "hours": {
+        "title": "Office Hours",
+        "weekdays": "Monday to Saturday: 9:00 AM - 7:00 PM IST",
+        "sunday": "Sunday: Closed",
+        "holidays": "Closed on national holidays"
+      },
+      "location": "Located in the heart of Delhi's business district"
+    },
+    "social": {
+      "title": "Follow Us",
+      "description": "Stay connected and get the latest updates",
+      "whatsapp": {
+        "title": "WhatsApp Updates",
+        "description": "Get breaking news and magazine highlights",
+        "number": "+91 98765 43215",
+        "action": "Send 'JOIN' to get updates"
+      },
+      "newsletter": {
+        "title": "Email Newsletter",
+        "description": "Weekly roundup of our best stories",
+        "action": "Subscribe for free updates"
+      }
+    },
+    "form": {
+      "title": "Send us a Message",
+      "subtitle": "Fill out the form below and we'll get back to you soon",
+      "name": "Your Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number (Optional)",
+      "subject": "Subject",
+      "subjectOptions": {
+        "general": "General Inquiry",
+        "subscription": "Subscription Help",
+        "advertising": "Advertising",
+        "editorial": "Editorial",
+        "technical": "Technical Support",
+        "feedback": "Feedback",
+        "other": "Other"
+      },
+      "message": "Your Message",
+      "messagePlaceholder": "Tell us how we can help you...",
+      "submit": "Send Message",
+      "sending": "Sending...",
+      "success": "Thank you! We'll get back to you within 24 hours.",
+      "error": "Something went wrong. Please try again or call us directly."
+    },
+    "subscriptionDetails": {
+      "title": "Subscription Information",
+      "digital": {
+        "title": "Digital Access",
+        "price": "Free",
+        "badge": "Always Free",
+        "features": [
+          "Unlimited access to all articles",
+          "Full magazine archive",
+          "Mobile and desktop access",
+          "Ad-free reading experience",
+          "Download articles for offline reading"
+        ],
+        "cta": "Get Digital Access"
+      },
+      "print": {
+        "title": "Print Magazine",
+        "price": "₹499 per month",
+        "badge": "Premium",
+        "features": [
+          "Monthly print magazine delivered to your home",
+          "Premium quality printing",
+          "Free digital access included",
+          "Exclusive subscriber-only content",
+          "Priority customer support"
+        ],
+        "cta": "Subscribe to Print",
+        "note": "Recurring monthly billing"
+      },
+      "payment": {
+        "title": "Payment Methods",
+        "methods": [
+          "UPI (Google Pay, PhonePe, Paytm)",
+          "Credit/Debit Cards",
+          "Net Banking",
+          "Bank Transfer",
+          "Cash on Delivery for print"
+        ],
+        "security": "All payments are secure and encrypted"
+      },
+      "support": {
+        "title": "Need Help?",
+        "contact": "Call us at +91 98765 43211",
+        "email": "subscriptions@vartmaansarokar.in",
+        "hours": "Available 9 AM to 7 PM IST"
+      }
+    }
+  },
+  "home": {
+    "heroContext": "ആഴവും കാഴ്ചപ്പാടും ഉള്ള വാർത്തകൾ",
+    "readFullArticle": "മുഴുവൻ കഥ വായിക്കുക",
+    "featuredCoverage": "ഈ ആഴ്ചയിലെ പ്രധാന കഥകൾ",
+    "emptyTitle": "ഇതുവരെ കഥകളില്ല",
+    "emptyBody": "പ്രസിദ്ധീകരിച്ച ശേഷം ഇവിടെ കാണാം.",
+    "featuredTitle": "ഈ ആഴ്ചയിലെ പ്രധാന കഥകൾ",
+    "allArticles": "എല്ലാ കഥകളും",
+    "noArticlesTitle": "ഇതുവരെ പ്രസിദ്ധീകരിച്ചിട്ടില്ല",
+    "noArticlesBody": "അഡ്മിൻ ഡാഷ്‌ബോർഡ് ഉപയോഗിച്ച് പ്രസിദ്ധീകരിക്കുക.",
+    "premiumEdition": "പ്രീമിയം പതിപ്പ്",
+    "magazineIntro": "ആഴത്തിലുള്ള വിശകലനവും വിദഗ്ധ അഭിപ്രായവും.",
+    "flipbookFeature": "ഫ്ലിപ്പ്‌ബുക്ക്",
+    "visualEssays": "ഫോട്ടോകളും വിഷ്വലുകളും",
+    "exploreIssue": "ഈ ലക്കം വായിക്കുക",
+    "editorsChoice": "എഡിറ്ററുടെ തിരഞ്ഞെടുപ്പ്",
+    "noMagazine": "ഇതുവരെ മാഗസിൻ ലഭ്യമല്ല."
+  },
+  "about": {
+    "badge": "പ്രസിദ്ധീകരണത്തെ കുറിച്ച്",
+    "heroTitle": "തലക്കെട്ടിനപ്പുറം വായനക്കാരോടൊപ്പം നിൽക്കുന്ന പത്രപ്രവർത്തനം.",
+    "heroBody": "ആഴം, വ്യക്തത, പൊതു പ്രസക്തി എന്നിവയിൽ കേന്ദ്രീകരിച്ച മാസിക.",
+    "tagCurrentAffairs": "സമകാലിക കാര്യങ്ങൾ",
+    "tagCulture": "സംസ്കാരവും സമൂഹവും",
+    "tagIdeas": "ആശയങ്ങളും നേതൃത്വവും",
+    "missionTitle": "ദൗത്യം",
+    "missionBody": "പൊതുജീവിതത്തെ രൂപപ്പെടുത്തുന്ന ശക്തികൾ മനസ്സിലാക്കാൻ സഹായം.",
+    "audienceTitle": "വായനക്കാർ",
+    "audienceBody": "സന്ദർഭവും സാരവും വിലമതിക്കുന്ന വായനക്കാർ.",
+    "quote": "സംഭാഷണത്തിനും ഉത്തരവാദിത്തത്തിനുമുള്ള വേദി.",
+    "whoWeAreBadge": "ഞങ്ങൾ ആരാണ്",
+    "whoWeAreTitle": "അറിവ് മാത്രമല്ല, ഉൾക്കാഴ്ച ആഗ്രഹിക്കുന്ന വായനക്കാർക്കായി.",
+    "whoWeAreP1": "പ്രസക്തിയിൽ വേരൂന്നിയത്.",
+    "whoWeAreP2": "യുവ വായനക്കാരെ ബോധവൽക്കരണ കഥകളുമായി ബന്ധിപ്പിക്കുക.",
+    "whoWeAreP3": "അർത്ഥവത്തായ പത്രപ്രവർത്തനം ജനങ്ങളെ വ്യക്തമാക്കണം.",
+    "visionTitle": "ഞങ്ങളുടെ ദൃഷ്ടി",
+    "visionLead": "പൊതുതാൽപ്പര്യ പത്രപ്രവർത്തനം.",
+    "visionBody": "വിവരമുള്ള വായനക്കാരുടെ തലമുറയ്ക്ക് പ്രചോദനം.",
+    "coverTitle": "ഞങ്ങൾ എന്ത് കവർ ചെയ്യുന്നു",
+    "coverBody": "ഇന്ത്യയുടെ ചിന്തയെ സ്വാധീനിക്കുന്ന വിഷയങ്ങൾ.",
+    "pillar1Title": "പൊതുകാര്യങ്ങൾ",
+    "pillar1Body": "നയവും ഭരണവും.",
+    "pillar2Title": "സമൂഹവും സംസ്കാരവും",
+    "pillar2Body": "സാമൂഹിക സാംസ്കാരിക ധാരകൾ.",
+    "pillar3Title": "ആശയങ്ങളും നേതൃത്വവും",
+    "pillar3Body": "പ്രൊഫൈലുകളും വിശകലനവും.",
+    "teamTitle": "എഡിറ്റോറിയൽ ടീം",
+    "teamBody": "പ്രസിദ്ധീകരണത്തിന്റെ ശബ്ദം.",
+    "publisher": "പ്രസാധകൻ",
+    "editor": "എഡിറ്റർ",
+    "digitalHead": "ഡിജിറ്റൽ മേധാവി",
+    "adminHead": "ഭരണ മേധാവി",
+    "publishedByTitle": "വാണി ക്രിയേഷൻസ് പ്രസിദ്ധീകരണം",
+    "publishedByBody": "വിശ്വസനീയ കഥപറച്ചിലിൽ നിന്ന് മാർഗനിർദേശം.",
+    "exploreMagazine": "മാഗസിൻ കാണുക"
+  },
+  "magazine": {
+    "title": "മാഗസിൻ",
+    "subtitle": "ഓൺലൈനായി വായിക്കുക.",
+    "emptyBody": "ഇതുവരെ മാഗസിൻ ഇല്ല.",
+    "edition": "ലക്കം",
+    "digitalPrice": "സൗജന്യം",
+    "physicalPrice": "₹499/മാസം",
+    "highResolution": "വായിക്കാൻ എളുപ്പം",
+    "editorialDepth": "മുഴുവൻ കഥകൾ",
+    "premiumAccess": "മുഴുവൻ ആക്സസ്",
+    "previousIssues": "മുൻ ലക്കങ്ങൾ",
+    "digitalSubscription": "ഓൺലൈൻ സൗജന്യം",
+    "digitalSubscriptionBody": "എല്ലാ ലക്കങ്ങളും സൗജന്യം.",
+    "perIssue": "ഓരോ ലക്കത്തിനും",
+    "claimDigitalAccess": "സൗജന്യമായി വായിക്കുക",
+    "physicalSubscription": "പ്രിന്റ് ലഭിക്കുക",
+    "physicalSubscriptionBody": "₹499-ൽ വീട്ടിലേക്ക് ഡെലിവറി.",
+    "subscribePrint": "₹499/മാസം"
+  },
+  "category": {
+    "label": "വിഷയം",
+    "summary": "{{category}} — {{count}} കഥകൾ.",
+    "byAuthor": "{{author}} എഴുതിയത്",
+    "emptyTitle": "കഥകൾ ഇല്ല",
+    "emptyCta": "മറ്റ് വിഷയങ്ങൾ"
+  },
+  "newsDetail": {
+    "notFoundTitle": "കഥ കണ്ടെത്തിയില്ല",
+    "backToHome": "ഹോം",
+    "backToFeed": "കഥകൾ",
+    "subscriberStory": "വായനക്കാർക്കായി",
+    "byAuthor": "{{author}} എഴുതിയത്",
+    "minRead": "{{count}} മിനിറ്റ്",
+    "broaderImpact": "ഇതിന്റെ അർത്ഥം",
+    "lockedBadge": "അംഗങ്ങൾക്ക്",
+    "lockedTitle": "വായിക്കാൻ സബ്‌സ്ക്രൈബ്",
+    "lockedBody": "സൗജന്യ ഓൺലൈൻ ആക്സസ് നേടുക.",
+    "openSubscriptionForm": "സബ്‌സ്ക്രൈബ്",
+    "relatedStories": "കൂടുതൽ കഥകൾ",
+    "sampleParagraphOne": "കൂടുതൽ റിപ്പോർട്ടിംഗ് ഉം വിദഗ്ധ അഭിപ്രായവും.",
+    "sampleParagraphTwo": "പ്രാദേശിക സംഭവങ്ങൾ വലിയ മാറ്റങ്ങളുമായി ബന്ധിപ്പിക്കുന്നു."
+  },
+  "sidebar": {
+    "sponsored": "സ്‌പോൺസർഡ്",
+    "learnMore": "കൂടുതൽ വായിക്കുക",
+    "newsletterBody": "ആഴ്ചയിൽ അപ്‌ഡേറ്റ്.",
+    "yourEmail": "ഇമെയിൽ",
+    "subscribeNow": "അപ്‌ഡേറ്റ് അയയ്ക്കുക"
+  },
+  "subscription": {
+    "digitalActivated": "ഡിജിറ്റൽ തയ്യാർ!",
+    "requestReceived": "അഭ്യർത്ഥന ലഭിച്ചു",
+    "digitalSuccess": "ഡിജിറ്റൽ ആക്സസ് ലഭിച്ചു!",
+    "physicalSuccess": "പേയ്‌മെന്റ് തെളിവ് ലഭിച്ചു.",
+    "unlockTitle": "ആക്സസ് തിരഞ്ഞെടുക്കുക",
+    "unlockBody": "ഡിജിറ്റൽ സൗജന്യം. പ്രിന്റ് ₹499.",
+    "digital": "ഓൺലൈൻ (സൗജന്യം)",
+    "physicalCopy": "പ്രിന്റ് (₹499)",
+    "free": "സൗജന്യം",
+    "physicalCardBody": "₹499/മാസം. തെളിവ് അപ്‌ലോഡ്.",
+    "fullName": "പേര്",
+    "emailAddress": "ഇമെയിൽ",
+    "phoneNumber": "ഫോൺ",
+    "uploadPaymentScreenshot": "തെളിവ് അപ്‌ലോഡ്",
+    "clickToUpload": "ക്ലിക്ക്",
+    "digitalNotePlaceholder": "കുറിപ്പ്...",
+    "physicalNotePlaceholder": "വിലാസം...",
+    "submitting": "സമർപ്പിക്കുന്നു...",
+    "activateDigital": "ഡിജിറ്റൽ (സൗജന്യം)",
+    "submitPhysical": "പ്രിന്റ് (₹499)",
+    "info": "ഡിജിറ്റൽ സൗജന്യം.",
+    "validationError": "വിവരങ്ങൾ നൽകുക.",
+    "invalidEmail": "സാധുവായ ഇമെയിൽ.",
+    "readError": "ഫയൽ വായിക്കാനായില്ല.",
+    "physicalError": "അഭ്യർത്ഥന പരാജയം.",
+    "genericError": "തെറ്റ് സംഭവിച്ചു."
+  },
+  "auth": {
+    "membership": "ആക്സസ് തിരഞ്ഞെടുക്കുക",
+    "popupTitle": "സൗജന്യമായി വായിക്കുക അല്ലെങ്കിൽ പ്രിന്റ്",
+    "digitalAccess": "ഓൺലൈൻ — സൗജന്യം",
+    "digitalPitch": "എല്ലാം സൗജന്യം.",
+    "physicalCopy": "പ്രിന്റ് ലഭിക്കുക",
+    "physicalPitch": "₹499/മാസം.",
+    "subscribeDigitalTitle": "സൗജന്യ ഡിജിറ്റൽ",
+    "subscribePhysicalTitle": "പ്രിന്റ് (₹499)",
+    "digitalReading": "സൗജന്യ ഡിജിറ്റൽ",
+    "magazineFormats": "ആക്സസ് തിരഞ്ഞെടുക്കുക",
+    "loginLabel": "സൈൻ ഇൻ",
+    "loginTitle": "ലോഗിൻ",
+    "password": "പാസ്‌വേഡ്",
+    "staffPasswordHint": "സ്റ്റാഫ് ഇമെയിൽ, പാസ്‌വേഡ്.",
+    "googleConfigHint": "Google സെറ്റപ്പിന് ശേഷം.",
+    "staffAccountsHint": "ഫൂട്ടർ ഷോർട്ട്‌കട്ട്."
+  },
+  "flipbook": {
+    "issueProgress": "ലക്കം പുരോഗതി",
+    "page": "പേജ്",
+    "zoomIn": "സൂം",
+    "fullscreen": "മുഴുവൻ സ്ക്രീൻ",
+    "digitalLabel": "എല്ലാ ലക്കങ്ങളും സൗജന്യം."
+  },
+  "chat": {
+    "title": "ചോദിക്കുക",
+    "subtitle": "URL നൽകുക, ചോദിക്കുക.",
+    "websitePlaceholder": "https://example.com",
+    "fetch": "ലഭ്യമാക്കുക",
+    "emptyState": "സന്ദേശങ്ങളില്ല.",
+    "inputPlaceholder": "ചോദിക്കുക...",
+    "thinking": "ചിന്തിക്കുന്നു...",
+    "send": "അയയ്ക്കുക",
+    "fetchingContent": "ലോഡ്...",
+    "titlePrefix": "ശീർഷകം:",
+    "textPrefix": "ടെക്സ്റ്റ്:",
+    "noResponse": "പ്രതികരണമില്ല.",
+    "failedToScrape": "വായിക്കാനായില്ല:",
+    "errorContactingServer": "തെറ്റ്:"
+  },
+  "admin": {
+    "welcomeBack": "സ്വാഗതം, {{name}}",
+    "dashboardBody": "കഥകൾ പ്രസിദ്ധീകരിക്കുക, മാഗസിൻ അപ്‌ലോഡ്.",
+    "activeIssues": "സജീവ ലക്കങ്ങൾ",
+    "newsArticles": "ലേഖനങ്ങൾ",
+    "subscribers": "അംഗങ്ങൾ",
+    "activeAds": "പരസ്യങ്ങൾ",
+    "editStory": "എഡിറ്റ്",
+    "publishStory": "പ്രസിദ്ധീകരിക്കുക",
+    "newsFormBody": "കഥ പ്രസിദ്ധീകരിക്കുക.",
+    "storyTitle": "ശീർഷകം",
+    "imageUrl": "ഫോട്ടോ URL",
+    "authorName": "രചയിതാവ്",
+    "shortExcerpt": "സംഗ്രഹം",
+    "fullArticleContent": "മുഴുവൻ കഥ",
+    "featureHomepage": "ഹോംപേജ്",
+    "requireSubscription": "പ്രീമിയം",
+    "updateStory": "സേവ്",
+    "publishedStories": "പ്രസിദ്ധീകരിച്ചവ",
+    "featured": "ഫീച്ചർഡ്",
+    "subscriber": "അംഗം",
+    "publishIssue": "ലക്കം പ്രസിദ്ധീകരിക്കുക",
+    "magazineFormBody": "ലക്കം അപ്‌ലോഡ്.",
+    "uploadPdf": "PDF",
+    "issueTitle": "ശീർഷകം",
+    "issueNumber": "നമ്പർ",
+    "coverImageUrl": "കവർ URL",
+    "pagesHint": "ഓരോ വരിയിലും URL",
+    "digitalPrice": "ഓൺലൈൻ ₹",
+    "physicalPrice": "പ്രിന്റ് ₹",
+    "gatedPage": "ഗേറ്റഡ്",
+    "freeIssue": "സൗജന്യം",
+    "enableBlurPaywall": "ബ്ലർ",
+    "magazineHelper": "ഓൺലൈൻ സൗജന്യം.",
+    "pages": "പേജുകൾ",
+    "digitalAccess": "ഓൺലൈൻ",
+    "blurPaywall": "ബ്ലർ",
+    "previewUntil": "പേജ് {{page}} വരെ",
+    "mediaLibrary": "മീഡിയ",
+    "mediaBody": "അപ്‌ലോഡ്.",
+    "noMedia": "മീഡിയ ഇല്ല.",
+    "advertisingSlots": "പരസ്യം",
+    "adsBody": "എഡിറ്റ്.",
+    "saveAds": "സേവ്",
+    "adTitle": "ശീർഷകം",
+    "destinationUrl": "URL",
+    "sidebarTop": "മുകളിൽ",
+    "sidebarMid": "മധ്യം",
+    "sidebarBottom": "താഴെ",
+    "homepageBanner": "ബാനർ",
+    "userRoles": "റോളുകൾ",
+    "userRolesBody": "ആക്സസ് നിയന്ത്രണം.",
+    "publishingNotes": "കുറിപ്പ്",
+    "settingsLineOne": "MongoDB ഡാറ്റ.",
+    "settingsLineTwo": "ഓത്ത് /api/auth/*.",
+    "settingsLineThree": "മീഡിയ /api/media.",
+    "masterPanel": "മാസ്റ്റർ പാനൽ"
+  }
+}

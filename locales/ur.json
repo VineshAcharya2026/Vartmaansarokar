@@ -1,0 +1,506 @@
+{
+  "brand": {
+    "lineOne": "ورتمان",
+    "lineTwo": "سروکار"
+  },
+  "roles": {
+    "general": "عام",
+    "magazine": "میگزین",
+    "admin": "ایڈمن",
+    "superAdmin": "سپر ایڈمن"
+  },
+  "categories": {
+    "nationalNews": "قومی خبریں",
+    "internationalNews": "بین الاقوامی خبریں",
+    "politics": "سیاست",
+    "business": "کاروبار",
+    "economy": "معیشت",
+    "sports": "کھیل",
+    "entertainment": "تفریح",
+    "technology": "ٹیکنالوجی",
+    "health": "صحت",
+    "environment": "ماحولیات",
+    "education": "تعلیم"
+  },
+  "ads": {
+    "premiumWatches": {
+      "title": "پریمیم گھڑیاں",
+      "description": "درست گھڑیاں۔"
+    },
+    "luxuryRealEstate": {
+      "title": "لگژری رئیل اسٹیٹ",
+      "description": "پریمیم رہائش۔"
+    },
+    "cloudServices": {
+      "title": "کلاؤڈ خدمات",
+      "description": "تیزی سے بڑھیں۔"
+    },
+    "fallbackDescription": "پریمیم پارٹنر مواد۔"
+  },
+  "common": {
+    "home": "ہوم",
+    "aboutUs": "ہمارے بارے میں",
+    "articles": "مضامین",
+    "advertisers": "شراکت دار",
+    "mediaGallery": "تصاویر",
+    "contactUs": "رابطہ",
+    "digitalMagazine": "میگزین",
+    "signIn": "سائن ان",
+    "loading": "انتظار کریں...",
+    "selectAccount": "اکاؤنٹ منتخب کریں",
+    "masterAdmin": "ایڈمن",
+    "editorLogin": "ایڈیٹر",
+    "standardUser": "قاری",
+    "dashboardPanel": "ڈیش بورڈ",
+    "signOut": "سائن آؤٹ",
+    "search": "تلاش",
+    "returnHome": "ہوم واپس",
+    "close": "بند",
+    "cancel": "منسوخ",
+    "delete": "حذف",
+    "edit": "ترمیم",
+    "save": "محفوظ",
+    "subscribe": "سبسکرائب",
+    "readMagazine": "میگزین پڑھیں",
+    "explore": "دریافت",
+    "newsletter": "ای میل اپڈیٹ",
+    "emailAddress": "ای میل",
+    "public": "عوامی",
+    "premium": "پریمیم",
+    "enabled": "آن",
+    "disabled": "آف",
+    "openAsset": "کھولیں",
+    "uploadMedia": "اپلوڈ",
+    "uploading": "اپلوڈ ہو رہا ہے...",
+    "overview": "خلاصہ",
+    "settings": "ترتیبات",
+    "media": "میڈیا",
+    "newsEditor": "خبر ایڈیٹر",
+    "digitalLibrary": "کہانیاں",
+    "crm": "قارئین"
+  },
+  "ticker": {
+    "newsflash": "نیوز فلیش"
+  },
+  "languageSwitcher": {
+    "buttonLabel": "زبان بدلیں",
+    "label": "زبان",
+    "dropdownTitle": "زبان منتخب کریں",
+    "dropdownSubtitle": "پوری ایپ میں زبان فوری بدلیں۔"
+  },
+  "loading": {
+    "experience": "نیوز روم لوڈ ہو رہا ہے..."
+  },
+  "footer": {
+    "description": "متجسس قارئین کے لیے معیاری صحافت اور میگزین۔",
+    "aboutLink": "ہمارے بارے میں",
+    "exploreTitle": "دریافت",
+    "topSectionsTitle": "اہم حصے",
+    "newsletterTitle": "نیوز لیٹر",
+    "newsletterDescription": "خبریں اور میگزین اپڈیٹ حاصل کریں۔",
+    "newsletterErrorEmpty": "سبسکرائب کے لیے ای میل دیں۔",
+    "newsletterErrorInvalid": "درست ای میل دیں۔",
+    "newsletterSuccess": "سبسکرائب ہو گیا۔",
+    "partnerWithUs": "شراکت دار بنیں",
+    "copyright": "© 2026 ورتمان سروکار۔ تمام حقوق محفوظ۔",
+    "tagline": "واضح، ایمانداری صحافت۔"
+  },
+  "notFound": {
+    "title": "صفحہ نہیں ملا",
+    "message": "یہ صفحہ موجود نہیں۔"
+  },
+  "routes": {
+    "contact": {
+      "title": "ہم سے بات کریں",
+      "subtitle": "ہم مدد کے لیے حاضر ہیں۔",
+      "body": "سوالات؟ contact@vartmaansarokar.in پر لکھیں۔",
+      "heroTitle": "رابطہ کریں",
+      "heroSubtitle": "ہم آپ کی رائے کی قدر کرتے ہیں",
+      "responseTime": "24 گھنٹوں میں جواب",
+      "officeHours": "پیر-ہفتہ، صبح 9 - شام 7 IST"
+    },
+    "advertisers": {
+      "title": "ہمارے ساتھ کام کریں",
+      "body": "ہزاروں قارئین تک پہنچیں؟ partners@vartmaansarokar.in"
+    },
+    "gallery": {
+      "title": "فوٹو کہانیاں",
+      "body": "ملک بھر سے خوبصورت تصاویر اور بصری کہانیاں۔"
+    }
+  },
+  "contact": {
+    "pageTitle": "ہم سے رابطہ کریں",
+    "pageSubtitle": "ہم آپ سے سننا چاہتے ہیں",
+    "sections": {
+      "general": {
+        "title": "عمومی استفسار",
+        "description": "مواد، سبسکرپشن کے بارے میں سوالات",
+        "email": "contact@vartmaansarokar.in",
+        "phone": "+91 98765 43210",
+        "response": "24 گھنٹوں میں جواب"
+      },
+      "subscriptions": {
+        "title": "سبسکرپشن مدد",
+        "description": "ڈیجیٹل رسائی، پرنٹ ڈیلیوری",
+        "email": "subscriptions@vartmaansarokar.in",
+        "phone": "+91 98765 43211",
+        "response": "12 گھنٹوں میں جواب",
+        "digitalHelp": "ڈیجیٹل رسائی",
+        "printHelp": "پرنٹ میگزین",
+        "billingHelp": "ادائیگی اور بلنگ"
+      },
+      "advertising": {
+        "title": "اشتہارات اور شراکت",
+        "description": "اپنے برانڈ سے قارئین تک پہنچیں",
+        "email": "partners@vartmaansarokar.in",
+        "phone": "+91 98765 43212",
+        "response": "48 گھنٹوں میں جواب",
+        "audience": "50,000+ قارئین",
+        "formats": "ڈیجیٹل، پرنٹ، کسٹم",
+        "pricing": "₹25,000/ماہ سے"
+      },
+      "editorial": {
+        "title": "ادارتی اور پریس",
+        "description": "میڈیا استفسار، پریس ریلیز",
+        "email": "editor@vartmaansarokar.in",
+        "phone": "+91 98765 43213",
+        "response": "48 گھنٹوں میں"
+      },
+      "technical": {
+        "title": "تکنیکی مدد",
+        "description": "ویب سائٹ، ایپ مسائل",
+        "email": "tech@vartmaansarokar.in",
+        "phone": "+91 98765 43214",
+        "response": "24 گھنٹوں میں"
+      }
+    },
+    "office": {
+      "title": "ہمارا دفتر",
+      "address": "وانی کریشنز پرائیویٹ لمیٹڈ\n123 نالج اسٹریٹ\nکناٹ پلیس\nنئی دہلی - 110001\nبھارت",
+      "hours": {
+        "title": "دفتر اوقات",
+        "weekdays": "پیر-ہفتہ: صبح 9:00 - شام 7:00 IST",
+        "sunday": "اتوار: بند",
+        "holidays": "قومی تعطیلات پر بند"
+      },
+      "location": "دہلی کے کاروباری ضلع میں"
+    },
+    "social": {
+      "title": "ہمیں فالو کریں",
+      "description": "جڑے رہیں",
+      "whatsapp": {
+        "title": "واٹس ایپ اپڈیٹ",
+        "description": "بریکنگ نیوز اور ہائی لائٹس",
+        "number": "+91 98765 43215",
+        "action": "'JOIN' بھیجیں"
+      },
+      "newsletter": {
+        "title": "ای میل نیوز لیٹر",
+        "description": "ہفتہ وار خلاصہ",
+        "action": "مفت سبسکرائب"
+      }
+    },
+    "form": {
+      "title": "پیغام بھیجیں",
+      "subtitle": "فارم بھریں",
+      "name": "پورا نام",
+      "email": "ای میل",
+      "phone": "فون (اختیاری)",
+      "subject": "موضوع",
+      "subjectOptions": {
+        "general": "عمومی",
+        "subscription": "سبسکرپشن",
+        "advertising": "اشتہار",
+        "editorial": "ادارتی",
+        "technical": "تکنیکی",
+        "feedback": "رائے",
+        "other": "دیگر"
+      },
+      "message": "پیغام",
+      "messagePlaceholder": "ہم کیسے مدد کریں...",
+      "submit": "بھیجیں",
+      "sending": "بھیج رہا ہے...",
+      "success": "شکریہ! 24 گھنٹوں میں رابطہ کریں گے۔",
+      "error": "غلطی۔ دوبارہ کوشش کریں۔"
+    },
+    "subscriptionDetails": {
+      "title": "سبسکرپشن معلومات",
+      "digital": {
+        "title": "ڈیجیٹل رسائی",
+        "price": "مفت",
+        "badge": "ہمیشہ مفت",
+        "features": [
+          "تمام مضامین تک لامحدود رسائی",
+          "مکمل آرکائیو",
+          "موبائل اور ڈیسک ٹاپ",
+          "اشتہار سے پاک",
+          "آف لائن ڈاؤن لوڈ"
+        ],
+        "cta": "ڈیجیٹل رسائی"
+      },
+      "print": {
+        "title": "پرنٹ میگزین",
+        "price": "₹499/ماہ",
+        "badge": "پریمیم",
+        "features": [
+          "ماہانہ گھر ڈیلیوری",
+          "پریمیم چھپائی",
+          "ڈیجیٹل شامل",
+          "خصوصی مواد",
+          "ترجیحی مدد"
+        ],
+        "cta": "پرنٹ سبسکرائب",
+        "note": "ماہانہ بلنگ"
+      },
+      "payment": {
+        "title": "ادائیگی کے طریقے",
+        "methods": [
+          "UPI",
+          "کریڈٹ/ڈیبٹ کارڈ",
+          "نیٹ بینکنگ",
+          "بینک ٹرانسفر",
+          "کیش آن ڈیلیوری"
+        ],
+        "security": "تمام ادائیگیاں محفوظ"
+      },
+      "support": {
+        "title": "مدد؟",
+        "contact": "+91 98765 43211",
+        "email": "subscriptions@vartmaansarokar.in",
+        "hours": "صبح 9 - شام 7 IST"
+      }
+    }
+  },
+  "home": {
+    "heroContext": "گہرائی اور نقطہ نظر کے ساتھ خبریں",
+    "readFullArticle": "پوری کہانی پڑھیں",
+    "featuredCoverage": "اس ہفتے کی اہم کہانیاں",
+    "emptyTitle": "ابھی تک کوئی کہانی نہیں",
+    "emptyBody": "شائع ہونے کے بعد یہاں نظر آئیں گی۔",
+    "featuredTitle": "اہم کہانیاں",
+    "allArticles": "تمام کہانیاں",
+    "noArticlesTitle": "ابھی تک شائع نہیں ہوئی",
+    "noArticlesBody": "ایڈمن ڈیش بورڈ سے شائع کریں۔",
+    "premiumEdition": "پریمیم ایڈیشن",
+    "magazineIntro": "گہرا تجزیہ اور ماہرین کی رائے۔",
+    "flipbookFeature": "فلپ بک",
+    "visualEssays": "تصاویر اور بصری",
+    "exploreIssue": "یہ شمارہ پڑھیں",
+    "editorsChoice": "ایڈیٹر کا انتخاب",
+    "noMagazine": "ابھی کوئی میگزین دستیاب نہیں۔"
+  },
+  "about": {
+    "badge": "اشاعت کے بارے میں",
+    "heroTitle": "سرخی کے بعد بھی قاری کے ساتھ رہنے والی صحافت۔",
+    "heroBody": "گہرائی، وضاحت اور عوامی مطابقت پر مرکوز ماہانہ اشاعت۔",
+    "tagCurrentAffairs": "حالیہ معاملات",
+    "tagCulture": "ثقافت اور معاشرہ",
+    "tagIdeas": "خیالات اور قیادت",
+    "missionTitle": "مشن",
+    "missionBody": "عوامی زندگی کو سمجھنے میں مدد۔",
+    "audienceTitle": "قارئین",
+    "audienceBody": "سیاق و سباق اور جوہر کی قدر کرنے والے قارئین۔",
+    "quote": "مکالمے اور ذمہ داری کا پلیٹ فارم۔",
+    "whoWeAreBadge": "ہم کون ہیں",
+    "whoWeAreTitle": "سمجھ بوجھ چاہنے والے قارئین کے لیے۔",
+    "whoWeAreP1": "مطابقت میں جڑیں۔",
+    "whoWeAreP2": "نوجوان قارئین کو شعور سے جوڑنا۔",
+    "whoWeAreP3": "بامعنی صحافت لوگوں کو واضح بنائے۔",
+    "visionTitle": "ہمارا نظریہ",
+    "visionLead": "عوامی مفاد کی صحافت۔",
+    "visionBody": "باخبر قارئین کی نسل کی حوصلہ افزائی۔",
+    "coverTitle": "ہم کیا کور کرتے ہیں",
+    "coverBody": "بھارت کی سوچ پر اثر ڈالنے والے موضوعات۔",
+    "pillar1Title": "عوامی معاملات",
+    "pillar1Body": "پالیسی اور حکمرانی۔",
+    "pillar2Title": "معاشرہ اور ثقافت",
+    "pillar2Body": "سماجی ثقافتی دھارے۔",
+    "pillar3Title": "خیالات اور قیادت",
+    "pillar3Body": "پروفائل اور تجزیہ۔",
+    "teamTitle": "ادارتی ٹیم",
+    "teamBody": "اشاعت کی آواز بنانے والے۔",
+    "publisher": "ناشر",
+    "editor": "ایڈیٹر",
+    "digitalHead": "ڈیجیٹل سربراہ",
+    "adminHead": "انتظامی سربراہ",
+    "publishedByTitle": "وانی کریشنز کی اشاعت",
+    "publishedByBody": "قابل اعتماد کہانی سنانے سے رہنمائی۔",
+    "exploreMagazine": "میگزین دیکھیں"
+  },
+  "magazine": {
+    "title": "میگزین",
+    "subtitle": "آن لائن پڑھیں۔",
+    "emptyBody": "ابھی کوئی میگزین نہیں۔",
+    "edition": "شمارہ",
+    "digitalPrice": "مفت",
+    "physicalPrice": "₹499/ماہ",
+    "highResolution": "آسان پڑھائی",
+    "editorialDepth": "مکمل کہانیاں",
+    "premiumAccess": "مکمل رسائی",
+    "previousIssues": "پچھلے شمارے",
+    "digitalSubscription": "آن لائن مفت",
+    "digitalSubscriptionBody": "تمام شمارے مفت۔",
+    "perIssue": "فی شمارہ",
+    "claimDigitalAccess": "مفت پڑھیں",
+    "physicalSubscription": "پرنٹ حاصل کریں",
+    "physicalSubscriptionBody": "₹499 میں گھر ڈیلیوری۔",
+    "subscribePrint": "₹499/ماہ"
+  },
+  "category": {
+    "label": "موضوع",
+    "summary": "{{category}} — {{count}} کہانیاں۔",
+    "byAuthor": "{{author}} کی طرف سے",
+    "emptyTitle": "کوئی کہانی نہیں",
+    "emptyCta": "دوسرے موضوعات دیکھیں"
+  },
+  "newsDetail": {
+    "notFoundTitle": "کہانی نہیں ملی",
+    "backToHome": "ہوم",
+    "backToFeed": "کہانیاں",
+    "subscriberStory": "قارئین کے لیے",
+    "byAuthor": "{{author}} کی طرف سے",
+    "minRead": "{{count}} منٹ",
+    "broaderImpact": "اس کا مطلب",
+    "lockedBadge": "ممبران کے لیے",
+    "lockedTitle": "پڑھنے کے لیے سبسکرائب کریں",
+    "lockedBody": "مفت آن لائن رسائی حاصل کریں۔",
+    "openSubscriptionForm": "سبسکرائب",
+    "relatedStories": "مزید کہانیاں",
+    "sampleParagraphOne": "مزید رپورٹنگ اور ماہرین کی رائے۔",
+    "sampleParagraphTwo": "مقامی واقعات بڑی تبدیلیوں سے جڑتے ہیں۔"
+  },
+  "sidebar": {
+    "sponsored": "اسپانسرڈ",
+    "learnMore": "مزید پڑھیں",
+    "newsletterBody": "ہفتہ وار اپڈیٹ۔",
+    "yourEmail": "ای میل",
+    "subscribeNow": "اپڈیٹ بھیجیں"
+  },
+  "subscription": {
+    "digitalActivated": "ڈیجیٹل رسائی تیار!",
+    "requestReceived": "درخواست موصول",
+    "digitalSuccess": "ڈیجیٹل رسائی ملی!",
+    "physicalSuccess": "ادائیگی ثبوت ملا۔",
+    "unlockTitle": "رسائی منتخب کریں",
+    "unlockBody": "ڈیجیٹل مفت۔ پرنٹ ₹499۔",
+    "digital": "آن لائن (مفت)",
+    "physicalCopy": "پرنٹ (₹499)",
+    "free": "مفت",
+    "physicalCardBody": "₹499/ماہ۔ ثبوت اپلوڈ۔",
+    "fullName": "نام",
+    "emailAddress": "ای میل",
+    "phoneNumber": "فون",
+    "uploadPaymentScreenshot": "ثبوت اپلوڈ",
+    "clickToUpload": "کلک کریں",
+    "digitalNotePlaceholder": "نوٹ...",
+    "physicalNotePlaceholder": "پتہ...",
+    "submitting": "جمع ہو رہا ہے...",
+    "activateDigital": "ڈیجیٹل (مفت)",
+    "submitPhysical": "پرنٹ (₹499)",
+    "info": "ڈیجیٹل مفت۔ پرنٹ ₹499۔",
+    "validationError": "تفصیلات دیں۔",
+    "invalidEmail": "درست ای میل۔",
+    "readError": "فائل نہیں پڑھی۔",
+    "physicalError": "درخواست ناکام۔",
+    "genericError": "غلطی ہوئی۔"
+  },
+  "auth": {
+    "membership": "رسائی منتخب کریں",
+    "popupTitle": "مفت پڑھیں یا پرنٹ",
+    "digitalAccess": "آن لائن — مفت",
+    "digitalPitch": "سب مفت۔ کارڈ نہیں چاہیے۔",
+    "physicalCopy": "پرنٹ حاصل کریں",
+    "physicalPitch": "₹499/ماہ۔",
+    "subscribeDigitalTitle": "مفت ڈیجیٹل",
+    "subscribePhysicalTitle": "پرنٹ (₹499)",
+    "digitalReading": "مفت ڈیجیٹل",
+    "magazineFormats": "رسائی منتخب کریں",
+    "loginLabel": "سائن ان",
+    "loginTitle": "لاگ ان",
+    "password": "پاس ورڈ",
+    "staffPasswordHint": "سٹاف ای میل اور پاس ورڈ۔",
+    "googleConfigHint": "Google سیٹ اپ کے بعد۔",
+    "staffAccountsHint": "فوٹر شارٹ کٹ۔"
+  },
+  "flipbook": {
+    "issueProgress": "شمارہ پیشرفت",
+    "page": "صفحہ",
+    "zoomIn": "بڑا",
+    "fullscreen": "پوری اسکرین",
+    "digitalLabel": "تمام شمارے مفت۔ پرنٹ ₹499۔"
+  },
+  "chat": {
+    "title": "پوچھیں",
+    "subtitle": "URL دیں اور پوچھیں۔",
+    "websitePlaceholder": "https://example.com",
+    "fetch": "لائیں",
+    "emptyState": "کوئی پیغام نہیں۔",
+    "inputPlaceholder": "پوچھیں...",
+    "thinking": "سوچ رہا ہے...",
+    "send": "بھیجیں",
+    "fetchingContent": "لوڈ...",
+    "titlePrefix": "عنوان:",
+    "textPrefix": "متن:",
+    "noResponse": "جواب نہیں۔",
+    "failedToScrape": "پڑھ نہیں سکا:",
+    "errorContactingServer": "غلطی:"
+  },
+  "admin": {
+    "welcomeBack": "خوش آمدید، {{name}}",
+    "dashboardBody": "کہانیاں شائع کریں، میگزین اپلوڈ کریں۔",
+    "activeIssues": "فعال شمارے",
+    "newsArticles": "مضامین",
+    "subscribers": "ممبران",
+    "activeAds": "اشتہارات",
+    "editStory": "ترمیم",
+    "publishStory": "شائع",
+    "newsFormBody": "کہانی شائع کریں۔",
+    "storyTitle": "عنوان",
+    "imageUrl": "فوٹو URL",
+    "authorName": "مصنف",
+    "shortExcerpt": "خلاصہ",
+    "fullArticleContent": "پوری کہانی",
+    "featureHomepage": "ہوم پیج",
+    "requireSubscription": "پریمیم",
+    "updateStory": "محفوظ",
+    "publishedStories": "شائع شدہ",
+    "featured": "فیچرڈ",
+    "subscriber": "ممبر",
+    "publishIssue": "شمارہ شائع",
+    "magazineFormBody": "شمارہ اپلوڈ۔",
+    "uploadPdf": "PDF",
+    "issueTitle": "عنوان",
+    "issueNumber": "نمبر",
+    "coverImageUrl": "کور URL",
+    "pagesHint": "URL فی لائن",
+    "digitalPrice": "آن لائن ₹",
+    "physicalPrice": "پرنٹ ₹",
+    "gatedPage": "گیٹڈ",
+    "freeIssue": "مفت",
+    "enableBlurPaywall": "بلر",
+    "magazineHelper": "آن لائن مفت۔",
+    "pages": "صفحات",
+    "digitalAccess": "آن لائن",
+    "blurPaywall": "بلر",
+    "previewUntil": "صفحہ {{page}} تک",
+    "mediaLibrary": "میڈیا",
+    "mediaBody": "اپلوڈ۔",
+    "noMedia": "میڈیا نہیں۔",
+    "advertisingSlots": "اشتہار",
+    "adsBody": "ترمیم۔",
+    "saveAds": "محفوظ",
+    "adTitle": "عنوان",
+    "destinationUrl": "URL",
+    "sidebarTop": "اوپر",
+    "sidebarMid": "درمیان",
+    "sidebarBottom": "نیچے",
+    "homepageBanner": "بینر",
+    "userRoles": "کردار",
+    "userRolesBody": "رسائی کنٹرول۔",
+    "publishingNotes": "نوٹ",
+    "settingsLineOne": "MongoDB ڈیٹا۔",
+    "settingsLineTwo": "Auth /api/auth/*.",
+    "settingsLineThree": "میڈیا /api/media.",
+    "masterPanel": "ماسٹر پینل"
+  }
+}

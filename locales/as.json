@@ -1,0 +1,506 @@
+{
+  "brand": {
+    "lineOne": "বৰ্তমান",
+    "lineTwo": "সৰোকাৰ"
+  },
+  "roles": {
+    "general": "সাধাৰণ",
+    "magazine": "আলোচনী",
+    "admin": "এডমিন",
+    "superAdmin": "চুপাৰ এডমিন"
+  },
+  "categories": {
+    "nationalNews": "ৰাষ্ট্ৰীয় বাতৰি",
+    "internationalNews": "আন্তৰ্জাতিক বাতৰি",
+    "politics": "ৰাজনীতি",
+    "business": "ব্যৱসায়",
+    "economy": "অৰ্থনীতি",
+    "sports": "ক্ৰীড়া",
+    "entertainment": "মনোৰঞ্জন",
+    "technology": "প্ৰযুক্তি",
+    "health": "স্বাস্থ্য",
+    "environment": "পৰিৱেশ",
+    "education": "শিক্ষা"
+  },
+  "ads": {
+    "premiumWatches": {
+      "title": "প্ৰিমিয়াম ঘড়ী",
+      "description": "সঠিক ঘড়ী।"
+    },
+    "luxuryRealEstate": {
+      "title": "বিলাসী ৰিয়েল এষ্টেট",
+      "description": "প্ৰিমিয়াম বাসস্থান।"
+    },
+    "cloudServices": {
+      "title": "ক্লাউড সেৱা",
+      "description": "দ্ৰুত বৃদ্ধি কৰক।"
+    },
+    "fallbackDescription": "প্ৰিমিয়াম অংশীদাৰ বিষয়বস্তু।"
+  },
+  "common": {
+    "home": "হোম",
+    "aboutUs": "আমাৰ বিষয়ে",
+    "articles": "প্ৰবন্ধ",
+    "advertisers": "অংশীদাৰ",
+    "mediaGallery": "ফটো",
+    "contactUs": "যোগাযোগ",
+    "digitalMagazine": "আলোচনী",
+    "signIn": "চাইন ইন",
+    "loading": "অপেক্ষা কৰক...",
+    "selectAccount": "একাউণ্ট বাছক",
+    "masterAdmin": "এডমিন",
+    "editorLogin": "সম্পাদক",
+    "standardUser": "পাঠক",
+    "dashboardPanel": "ডেশ্ববোৰ্ড",
+    "signOut": "চাইন আউট",
+    "search": "সন্ধান",
+    "returnHome": "হোমলৈ ঘূৰক",
+    "close": "বন্ধ",
+    "cancel": "বাতিল",
+    "delete": "মচক",
+    "edit": "সম্পাদনা",
+    "save": "সংৰক্ষণ",
+    "subscribe": "চাবস্ক্ৰাইব",
+    "readMagazine": "আলোচনী পঢ়ক",
+    "explore": "অন্বেষণ",
+    "newsletter": "ইমেইল আপডেট",
+    "emailAddress": "ইমেইল",
+    "public": "ৰাজহুৱা",
+    "premium": "প্ৰিমিয়াম",
+    "enabled": "অন",
+    "disabled": "অফ",
+    "openAsset": "খোলক",
+    "uploadMedia": "আপলোড",
+    "uploading": "আপলোড হৈ আছে...",
+    "overview": "সাৰাংশ",
+    "settings": "ছেটিংছ",
+    "media": "মিডিয়া",
+    "newsEditor": "বাতৰি সম্পাদক",
+    "digitalLibrary": "কাহিনী",
+    "crm": "পাঠক"
+  },
+  "ticker": {
+    "newsflash": "নিউজফ্লেশ্ব"
+  },
+  "languageSwitcher": {
+    "buttonLabel": "ভাষা সলনি কৰক",
+    "label": "ভাষা",
+    "dropdownTitle": "ভাষা বাছক",
+    "dropdownSubtitle": "সমগ্ৰ এপত ভাষা তৎক্ষণাত সলনি কৰক।"
+  },
+  "loading": {
+    "experience": "নিউজৰুম লোড হৈ আছে..."
+  },
+  "footer": {
+    "description": "কৌতূহলী পাঠকৰ বাবে মানসম্পন্ন সাংবাদিকতা আৰু আলোচনী।",
+    "aboutLink": "আমাৰ বিষয়ে",
+    "exploreTitle": "অন্বেষণ",
+    "topSectionsTitle": "প্ৰধান বিভাগ",
+    "newsletterTitle": "নিউজলেটাৰ",
+    "newsletterDescription": "বাতৰি আপডেট পাওক।",
+    "newsletterErrorEmpty": "চাবস্ক্ৰাইবৰ বাবে ইমেইল দিয়ক।",
+    "newsletterErrorInvalid": "সঠিক ইমেইল দিয়ক।",
+    "newsletterSuccess": "চাবস্ক্ৰাইব হ'ল।",
+    "partnerWithUs": "অংশীদাৰ হওক",
+    "copyright": "© 2026 বৰ্তমান সৰোকাৰ। সৰ্বস্বত্ব সংৰক্ষিত।",
+    "tagline": "স্পষ্ট, সৎ সাংবাদিকতা।"
+  },
+  "notFound": {
+    "title": "পৃষ্ঠা পোৱা নগ'ল",
+    "message": "এই পৃষ্ঠা বিদ্যমান নহয়।"
+  },
+  "routes": {
+    "contact": {
+      "title": "আমাৰ সৈতে কথা পাতক",
+      "subtitle": "আমি সহায়তাৰ বাবে ইয়াত আছো।",
+      "body": "প্ৰশ্ন? contact@vartmaansarokar.in-ত লিখক।",
+      "heroTitle": "যোগাযোগ কৰক",
+      "heroSubtitle": "আমি আপোনাৰ মতামতক মূল্য দিওঁ",
+      "responseTime": "24 ঘণ্টাত সকলো বাৰ্তাৰ উত্তৰ",
+      "officeHours": "সোম-শনি, ৰাতিপুৱা 9 - সন্ধিয়া 7 IST"
+    },
+    "advertisers": {
+      "title": "আমাৰ সৈতে কাম কৰক",
+      "body": "হাজাৰ পাঠকলৈ পাওক? partners@vartmaansarokar.in"
+    },
+    "gallery": {
+      "title": "ফটো কাহিনী",
+      "body": "দেশজুৰি সুন্দৰ ফটো আৰু ভিজুৱেল কাহিনী।"
+    }
+  },
+  "contact": {
+    "pageTitle": "আমাৰ সৈতে যোগাযোগ কৰক",
+    "pageSubtitle": "আমি আপোনাৰ পৰা শুনিব বিচাৰো",
+    "sections": {
+      "general": {
+        "title": "সাধাৰণ প্ৰশ্ন",
+        "description": "বিষয়বস্তু, চাবস্ক্ৰিপশ্বন বিষয়ে প্ৰশ্ন",
+        "email": "contact@vartmaansarokar.in",
+        "phone": "+91 98765 43210",
+        "response": "24 ঘণ্টাত উত্তৰ"
+      },
+      "subscriptions": {
+        "title": "চাবস্ক্ৰিপশ্বন সহায়",
+        "description": "ডিজিটেল, প্ৰিণ্ট ডেলিভাৰী",
+        "email": "subscriptions@vartmaansarokar.in",
+        "phone": "+91 98765 43211",
+        "response": "12 ঘণ্টাত উত্তৰ",
+        "digitalHelp": "ডিজিটেল সমস্যা",
+        "printHelp": "প্ৰিণ্ট অৰ্ডাৰ",
+        "billingHelp": "পেমেণ্ট আৰু বিলিং"
+      },
+      "advertising": {
+        "title": "বিজ্ঞাপন আৰু অংশীদাৰিত্ব",
+        "description": "আপোনাৰ ব্ৰেণ্ডেৰে পাঠকলৈ পাওক",
+        "email": "partners@vartmaansarokar.in",
+        "phone": "+91 98765 43212",
+        "response": "48 ঘণ্টাত উত্তৰ",
+        "audience": "50,000+ পাঠক",
+        "formats": "ডিজিটেল, প্ৰিণ্ট, কাষ্টম",
+        "pricing": "₹25,000/মাহৰ পৰা"
+      },
+      "editorial": {
+        "title": "সম্পাদকীয় আৰু প্ৰেছ",
+        "description": "মিডিয়া প্ৰশ্ন, প্ৰেছ ৰিলিজ",
+        "email": "editor@vartmaansarokar.in",
+        "phone": "+91 98765 43213",
+        "response": "48 ঘণ্টাত"
+      },
+      "technical": {
+        "title": "প্ৰযুক্তি সহায়",
+        "description": "ৱেবচাইট, এপ সমস্যা",
+        "email": "tech@vartmaansarokar.in",
+        "phone": "+91 98765 43214",
+        "response": "24 ঘণ্টাত"
+      }
+    },
+    "office": {
+      "title": "আমাৰ কাৰ্যালয়",
+      "address": "বাণী ক্ৰিয়েচনচ প্ৰাইভেট লিমিটেড\n123 নলেজ ষ্ট্ৰীট\nকনট প্লেচ\nনতুন দিল্লী - 110001\nভাৰত",
+      "hours": {
+        "title": "কাৰ্যালয় সময়",
+        "weekdays": "সোম-শনি: ৰাতিপুৱা 9:00 - সন্ধিয়া 7:00 IST",
+        "sunday": "দেওবাৰ: বন্ধ",
+        "holidays": "ৰাষ্ট্ৰীয় বন্ধত বন্ধ"
+      },
+      "location": "দিল্লীৰ ব্যৱসায়িক জিলাত"
+    },
+    "social": {
+      "title": "আমাক ফলো কৰক",
+      "description": "সংযুক্ত থাকক",
+      "whatsapp": {
+        "title": "হোৱাটচএপ আপডেট",
+        "description": "ব্ৰেকিং নিউজ আৰু হাইলাইটচ",
+        "number": "+91 98765 43215",
+        "action": "আপডেটৰ বাবে 'JOIN' পঠাওক"
+      },
+      "newsletter": {
+        "title": "ইমেইল নিউজলেটাৰ",
+        "description": "সাপ্তাহিক সাৰাংশ",
+        "action": "বিনামূলীয়া চাবস্ক্ৰাইব"
+      }
+    },
+    "form": {
+      "title": "বাৰ্তা পঠাওক",
+      "subtitle": "ফৰ্ম পূৰণ কৰক",
+      "name": "সম্পূৰ্ণ নাম",
+      "email": "ইমেইল",
+      "phone": "ফোন (ঐচ্ছিক)",
+      "subject": "বিষয়",
+      "subjectOptions": {
+        "general": "সাধাৰণ",
+        "subscription": "চাবস্ক্ৰিপশ্বন",
+        "advertising": "বিজ্ঞাপন",
+        "editorial": "সম্পাদকীয়",
+        "technical": "প্ৰযুক্তি",
+        "feedback": "মতামত",
+        "other": "অন্যান্য"
+      },
+      "message": "বাৰ্তা",
+      "messagePlaceholder": "আমি কেনেকৈ সহায় কৰিম...",
+      "submit": "পঠাওক",
+      "sending": "পঠোৱা হৈছে...",
+      "success": "ধন্যবাদ! 24 ঘণ্টাত যোগাযোগ কৰিম।",
+      "error": "ভুল হ'ল। পুনৰ চেষ্টা কৰক।"
+    },
+    "subscriptionDetails": {
+      "title": "চাবস্ক্ৰিপশ্বন তথ্য",
+      "digital": {
+        "title": "ডিজিটেল এক্সেচ",
+        "price": "বিনামূলীয়া",
+        "badge": "সদায় বিনামূলীয়া",
+        "features": [
+          "সকলো প্ৰবন্ধত অসীম এক্সেচ",
+          "সম্পূৰ্ণ আৰ্কাইভ",
+          "মোবাইল আৰু ডেস্কটপ",
+          "বিজ্ঞাপনমুক্ত পঢ়া",
+          "অফলাইন ডাউনলোড"
+        ],
+        "cta": "ডিজিটেল এক্সেচ"
+      },
+      "print": {
+        "title": "প্ৰিণ্ট আলোচনী",
+        "price": "₹499/মাহ",
+        "badge": "প্ৰিমিয়াম",
+        "features": [
+          "মাহেকীয়া ঘৰলৈ ডেলিভাৰী",
+          "প্ৰিমিয়াম মুদ্ৰণ",
+          "ডিজিটেল অন্তৰ্ভুক্ত",
+          "বিশেষ বিষয়বস্তু",
+          "অগ্ৰাধিকাৰ সহায়"
+        ],
+        "cta": "প্ৰিণ্ট চাবস্ক্ৰাইব",
+        "note": "মাহেকীয়া বিলিং"
+      },
+      "payment": {
+        "title": "পেমেণ্ট পদ্ধতি",
+        "methods": [
+          "UPI",
+          "ক্ৰেডিট/ডেবিট কাৰ্ড",
+          "নেট বেংকিং",
+          "বেংক ট্ৰেন্সফাৰ",
+          "কেচ অন ডেলিভাৰী"
+        ],
+        "security": "সকলো পেমেণ্ট সুৰক্ষিত"
+      },
+      "support": {
+        "title": "সহায়?",
+        "contact": "+91 98765 43211",
+        "email": "subscriptions@vartmaansarokar.in",
+        "hours": "ৰাতিপুৱা 9 - সন্ধিয়া 7 IST"
+      }
+    }
+  },
+  "home": {
+    "heroContext": "গভীৰতা আৰু দৃষ্টিভংগীৰে বাতৰি",
+    "readFullArticle": "সম্পূৰ্ণ কাহিনী পঢ়ক",
+    "featuredCoverage": "এই সপ্তাহৰ মুখ্য কাহিনী",
+    "emptyTitle": "এতিয়াও কোনো কাহিনী নাই",
+    "emptyBody": "প্ৰকাশ হোৱাৰ পিছত ইয়াত দেখা যাব।",
+    "featuredTitle": "মুখ্য কাহিনী",
+    "allArticles": "সকলো কাহিনী",
+    "noArticlesTitle": "এতিয়াও প্ৰকাশ হোৱা নাই",
+    "noArticlesBody": "এডমিন ডেশ্ববোৰ্ডৰ পৰা প্ৰকাশ কৰক।",
+    "premiumEdition": "প্ৰিমিয়াম সংস্কৰণ",
+    "magazineIntro": "গভীৰ বিশ্লেষণ আৰু বিশেষজ্ঞ মতামত।",
+    "flipbookFeature": "ফ্লিপবুক",
+    "visualEssays": "ফটো আৰু ভিজুৱেল",
+    "exploreIssue": "এই সংখ্যা পঢ়ক",
+    "editorsChoice": "সম্পাদকৰ পছন্দ",
+    "noMagazine": "এতিয়াও কোনো আলোচনী উপলব্ধ নহয়।"
+  },
+  "about": {
+    "badge": "প্ৰকাশনৰ বিষয়ে",
+    "heroTitle": "শিৰোনামৰ পিছতো পাঠকৰ সৈতে থকা সাংবাদিকতা।",
+    "heroBody": "গভীৰতা, স্পষ্টতা আৰু ৰাজহুৱা প্ৰাসংগিকতাত কেন্দ্ৰীভূত মাহেকীয়া প্ৰকাশন।",
+    "tagCurrentAffairs": "সাম্প্ৰতিক বিষয়",
+    "tagCulture": "সংস্কৃতি আৰু সমাজ",
+    "tagIdeas": "ধাৰণা আৰু নেতৃত্ব",
+    "missionTitle": "লক্ষ্য",
+    "missionBody": "ৰাজহুৱা জীৱনক গঢ় দিয়া শক্তিবোৰ বুজাত সহায়।",
+    "audienceTitle": "পাঠক",
+    "audienceBody": "প্ৰসংগ আৰু সাৰক মূল্য দিয়া পাঠক।",
+    "quote": "সংলাপ আৰু দায়িত্বৰ মঞ্চ।",
+    "whoWeAreBadge": "আমি কোন",
+    "whoWeAreTitle": "বুজাবুজি বিচৰা পাঠকৰ বাবে।",
+    "whoWeAreP1": "প্ৰাসংগিকতাত শিপা।",
+    "whoWeAreP2": "যুৱ পাঠকক সচেতনতাৰ সৈতে সংযোগ।",
+    "whoWeAreP3": "অৰ্থপূৰ্ণ সাংবাদিকতাই মানুহক স্পষ্ট কৰিব লাগে।",
+    "visionTitle": "আমাৰ দৃষ্টিভংগী",
+    "visionLead": "জনস্বাৰ্থ সাংবাদিকতা।",
+    "visionBody": "জ্ঞাত পাঠকৰ প্ৰজন্মক উৎসাহিত কৰা।",
+    "coverTitle": "আমি কি সামৰি লওঁ",
+    "coverBody": "ভাৰতৰ চিন্তাধাৰাক প্ৰভাৱিত কৰা বিষয়।",
+    "pillar1Title": "ৰাজহুৱা বিষয়",
+    "pillar1Body": "নীতি আৰু শাসন।",
+    "pillar2Title": "সমাজ আৰু সংস্কৃতি",
+    "pillar2Body": "সামাজিক সাংস্কৃতিক ধাৰা।",
+    "pillar3Title": "ধাৰণা আৰু নেতৃত্ব",
+    "pillar3Body": "প্ৰফাইল আৰু বিশ্লেষণ।",
+    "teamTitle": "সম্পাদকীয় দল",
+    "teamBody": "প্ৰকাশনৰ কণ্ঠস্বৰ গঢ়া ব্যক্তি।",
+    "publisher": "প্ৰকাশক",
+    "editor": "সম্পাদক",
+    "digitalHead": "ডিজিটেল প্ৰধান",
+    "adminHead": "প্ৰশাসন প্ৰধান",
+    "publishedByTitle": "বাণী ক্ৰিয়েচনচৰ দ্বাৰা প্ৰকাশিত",
+    "publishedByBody": "বিশ্বাসযোগ্য কাহিনী কোৱাৰ পৰা নিৰ্দেশিত।",
+    "exploreMagazine": "আলোচনী চাওক"
+  },
+  "magazine": {
+    "title": "আলোচনী",
+    "subtitle": "অনলাইনত পঢ়ক।",
+    "emptyBody": "এতিয়াও আলোচনী নাই।",
+    "edition": "সংখ্যা",
+    "digitalPrice": "বিনামূলীয়া",
+    "physicalPrice": "₹499/মাহ",
+    "highResolution": "পঢ়িবলৈ সহজ",
+    "editorialDepth": "সম্পূৰ্ণ কাহিনী",
+    "premiumAccess": "সম্পূৰ্ণ এক্সেচ",
+    "previousIssues": "আগৰ সংখ্যা",
+    "digitalSubscription": "অনলাইন বিনামূলীয়া",
+    "digitalSubscriptionBody": "সকলো সংখ্যা বিনামূলীয়া।",
+    "perIssue": "প্ৰতি সংখ্যা",
+    "claimDigitalAccess": "বিনামূলীয়াকৈ পঢ়ক",
+    "physicalSubscription": "প্ৰিণ্ট পাওক",
+    "physicalSubscriptionBody": "₹499ত ঘৰলৈ ডেলিভাৰী।",
+    "subscribePrint": "₹499/মাহ"
+  },
+  "category": {
+    "label": "বিষয়",
+    "summary": "{{category}} — {{count}} কাহিনী।",
+    "byAuthor": "{{author}}ৰ দ্বাৰা",
+    "emptyTitle": "কোনো কাহিনী নাই",
+    "emptyCta": "অন্য বিষয় চাওক"
+  },
+  "newsDetail": {
+    "notFoundTitle": "কাহিনী পোৱা নগ'ল",
+    "backToHome": "হোম",
+    "backToFeed": "কাহিনী",
+    "subscriberStory": "পাঠকৰ বাবে",
+    "byAuthor": "{{author}}ৰ দ্বাৰা",
+    "minRead": "{{count}} মিনিট",
+    "broaderImpact": "ইয়াৰ অৰ্থ",
+    "lockedBadge": "সদস্যৰ বাবে",
+    "lockedTitle": "পঢ়িবলৈ চাবস্ক্ৰাইব কৰক",
+    "lockedBody": "বিনামূলীয়া অনলাইন এক্সেচ পাওক।",
+    "openSubscriptionForm": "চাবস্ক্ৰাইব",
+    "relatedStories": "আৰু কাহিনী",
+    "sampleParagraphOne": "অধিক ৰিপোৰ্টিং আৰু বিশেষজ্ঞ মতামত।",
+    "sampleParagraphTwo": "স্থানীয় ঘটনা ডাঙৰ পৰিৱৰ্তনৰ সৈতে সংযুক্ত।"
+  },
+  "sidebar": {
+    "sponsored": "স্পনচৰড",
+    "learnMore": "অধিক পঢ়ক",
+    "newsletterBody": "সাপ্তাহিক আপডেট।",
+    "yourEmail": "ইমেইল",
+    "subscribeNow": "আপডেট পঠাওক"
+  },
+  "subscription": {
+    "digitalActivated": "ডিজিটেল সাজু!",
+    "requestReceived": "অনুৰোধ পোৱা গ'ল",
+    "digitalSuccess": "ডিজিটেল এক্সেচ পালে!",
+    "physicalSuccess": "পেমেণ্ট প্ৰমাণ পোৱা গ'ল।",
+    "unlockTitle": "এক্সেচ বাছক",
+    "unlockBody": "ডিজিটেল বিনামূলীয়া। প্ৰিণ্ট ₹499।",
+    "digital": "অনলাইন (বিনামূলীয়া)",
+    "physicalCopy": "প্ৰিণ্ট (₹499)",
+    "free": "বিনামূলীয়া",
+    "physicalCardBody": "₹499/মাহ। প্ৰমাণ আপলোড।",
+    "fullName": "নাম",
+    "emailAddress": "ইমেইল",
+    "phoneNumber": "ফোন",
+    "uploadPaymentScreenshot": "প্ৰমাণ আপলোড",
+    "clickToUpload": "ক্লিক কৰক",
+    "digitalNotePlaceholder": "টোকা...",
+    "physicalNotePlaceholder": "ঠিকনা...",
+    "submitting": "জমা হৈছে...",
+    "activateDigital": "ডিজিটেল (বিনামূলীয়া)",
+    "submitPhysical": "প্ৰিণ্ট (₹499)",
+    "info": "ডিজিটেল বিনামূলীয়া।",
+    "validationError": "তথ্য দিয়ক।",
+    "invalidEmail": "সঠিক ইমেইল।",
+    "readError": "ফাইল পঢ়িব নোৱাৰি।",
+    "physicalError": "অনুৰোধ বিফল।",
+    "genericError": "ভুল হ'ল।"
+  },
+  "auth": {
+    "membership": "এক্সেচ বাছক",
+    "popupTitle": "বিনামূলীয়াকৈ পঢ়ক বা প্ৰিণ্ট",
+    "digitalAccess": "অনলাইন — বিনামূলীয়া",
+    "digitalPitch": "সকলো বিনামূলীয়া। কাৰ্ড নালাগে।",
+    "physicalCopy": "প্ৰিণ্ট পাওক",
+    "physicalPitch": "₹499/মাহ।",
+    "subscribeDigitalTitle": "বিনামূলীয়া ডিজিটেল",
+    "subscribePhysicalTitle": "প্ৰিণ্ট (₹499)",
+    "digitalReading": "বিনামূলীয়া ডিজিটেল",
+    "magazineFormats": "এক্সেচ বাছক",
+    "loginLabel": "চাইন ইন",
+    "loginTitle": "লগ ইন",
+    "password": "পাছৱৰ্ড",
+    "staffPasswordHint": "ষ্টাফ ইমেইল আৰু পাছৱৰ্ড।",
+    "googleConfigHint": "Google ছেটআপৰ পিছত।",
+    "staffAccountsHint": "ফুটাৰ শ্বৰ্টকাট।"
+  },
+  "flipbook": {
+    "issueProgress": "সংখ্যা অগ্ৰগতি",
+    "page": "পৃষ্ঠা",
+    "zoomIn": "ডাঙৰ",
+    "fullscreen": "সম্পূৰ্ণ পৰ্দা",
+    "digitalLabel": "সকলো সংখ্যা বিনামূলীয়া। প্ৰিণ্ট ₹499।"
+  },
+  "chat": {
+    "title": "সুধিয়ক",
+    "subtitle": "URL দিয়ক আৰু সুধিয়ক।",
+    "websitePlaceholder": "https://example.com",
+    "fetch": "আনক",
+    "emptyState": "কোনো বাৰ্তা নাই।",
+    "inputPlaceholder": "সুধিয়ক...",
+    "thinking": "চিন্তা কৰিছে...",
+    "send": "পঠাওক",
+    "fetchingContent": "লোড...",
+    "titlePrefix": "শিৰোনাম:",
+    "textPrefix": "পাঠ:",
+    "noResponse": "উত্তৰ নাই।",
+    "failedToScrape": "পঢ়িব নোৱাৰিলে:",
+    "errorContactingServer": "ভুল:"
+  },
+  "admin": {
+    "welcomeBack": "স্বাগতম, {{name}}",
+    "dashboardBody": "কাহিনী প্ৰকাশ কৰক, আলোচনী আপলোড কৰক।",
+    "activeIssues": "সক্ৰিয় সংখ্যা",
+    "newsArticles": "প্ৰবন্ধ",
+    "subscribers": "সদস্য",
+    "activeAds": "বিজ্ঞাপন",
+    "editStory": "সম্পাদনা",
+    "publishStory": "প্ৰকাশ",
+    "newsFormBody": "কাহিনী প্ৰকাশ কৰক।",
+    "storyTitle": "শিৰোনাম",
+    "imageUrl": "ফটো URL",
+    "authorName": "লেখক",
+    "shortExcerpt": "সাৰাংশ",
+    "fullArticleContent": "সম্পূৰ্ণ কাহিনী",
+    "featureHomepage": "হোমপেজ",
+    "requireSubscription": "প্ৰিমিয়াম",
+    "updateStory": "সংৰক্ষণ",
+    "publishedStories": "প্ৰকাশিত",
+    "featured": "ফিচাৰ্ড",
+    "subscriber": "সদস্য",
+    "publishIssue": "সংখ্যা প্ৰকাশ",
+    "magazineFormBody": "সংখ্যা আপলোড।",
+    "uploadPdf": "PDF",
+    "issueTitle": "শিৰোনাম",
+    "issueNumber": "নম্বৰ",
+    "coverImageUrl": "কভাৰ URL",
+    "pagesHint": "URL প্ৰতি শাৰী",
+    "digitalPrice": "অনলাইন ₹",
+    "physicalPrice": "প্ৰিণ্ট ₹",
+    "gatedPage": "গেটেড",
+    "freeIssue": "বিনামূলীয়া",
+    "enableBlurPaywall": "ব্লাৰ",
+    "magazineHelper": "অনলাইন বিনামূলীয়া।",
+    "pages": "পৃষ্ঠা",
+    "digitalAccess": "অনলাইন",
+    "blurPaywall": "ব্লাৰ",
+    "previewUntil": "পৃষ্ঠা {{page}} লৈকে",
+    "mediaLibrary": "মিডিয়া",
+    "mediaBody": "আপলোড।",
+    "noMedia": "মিডিয়া নাই।",
+    "advertisingSlots": "বিজ্ঞাপন",
+    "adsBody": "সম্পাদনা।",
+    "saveAds": "সংৰক্ষণ",
+    "adTitle": "শিৰোনাম",
+    "destinationUrl": "URL",
+    "sidebarTop": "ওপৰত",
+    "sidebarMid": "মাজত",
+    "sidebarBottom": "তলত",
+    "homepageBanner": "বেনাৰ",
+    "userRoles": "ভূমিকা",
+    "userRolesBody": "এক্সেচ নিয়ন্ত্ৰণ।",
+    "publishingNotes": "টোকা",
+    "settingsLineOne": "MongoDB ডাটা।",
+    "settingsLineTwo": "Auth /api/auth/*.",
+    "settingsLineThree": "মিডিয়া /api/media.",
+    "masterPanel": "মাষ্টাৰ পেনেল"
+  }
+}
