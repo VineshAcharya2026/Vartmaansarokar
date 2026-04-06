@@ -287,7 +287,7 @@ function setupContentRoutes(router: Router, env: Env): void {
   
   // GET /api/articles/:id
   router.get('/api/articles/:id', async (req, ctx) => {
-    const { id } = req.params;
+    const { id } = ctx.params;
     const article = await ctx.store.getArticleById(id);
     if (!article) {
       return errorResponse('Article not found.', 404);
@@ -311,7 +311,7 @@ function setupContentRoutes(router: Router, env: Env): void {
   
   // PATCH /api/articles/:id (protected)
   router.patch('/api/articles/:id', async (req, ctx) => {
-    const { id } = req.params;
+    const { id } = ctx.params;
     const updates: Partial<Article> = await req.json();
     
     const updated = await ctx.store.updateArticle(id, updates);
@@ -322,7 +322,7 @@ function setupContentRoutes(router: Router, env: Env): void {
   
   // DELETE /api/articles/:id (protected)
   router.delete('/api/articles/:id', async (req, ctx) => {
-    const { id } = req.params;
+    const { id } = ctx.params;
     
     await ctx.store.deleteArticle(id);
     const articles = await ctx.store.listArticles();
@@ -347,7 +347,7 @@ function setupContentRoutes(router: Router, env: Env): void {
   
   // PATCH /api/magazines/:id (protected)
   router.patch('/api/magazines/:id', async (req, ctx) => {
-    const { id } = req.params;
+    const { id } = ctx.params;
     const updates = await req.json();
     
     const updated = await ctx.store.updateMagazine(id, updates);
@@ -358,7 +358,7 @@ function setupContentRoutes(router: Router, env: Env): void {
   
   // DELETE /api/magazines/:id (protected)
   router.delete('/api/magazines/:id', async (req, ctx) => {
-    const { id } = req.params;
+    const { id } = ctx.params;
     
     await ctx.store.deleteMagazine(id);
     const magazines = await ctx.store.listMagazines();
@@ -444,7 +444,7 @@ function setupMediaRoutes(router: Router, env: Env): void {
   
   // GET /media/:key (R2 proxy)
   router.get('/media/:key', async (req, ctx) => {
-    const { key } = req.params;
+    const { key } = ctx.params;
     const object = await env.MEDIA_BUCKET.get(key);
     
     if (!object) {
@@ -476,7 +476,7 @@ function setupSubscriptionRoutes(router: Router, env: Env): void {
   
   // PATCH /api/subscriptions/requests/:id/status (protected)
   router.patch('/api/subscriptions/requests/:id/status', async (req, ctx) => {
-    const { id } = req.params;
+    const { id } = ctx.params;
     const { status } = await req.json();
     
     const request = await ctx.store.updateSubscriptionRequest(id, status);
@@ -496,7 +496,7 @@ function setupUserRoutes(router: Router, env: Env): void {
   
   // PATCH /api/users/:id/role (protected)
   router.patch('/api/users/:id/role', async (req, ctx) => {
-    const { id } = req.params;
+    const { id } = ctx.params;
     const { role } = await req.json();
     
     const user = await ctx.store.updateUser(id, { role });
