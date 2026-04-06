@@ -1,5 +1,6 @@
 import { Router } from './workers-router.js';
 import { d1Store, D1Database } from './d1-store.js';
+import type { Article, MagazineIssue, SubscriptionRequest, Ad } from './types.js';
 
 // Cloudflare Workers environment bindings
 export interface Env {
@@ -311,7 +312,7 @@ function setupContentRoutes(router: Router, env: Env): void {
   // PATCH /api/articles/:id (protected)
   router.patch('/api/articles/:id', async (req, ctx) => {
     const { id } = req.params;
-    const updates = await req.json();
+    const updates: Partial<Article> = await req.json();
     
     const updated = await ctx.store.updateArticle(id, updates);
     const articles = await ctx.store.listArticles();
@@ -337,7 +338,7 @@ function setupContentRoutes(router: Router, env: Env): void {
   
   // POST /api/magazines (protected)
   router.post('/api/magazines', async (req, ctx) => {
-    const magazine = await req.json();
+    const magazine: MagazineIssue = await req.json();
     const created = await ctx.store.createMagazine(magazine);
     const magazines = await ctx.store.listMagazines();
     
@@ -373,7 +374,7 @@ function setupContentRoutes(router: Router, env: Env): void {
   
   // PUT /api/ads (protected)
   router.put('/api/ads', async (req, ctx) => {
-    const { ads } = await req.json();
+    const { ads }: { ads: Ad[] } = await req.json();
     const updated = await ctx.store.replaceAds(ads);
     
     return successResponse({ ads: updated }, 'Ads updated.');
@@ -468,8 +469,8 @@ function setupSubscriptionRoutes(router: Router, env: Env): void {
   
   // POST /api/subscriptions/requests
   router.post('/api/subscriptions/requests', async (req, ctx) => {
-    const data = await req.json();
-    const request = await ctx.store.createSubscriptionRequest(data);
+    const data: Omit<SubscriptionRequest, 'status' | 'id' | 'createdAt' | 'updatedAt'> = await req.json();
+    const request: SubscriptionRequest = await ctx.store.createSubscriptionRequest({ ...data, status: 'pending' });
     return successResponse({ request, requestId: request.id }, 'Request created.', 201);
   });
   
@@ -509,7 +510,7 @@ function setupUserRoutes(router: Router, env: Env): void {
 function setupChatRoutes(router: Router, env: Env): void {
   // POST /api/chat
   router.post('/api/chat', async (req, ctx) => {
-    const { url, message } = await req.json();
+    const { url, message }: { url?: string; message: string } = await req.json();
     
     if (!message) {
       return errorResponse('A message is required.', 400);
