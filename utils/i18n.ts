@@ -28,8 +28,8 @@ const AD_DESCRIPTION_KEY_MAP: Record<string, string> = {
 };
 
 const ROLE_KEY_MAP: Record<UserRole, string> = {
-  [UserRole.GENERAL]: 'roles.general',
-  [UserRole.MAGAZINE]: 'roles.magazine',
+  [UserRole.SUBSCRIBER]: 'roles.general',
+  [UserRole.EDITOR]: 'roles.magazine',
   [UserRole.ADMIN]: 'roles.admin',
   [UserRole.SUPER_ADMIN]: 'roles.superAdmin'
 };

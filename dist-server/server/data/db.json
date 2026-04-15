@@ -1,0 +1,182 @@
+{
+  "users": [
+    {
+      "id": "user_c2eb66a9-4207-4fc9-a9f2-b644072f0385",
+      "email": "editor@cms.com",
+      "name": "Editor",
+      "role": "EDITOR",
+      "authProvider": "PASSWORD",
+      "isActive": true,
+      "passwordHash": "$2b$10$/e.tXBVOqxahH13ZGk.4Me52cfn2q9REZtYGv7zHUTBHDo6kqdaka",
+      "createdAt": "2026-04-11T10:11:56.239Z",
+      "updatedAt": "2026-04-11T10:11:57.632Z"
+    },
+    {
+      "id": "user_acd0acd1-6f0a-4d7b-9c13-a76a49df390c",
+      "email": "admin@cms.com",
+      "name": "Admin",
+      "role": "ADMIN",
+      "authProvider": "PASSWORD",
+      "isActive": true,
+      "passwordHash": "$2b$10$O0yIu2SzUp5o2eTc8DFUwe3BCIHW/oIgT10pPn4s/US4mLSo.Qeei",
+      "createdAt": "2026-04-11T10:10:56.239Z",
+      "updatedAt": "2026-04-11T10:11:57.808Z"
+    },
+    {
+      "id": "user_8ff6a0ff-a311-4f1c-bfaa-65b9925a0c24",
+      "email": "superadmin@cms.com",
+      "name": "Super Admin",
+      "role": "SUPER_ADMIN",
+      "authProvider": "PASSWORD",
+      "isActive": true,
+      "passwordHash": "$2b$10$odd6444XFpmACncCeFTqSurSnbz2JDALqwNssCADVojnvAA2qYD0S",
+      "createdAt": "2026-04-11T10:09:56.239Z",
+      "updatedAt": "2026-04-11T10:11:57.971Z"
+    },
+    {
+      "id": "user_285438b8-9625-471e-9555-9c5d76f53b36",
+      "email": "editor2@cms.com",
+      "name": "Second Editor",
+      "role": "EDITOR",
+      "authProvider": "PASSWORD",
+      "isActive": false,
+      "passwordHash": "$2b$10$nJMRRMi/ve5LhP8BPGaMquVr/LuAALr2yhlMY2MY8ODnjUwTI5mOq",
+      "createdAt": "2026-04-11T10:29:48.364Z",
+      "updatedAt": "2026-04-11T10:29:48.387Z"
+    }
+  ],
+  "articles": [
+    {
+      "id": "seed-article-1",
+      "title": "Government Announces New Infrastructure Policy",
+      "category": "National News",
+      "excerpt": "The central government has unveiled a large-scale infrastructure plan spanning rail, roads, and logistics.",
+      "content": "A long-term infrastructure package has been announced with emphasis on modernization, state coordination, and public investment.",
+      "image": "https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=500&fit=crop",
+      "author": "Editorial Desk",
+      "date": "2026-04-01",
+      "featured": true,
+      "requiresSubscription": false,
+      "status": "APPROVED",
+      "createdAt": "2026-04-11T10:11:56.845Z",
+      "updatedAt": "2026-04-11T10:11:56.845Z"
+    },
+    {
+      "image": "https://example.com/image.jpg",
+      "excerpt": "Short excerpt",
+      "category": "Technology",
+      "author": "Editor",
+      "date": "2026-04-11",
+      "requiresSubscription": false,
+      "content": "Longer content body",
+      "title": "Audit Test Article",
+      "featured": false,
+      "status": "APPROVED",
+      "submittedBy": "user_c2eb66a9-4207-4fc9-a9f2-b644072f0385",
+      "id": "article_c4bf82ef-fa8f-4726-8ce4-482a06d9cb9f",
+      "createdAt": "2026-04-11T10:29:48.071Z",
+      "updatedAt": "2026-04-11T10:29:48.131Z",
+      "submittedAt": "2026-04-11T10:29:48.107Z",
+      "approvedBy": "user_acd0acd1-6f0a-4d7b-9c13-a76a49df390c",
+      "approvedAt": "2026-04-11T10:29:48.131Z"
+    }
+  ],
+  "magazines": [
+    {
+      "id": "seed-magazine-1",
+      "title": "The Future of Urban Living",
+      "issueNumber": "April 2026",
+      "coverImage": "https://images.unsplash.com/photo-1504711434969-e33886168d8c?w=400&h=600&fit=crop",
+      "pages": [
+        "https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=1200&fit=crop",
+        "https://images.unsplash.com/photo-1523995462485-3d171b5c8fa9?w=800&h=1200&fit=crop"
+      ],
+      "date": "2026-04-01",
+      "priceDigital": 0,
+      "pricePhysical": 499,
+      "isFree": true,
+      "gatedPage": 2,
+      "blurPaywall": false,
+      "status": "APPROVED",
+      "createdAt": "2026-04-11T10:11:56.845Z",
+      "updatedAt": "2026-04-11T10:11:56.845Z"
+    }
+  ],
+  "ads": [
+    {
+      "id": "seed-ad-1",
+      "title": "Premium Watches",
+      "imageUrl": "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=800&h=400&fit=crop",
+      "link": "https://example.com/watches",
+      "position": "SIDEBAR_TOP",
+      "description": "Precision-made timepieces for a discerning audience.",
+      "ctaText": "Explore Collection",
+      "createdAt": "2026-04-11T10:11:56.845Z",
+      "updatedAt": "2026-04-11T10:11:56.845Z"
+    }
+  ],
+  "media": [],
+  "subscriptionRequests": [
+    {
+      "resourceId": "seed-magazine-1",
+      "name": "Demo Subscriber",
+      "resourceTitle": "The Future of Urban Living",
+      "phone": "9999999999",
+      "accessType": "PHYSICAL",
+      "resourceType": "MAGAZINE",
+      "email": "subscriber@example.com",
+      "status": "APPROVED",
+      "id": "subscriber_0715d47c-4dc7-4eab-87ab-75777eb51cda",
+      "createdAt": "2026-04-11T10:29:48.144Z",
+      "updatedAt": "2026-04-11T10:29:48.159Z",
+      "reviewedBy": "user_acd0acd1-6f0a-4d7b-9c13-a76a49df390c",
+      "reviewedAt": "2026-04-11T10:29:48.159Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "audit_d8ee3649-21c7-4d53-ad04-0a3378742006",
+      "actorId": "user_8ff6a0ff-a311-4f1c-bfaa-65b9925a0c24",
+      "actorEmail": "superadmin@cms.com",
+      "actorRole": "SUPER_ADMIN",
+      "action": "USER_DEACTIVATED",
+      "targetType": "user",
+      "targetId": "user_285438b8-9625-471e-9555-9c5d76f53b36",
+      "createdAt": "2026-04-11T10:29:48.397Z"
+    },
+    {
+      "id": "audit_3c958931-b197-41d4-a5b1-db3c55590d60",
+      "actorId": "user_8ff6a0ff-a311-4f1c-bfaa-65b9925a0c24",
+      "actorEmail": "superadmin@cms.com",
+      "actorRole": "SUPER_ADMIN",
+      "action": "USER_CREATED",
+      "targetType": "user",
+      "targetId": "user_285438b8-9625-471e-9555-9c5d76f53b36",
+      "details": {
+        "email": "editor2@cms.com",
+        "role": "EDITOR"
+      },
+      "createdAt": "2026-04-11T10:29:48.368Z"
+    },
+    {
+      "id": "audit_3f04b918-9ee6-44cf-961e-0f465710e200",
+      "actorId": "user_acd0acd1-6f0a-4d7b-9c13-a76a49df390c",
+      "actorEmail": "admin@cms.com",
+      "actorRole": "ADMIN",
+      "action": "ARTICLE_APPROVED",
+      "targetType": "article",
+      "targetId": "article_c4bf82ef-fa8f-4726-8ce4-482a06d9cb9f",
+      "createdAt": "2026-04-11T10:29:48.133Z"
+    },
+    {
+      "id": "audit_73d71029-8a63-4d87-966a-c46abe2117cd",
+      "actorId": "user_c2eb66a9-4207-4fc9-a9f2-b644072f0385",
+      "actorEmail": "editor@cms.com",
+      "actorRole": "EDITOR",
+      "action": "ARTICLE_SUBMITTED",
+      "targetType": "article",
+      "targetId": "article_c4bf82ef-fa8f-4726-8ce4-482a06d9cb9f",
+      "createdAt": "2026-04-11T10:29:48.110Z"
+    }
+  ]
+}

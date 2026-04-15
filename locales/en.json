@@ -3,43 +3,21 @@
     "lineOne": "Vartmaan",
     "lineTwo": "Sarokaar"
   },
-  "roles": {
-    "general": "General",
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "partners": "Partners",
+    "media": "Media",
+    "contact": "Contact",
+    "stories": "Stories",
     "magazine": "Magazine",
-    "admin": "Admin",
-    "superAdmin": "Super Admin"
-  },
-  "categories": {
-    "nationalNews": "National News",
-    "internationalNews": "International News",
-    "politics": "Politics",
-    "business": "Business",
-    "economy": "Economy",
-    "sports": "Sports",
-    "entertainment": "Entertainment",
-    "technology": "Technology",
-    "health": "Health",
-    "environment": "Environment",
-    "education": "Education"
-  },
-  "ads": {
-    "premiumWatches": {
-      "title": "Premium Watches",
-      "description": "Precision-crafted timepieces for leaders who appreciate timeless design and modern engineering."
-    },
-    "luxuryRealEstate": {
-      "title": "Luxury Real Estate",
-      "description": "Discover premium residences, curated investments, and concierge-led property experiences."
-    },
-    "cloudServices": {
-      "title": "Cloud Computing Services",
-      "description": "Scale faster with reliable infrastructure, security-first tooling, and expert migration support."
-    },
-    "fallbackDescription": "Premium partner content curated for the Vartmaan Sarokaar readership."
+    "subscribe": "Subscribe"
   },
   "common": {
     "home": "Home",
     "aboutUs": "About",
+    "currentConcerns": "Current Concerns",
+    "deepInsights": "Deep Insights",
     "articles": "Stories",
     "advertisers": "Partners",
     "mediaGallery": "Photos",
@@ -277,7 +255,7 @@
     "featuredCoverage": "Top Stories This Week",
     "emptyTitle": "No featured stories yet",
     "emptyBody": "Featured stories will appear here once they are published.",
-    "featuredTitle": "This Week’s Top Stories",
+    "featuredTitle": "This Week's Top Stories",
     "allArticles": "All Stories",
     "noArticlesTitle": "No stories published yet",
     "noArticlesBody": "Use the admin dashboard to publish your first story and it will appear here.",
@@ -286,8 +264,15 @@
     "flipbookFeature": "Easy to read flipbook",
     "visualEssays": "Beautiful photos and visuals",
     "exploreIssue": "Read This Issue",
-    "editorsChoice": "Editor’s Picks",
-    "noMagazine": "No magazine is available yet. Publish one from the dashboard to show it here."
+    "editorsChoice": "Editor's Picks",
+    "noMagazine": "No magazine is available yet. Publish one from the dashboard to show it here.",
+    "trendingCategories": "Trending Categories",
+    "articles": "Articles",
+    "categorySpotlight": "Category Spotlight",
+    "viewAll": "View All",
+    "noArticlesInCategory": "No articles yet",
+    "moreIn": "More in",
+    "sponsored": "Sponsored"
   },
   "about": {
     "badge": "About The Publication",
@@ -420,7 +405,15 @@
     "password": "Password",
     "staffPasswordHint": "Enter your staff email and password to access the admin panel.",
     "googleConfigHint": "Google sign-in will be available once we set it up.",
-    "staffAccountsHint": "Staff can sign in from the footer shortcuts."
+    "staffAccountsHint": "Staff can sign in from the footer shortcuts.",
+    "staffShortcuts": "Staff Login",
+    "superAdminLogin": "Super Admin Login",
+    "adminLogin": "Admin Login",
+    "editorLogin": "Editor Login",
+    "superAdmin": "Super Admin",
+    "admin": "Admin",
+    "googleSuccess": "Signed in with Google successfully.",
+    "googleError": "Unable to sign in with Google."
   },
   "flipbook": {
     "issueProgress": "Issue Progress",
@@ -502,5 +495,40 @@
     "settingsLineTwo": "Auth routes are available at /api/auth/signup, /api/auth/login, and /api/auth/me.",
     "settingsLineThree": "Protected uploads and media routes are available at /api/uploads and /api/media.",
     "masterPanel": "Master Panel"
+  },
+  "staffLogin": {
+    "title": "Vartmaan Sarokaar",
+    "subtitle": "Staff Admin Portal",
+    "loginTitle": "Staff Login",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "editor@vartmaansarokar.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "signInButton": "Sign In",
+    "signingIn": "Signing In...",
+    "loginSuccess": "Login successful! Redirecting...",
+    "emailError": "Please enter your email address",
+    "passwordError": "Please enter your password",
+    "invalidCredentials": "Invalid email or password",
+    "unexpectedError": "An unexpected error occurred. Please try again.",
+    "quickLogin": "Quick Login (Development)",
+    "superadmin": "Superadmin",
+    "admin": "Admin",
+    "editor": "Editor",
+    "roleInfo": "Access restricted to authorized staff only.",
+    "rolesLabel": "Roles: Superadmin | Admin | Editor"
+  },
+  "navbar": {
+    "currentConcerns": "Current Concerns, Deep Insights",
+    "hindi": "Hindi",
+    "english": "English",
+    "newsletter": "Newsletter",
+    "advertise": "Advertise",
+    "subscribe": "Subscribe",
+    "signIn": "Sign In",
+    "menu": "Menu",
+    "magazine": "Magazine",
+    "adminDashboard": "Admin Dashboard",
+    "signOut": "Sign Out"
   }
 }

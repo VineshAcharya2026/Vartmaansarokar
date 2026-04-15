@@ -6,12 +6,16 @@ import { fileURLToPath } from 'node:url';
 import {
   Ad,
   AppStatePayload,
+  AuditAction,
+  AuditLog,
+  ContentStatus,
+  DashboardStats,
   MagazineIssue,
   MediaFile,
   NewsPost,
-  Subscription,
   SubscriptionRequest,
   SubscriptionStatus,
+  SubscriptionType,
   User,
   UserRole
 } from '../types.js';
@@ -27,6 +31,7 @@ interface PersistedDatabase {
   ads: Ad[];
   media: MediaFile[];
   subscriptionRequests: SubscriptionRequest[];
+  auditLogs: AuditLog[];
 }
 
 interface CreateUserInput {
@@ -37,7 +42,12 @@ interface CreateUserInput {
   authProvider?: UserRecord['authProvider'];
   googleId?: string;
   avatarUrl?: string;
-  subscription?: Subscription;
+  isActive?: boolean;
+}
+
+interface ContentReviewInput {
+  reviewedBy: UserRecord;
+  reason?: string;
 }
 
 interface MediaFilters {
@@ -50,10 +60,18 @@ const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
-const SYSTEM_USERS = [
-  { name: 'Super Admin', email: 'superadmin@vartmaansarokar.com', role: UserRole.SUPER_ADMIN, password: process.env.STAFF_PASSWORD || 'PassworD@2026' },
-  { name: 'Admin', email: 'admin@vartmaansarokar.com', role: UserRole.ADMIN, password: process.env.STAFF_PASSWORD || 'PassworD@2026' },
-  { name: 'Editor', email: 'editor@vartmaansarokar.com', role: UserRole.MAGAZINE, password: process.env.STAFF_PASSWORD || 'PassworD@2026' }
+const DEFAULT_ACCOUNTS = [
+  // Legacy cms.com accounts (kept for backward compatibility)
+  { name: 'Editor', email: 'editor@cms.com', role: UserRole.EDITOR, password: 'Editor@1234' },
+  { name: 'Admin', email: 'admin@cms.com', role: UserRole.ADMIN, password: 'Admin@1234' },
+  { name: 'Super Admin', email: 'superadmin@cms.com', role: UserRole.SUPER_ADMIN, password: 'SuperAdmin@1234' },
+  // New vartmaan.in domain accounts required by the task
+  { name: 'Admin', email: 'admin@vartmaan.in', role: UserRole.ADMIN, password: 'PassworD@2026' },
+  { name: 'Editor', email: 'editor@vartmaan.in', role: UserRole.EDITOR, password: 'PassworD@2026' },
+  // Primary staff accounts (vartmaansarokar.com)
+  { name: 'Super Admin', email: 'superadmin@vartmaansarokar.com', role: UserRole.SUPER_ADMIN, password: 'PassworD@2026' },
+  { name: 'Admin', email: 'admin@vartmaansarokar.com', role: UserRole.ADMIN, password: 'PassworD@2026' },
+  { name: 'Editor', email: 'editor@vartmaansarokar.com', role: UserRole.EDITOR, password: 'PassworD@2026' }
 ] as const;
 
 const INITIAL_NEWS: NewsPost[] = [
@@ -62,26 +80,13 @@ const INITIAL_NEWS: NewsPost[] = [
     title: 'Government Announces New Infrastructure Policy',
     category: 'National News',
     excerpt: 'The central government has unveiled a large-scale infrastructure plan spanning rail, roads, and logistics.',
-    content:
-      'A long-term infrastructure package has been announced with emphasis on modernization, state coordination, and public investment. Analysts expect this to influence regional development, freight movement, and job creation over the coming quarters.',
+    content: 'A long-term infrastructure package has been announced with emphasis on modernization, state coordination, and public investment.',
     image: 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=500&fit=crop',
-    author: 'Priya Sharma',
-    date: 'Oct 24, 2023',
+    author: 'Editorial Desk',
+    date: '2026-04-01',
     featured: true,
-    requiresSubscription: false
-  },
-  {
-    id: 'seed-article-2',
-    title: 'Global Tech Giants Pivot to Sustainable AI',
-    category: 'Technology',
-    excerpt: 'Major technology companies are investing in energy-efficient AI infrastructure and greener data centers.',
-    content:
-      'Artificial intelligence adoption continues to accelerate, but the next phase of competition is increasingly focused on efficient compute, power optimization, and sustainable data center design.',
-    image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=500&fit=crop',
-    author: 'Ravi Kumar',
-    date: 'Oct 23, 2023',
-    featured: true,
-    requiresSubscription: true
+    requiresSubscription: false,
+    status: 'APPROVED'
   }
 ];
 
@@ -89,20 +94,19 @@ const INITIAL_MAGAZINES: MagazineIssue[] = [
   {
     id: 'seed-magazine-1',
     title: 'The Future of Urban Living',
-    issueNumber: 'October 2023',
+    issueNumber: 'April 2026',
     coverImage: 'https://images.unsplash.com/photo-1504711434969-e33886168d8c?w=400&h=600&fit=crop',
     pages: [
       'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=1200&fit=crop',
-      'https://images.unsplash.com/photo-1523995462485-3d171b5c8fa9?w=800&h=1200&fit=crop',
-      'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=1200&fit=crop',
-      'https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?w=800&h=1200&fit=crop'
+      'https://images.unsplash.com/photo-1523995462485-3d171b5c8fa9?w=800&h=1200&fit=crop'
     ],
-    date: '2023-10-01',
+    date: '2026-04-01',
     priceDigital: 0,
     pricePhysical: 499,
     isFree: true,
-    gatedPage: 3,
-    blurPaywall: true
+    gatedPage: 2,
+    blurPaywall: false,
+    status: 'APPROVED'
   }
 ];
 
@@ -115,24 +119,6 @@ const INITIAL_ADS: Ad[] = [
     position: 'SIDEBAR_TOP',
     description: 'Precision-made timepieces for a discerning audience.',
     ctaText: 'Explore Collection'
-  },
-  {
-    id: 'seed-ad-2',
-    title: 'Luxury Real Estate',
-    imageUrl: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=400&fit=crop',
-    link: 'https://example.com/homes',
-    position: 'SIDEBAR_MID',
-    description: 'Curated property showcases in premium locations.',
-    ctaText: 'View Listings'
-  },
-  {
-    id: 'seed-ad-3',
-    title: 'Cloud Computing Services',
-    imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=400&fit=crop',
-    link: 'https://example.com/cloud',
-    position: 'SIDEBAR_BOTTOM',
-    description: 'Enterprise infrastructure for teams ready to scale.',
-    ctaText: 'Book Demo'
   }
 ];
 
@@ -157,86 +143,67 @@ function sanitizeUser(user: UserRecord): User {
   return safeUser;
 }
 
+function normalizeRole(role: unknown): UserRole {
+  const value = typeof role === 'string' ? role.toUpperCase() : '';
+  if (value === UserRole.ADMIN || value === UserRole.SUPER_ADMIN || value === UserRole.EDITOR || value === UserRole.SUBSCRIBER) {
+    return value;
+  }
+  if (value === 'MAGAZINE') return UserRole.EDITOR;
+  if (value === 'GENERAL') return UserRole.SUBSCRIBER;
+  return UserRole.SUBSCRIBER;
+}
+
+function normalizeContentStatus(status: unknown): ContentStatus {
+  const value = typeof status === 'string' ? status.toUpperCase() : '';
+  if (value === 'DRAFT' || value === 'IN_REVIEW' || value === 'APPROVED' || value === 'REJECTED' || value === 'PUBLISHED') {
+    return value;
+  }
+  return 'APPROVED';
+}
+
+function normalizeSubscriptionStatus(status: unknown): SubscriptionStatus {
+  const value = typeof status === 'string' ? status.toUpperCase() : '';
+  if (value === 'ACTIVE' || value === 'EXPIRED' || value === 'PENDING' || value === 'APPROVED' || value === 'REJECTED') {
+    return value;
+  }
+  return 'PENDING';
+}
+
 function sortByNewest<T extends { createdAt?: string }>(items: T[]) {
-  return [...items].sort((left, right) => {
-    const leftValue = Date.parse(left.createdAt ?? '');
-    const rightValue = Date.parse(right.createdAt ?? '');
-    return rightValue - leftValue;
-  });
+  return [...items].sort((left, right) => Date.parse(right.createdAt ?? '') - Date.parse(left.createdAt ?? ''));
 }
 
 function sortByOldest<T extends { createdAt?: string }>(items: T[]) {
-  return [...items].sort((left, right) => {
-    const leftValue = Date.parse(left.createdAt ?? '');
-    const rightValue = Date.parse(right.createdAt ?? '');
-    return leftValue - rightValue;
-  });
-}
-
-function sortAds(items: Ad[]) {
-  const order: Record<Ad['position'], number> = {
-    SIDEBAR_TOP: 0,
-    SIDEBAR_MID: 1,
-    SIDEBAR_BOTTOM: 2,
-    HOMEPAGE_BANNER: 3
-  };
-
-  return [...items].sort((left, right) => order[left.position] - order[right.position]);
+  return [...items].sort((left, right) => Date.parse(left.createdAt ?? '') - Date.parse(right.createdAt ?? ''));
 }
 
 async function createDefaultDatabase(): Promise<PersistedDatabase> {
   const createdAtBase = Date.now();
-
   const users = await Promise.all(
-    SYSTEM_USERS.map(async (user, index) => {
-      const createdAt = new Date(createdAtBase - index * 60000).toISOString();
-      return withTimestamps<UserRecord>(
+    DEFAULT_ACCOUNTS.map(async (account, index) =>
+      withTimestamps<UserRecord>(
         {
           id: createId('user'),
-          email: user.email,
-          name: user.name,
-          role: user.role,
+          email: account.email,
+          name: account.name,
+          role: account.role,
           authProvider: 'PASSWORD',
-          passwordHash: await bcrypt.hash(user.password, 10)
+          isActive: true,
+          passwordHash: await bcrypt.hash(account.password, 10)
         },
-        createdAt
-      );
-    })
-  );
-
-  const articles = INITIAL_NEWS.map((article, index) =>
-    withTimestamps<NewsPost>(
-      {
-        ...article,
-        featured: article.featured ?? false,
-        requiresSubscription: article.requiresSubscription ?? false
-      },
-      new Date(createdAtBase - index * 3600000).toISOString()
+        new Date(createdAtBase - index * 60000).toISOString()
+      )
     )
-  );
-
-  const magazines = INITIAL_MAGAZINES.map((magazine, index) =>
-    withTimestamps<MagazineIssue>(
-      {
-        ...magazine,
-        isFree: magazine.isFree ?? false,
-        blurPaywall: magazine.blurPaywall ?? false
-      },
-      new Date(createdAtBase - index * 86400000).toISOString()
-    )
-  );
-
-  const ads = INITIAL_ADS.map((ad, index) =>
-    withTimestamps<Ad>({ ...ad }, new Date(createdAtBase - index * 300000).toISOString())
   );
 
   return {
     users,
-    articles,
-    magazines,
-    ads,
+    articles: INITIAL_NEWS.map((article) => withTimestamps(article)),
+    magazines: INITIAL_MAGAZINES.map((magazine) => withTimestamps(magazine)),
+    ads: INITIAL_ADS.map((ad) => withTimestamps(ad)),
     media: [],
-    subscriptionRequests: []
+    subscriptionRequests: [],
+    auditLogs: []
   };
 }
 
@@ -248,13 +215,13 @@ export class FileStore {
 
     try {
       const content = await fs.readFile(DB_FILE, 'utf8');
-      this.data = JSON.parse(content) as PersistedDatabase;
-    } catch (error) {
+      this.data = this.normalizeDatabase(JSON.parse(content) as Partial<PersistedDatabase>);
+    } catch {
       this.data = await createDefaultDatabase();
       await this.persist();
     }
 
-    await this.ensureSystemUsers();
+    await this.ensureDefaultAccounts();
   }
 
   getDatabaseFilePath() {
@@ -263,15 +230,18 @@ export class FileStore {
 
   getPublicAppState(): AppStatePayload {
     return {
-      news: this.listArticles(),
-      magazines: this.listMagazines(),
+      news: this.listArticles({ includeUnapproved: false }),
+      magazines: this.listMagazines({ includeUnapproved: false }),
       ads: this.listAds(),
       users: this.listUsers()
     };
   }
 
-  listUsers() {
-    return sortByOldest(this.requireData().users).map(sanitizeUser);
+  listUsers(includeInactive = true) {
+    const users = sortByOldest(this.requireData().users)
+      .filter((user) => includeInactive || user.isActive !== false)
+      .map(sanitizeUser);
+    return users;
   }
 
   getUserById(id: string) {
@@ -296,8 +266,8 @@ export class FileStore {
       authProvider: input.authProvider ?? 'PASSWORD',
       googleId: input.googleId,
       avatarUrl: input.avatarUrl,
-      passwordHash: input.passwordHash,
-      subscription: input.subscription
+      isActive: input.isActive ?? true,
+      passwordHash: input.passwordHash
     });
 
     this.requireData().users.push(record);
@@ -308,21 +278,26 @@ export class FileStore {
   async updateUser(id: string, updates: Partial<Omit<UserRecord, 'id' | 'createdAt'>>) {
     const data = this.requireData();
     const index = data.users.findIndex((user) => user.id === id);
-    if (index === -1) {
-      return null;
-    }
+    if (index === -1) return null;
 
-    data.users[index] = {
-      ...data.users[index],
-      ...updates,
-      updatedAt: nowIso()
-    };
+    data.users[index] = { ...data.users[index], ...updates, updatedAt: nowIso() };
     await this.persist();
     return data.users[index];
   }
 
-  listArticles() {
-    return sortByNewest(this.requireData().articles);
+  listArticles(options: { includeUnapproved?: boolean; authorId?: string } = {}) {
+    const { includeUnapproved = true, authorId } = options;
+    return sortByNewest(
+      this.requireData().articles.filter((article) => {
+        if (!includeUnapproved && !['APPROVED', 'PUBLISHED'].includes(article.status ?? '')) return false;
+        if (authorId && article.submittedBy !== authorId) return false;
+        return true;
+      })
+    );
+  }
+
+  listArticleQueue() {
+    return this.listArticles().filter((article) => article.status === 'IN_REVIEW');
   }
 
   getArticleById(id: string) {
@@ -334,7 +309,8 @@ export class FileStore {
       ...input,
       id: input.id || createId('article'),
       featured: input.featured ?? false,
-      requiresSubscription: input.requiresSubscription ?? false
+      requiresSubscription: input.requiresSubscription ?? false,
+      status: input.status ?? 'DRAFT'
     });
     this.requireData().articles.push(article);
     await this.persist();
@@ -344,35 +320,47 @@ export class FileStore {
   async updateArticle(id: string, updates: Partial<NewsPost>) {
     const data = this.requireData();
     const index = data.articles.findIndex((article) => article.id === id);
-    if (index === -1) {
-      return null;
-    }
+    if (index === -1) return null;
 
-    data.articles[index] = {
-      ...data.articles[index],
-      ...updates,
-      featured: updates.featured ?? data.articles[index].featured,
-      requiresSubscription: updates.requiresSubscription ?? data.articles[index].requiresSubscription,
-      updatedAt: nowIso()
-    };
+    data.articles[index] = { ...data.articles[index], ...updates, updatedAt: nowIso() };
     await this.persist();
     return data.articles[index];
+  }
+
+  async reviewArticle(id: string, status: Extract<ContentStatus, 'APPROVED' | 'REJECTED'>, input: ContentReviewInput) {
+    return this.updateArticle(id, {
+      status,
+      approvedBy: status === 'APPROVED' ? input.reviewedBy.id : undefined,
+      approvedAt: status === 'APPROVED' ? nowIso() : undefined,
+      rejectedBy: status === 'REJECTED' ? input.reviewedBy.id : undefined,
+      rejectedAt: status === 'REJECTED' ? nowIso() : undefined,
+      rejectionReason: status === 'REJECTED' ? input.reason ?? 'Rejected by reviewer' : undefined
+    });
   }
 
   async deleteArticle(id: string) {
     const data = this.requireData();
     const index = data.articles.findIndex((article) => article.id === id);
-    if (index === -1) {
-      return null;
-    }
+    if (index === -1) return null;
 
     const [deleted] = data.articles.splice(index, 1);
     await this.persist();
     return deleted;
   }
 
-  listMagazines() {
-    return sortByNewest(this.requireData().magazines);
+  listMagazines(options: { includeUnapproved?: boolean; authorId?: string } = {}) {
+    const { includeUnapproved = true, authorId } = options;
+    return sortByNewest(
+      this.requireData().magazines.filter((magazine) => {
+        if (!includeUnapproved && !['APPROVED', 'PUBLISHED'].includes(magazine.status ?? '')) return false;
+        if (authorId && magazine.submittedBy !== authorId) return false;
+        return true;
+      })
+    );
+  }
+
+  listMagazineQueue() {
+    return this.listMagazines().filter((magazine) => magazine.status === 'IN_REVIEW');
   }
 
   getMagazineById(id: string) {
@@ -384,7 +372,8 @@ export class FileStore {
       ...input,
       id: input.id || createId('magazine'),
       isFree: input.isFree ?? false,
-      blurPaywall: input.blurPaywall ?? false
+      blurPaywall: input.blurPaywall ?? false,
+      status: input.status ?? 'DRAFT'
     });
     this.requireData().magazines.push(magazine);
     await this.persist();
@@ -394,25 +383,28 @@ export class FileStore {
   async updateMagazine(id: string, updates: Partial<MagazineIssue>) {
     const data = this.requireData();
     const index = data.magazines.findIndex((magazine) => magazine.id === id);
-    if (index === -1) {
-      return null;
-    }
+    if (index === -1) return null;
 
-    data.magazines[index] = {
-      ...data.magazines[index],
-      ...updates,
-      updatedAt: nowIso()
-    };
+    data.magazines[index] = { ...data.magazines[index], ...updates, updatedAt: nowIso() };
     await this.persist();
     return data.magazines[index];
+  }
+
+  async reviewMagazine(id: string, status: Extract<ContentStatus, 'APPROVED' | 'REJECTED'>, input: ContentReviewInput) {
+    return this.updateMagazine(id, {
+      status,
+      approvedBy: status === 'APPROVED' ? input.reviewedBy.id : undefined,
+      approvedAt: status === 'APPROVED' ? nowIso() : undefined,
+      rejectedBy: status === 'REJECTED' ? input.reviewedBy.id : undefined,
+      rejectedAt: status === 'REJECTED' ? nowIso() : undefined,
+      rejectionReason: status === 'REJECTED' ? input.reason ?? 'Rejected by reviewer' : undefined
+    });
   }
 
   async deleteMagazine(id: string) {
     const data = this.requireData();
     const index = data.magazines.findIndex((magazine) => magazine.id === id);
-    if (index === -1) {
-      return null;
-    }
+    if (index === -1) return null;
 
     const [deleted] = data.magazines.splice(index, 1);
     await this.persist();
@@ -420,18 +412,12 @@ export class FileStore {
   }
 
   listAds() {
-    return sortAds(this.requireData().ads);
+    return sortByOldest(this.requireData().ads);
   }
 
   async replaceAds(ads: Ad[]) {
     this.requireData().ads = ads.map((ad, index) =>
-      withTimestamps<Ad>(
-        {
-          ...ad,
-          id: ad.id || createId('ad')
-        },
-        new Date(Date.now() - index * 1000).toISOString()
-      )
+      withTimestamps<Ad>({ ...ad, id: ad.id || createId('ad') }, new Date(Date.now() - index * 1000).toISOString())
     );
     await this.persist();
     return this.listAds();
@@ -443,24 +429,15 @@ export class FileStore {
 
     return sortByNewest(
       this.requireData().media.filter((item) => {
-        if (kind && item.kind !== kind) {
-          return false;
-        }
-
-        if (normalizedSearch && !item.originalName.toLowerCase().includes(normalizedSearch)) {
-          return false;
-        }
-
+        if (kind && item.kind !== kind) return false;
+        if (normalizedSearch && !item.originalName.toLowerCase().includes(normalizedSearch)) return false;
         return true;
       })
     );
   }
 
   async createMedia(input: Omit<MediaFile, 'id' | 'createdAt' | 'updatedAt'>) {
-    const media = withTimestamps({
-      ...input,
-      id: createId('media')
-    });
+    const media = withTimestamps({ ...input, id: createId('media') });
     this.requireData().media.push(media);
     await this.persist();
     return media;
@@ -469,9 +446,7 @@ export class FileStore {
   async deleteMedia(id: string) {
     const data = this.requireData();
     const index = data.media.findIndex((item) => item.id === id);
-    if (index === -1) {
-      return null;
-    }
+    if (index === -1) return null;
 
     const [deleted] = data.media.splice(index, 1);
     await this.persist();
@@ -485,7 +460,7 @@ export class FileStore {
   async createSubscriptionRequest(input: Omit<SubscriptionRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'> & { status?: SubscriptionStatus }) {
     const request = withTimestamps<SubscriptionRequest>({
       ...input,
-      id: createId('subscription'),
+      id: createId('subscriber'),
       status: input.status ?? 'PENDING'
     });
     this.requireData().subscriptionRequests.push(request);
@@ -493,80 +468,30 @@ export class FileStore {
     return request;
   }
 
-  async updateSubscriptionRequest(id: string, status: SubscriptionStatus) {
+  async updateSubscriptionRequest(id: string, status: SubscriptionStatus, reviewer?: UserRecord) {
     const data = this.requireData();
     const index = data.subscriptionRequests.findIndex((request) => request.id === id);
-    if (index === -1) {
-      return null;
-    }
+    if (index === -1) return null;
 
     data.subscriptionRequests[index] = {
       ...data.subscriptionRequests[index],
       status,
+      reviewedBy: reviewer?.id,
+      reviewedAt: reviewer ? nowIso() : data.subscriptionRequests[index].reviewedAt,
       updatedAt: nowIso()
     };
     await this.persist();
     return data.subscriptionRequests[index];
   }
 
-  async ensurePhysicalSubscriptionUser(payload: { email: string; name: string; status: SubscriptionStatus }) {
-    const normalizedEmail = payload.email.trim().toLowerCase();
-    const existing = this.findUserByEmail(normalizedEmail);
+  async deleteSubscriptionRequest(id: string) {
+    const data = this.requireData();
+    const index = data.subscriptionRequests.findIndex((request) => request.id === id);
+    if (index === -1) return null;
 
-    if (!existing) {
-      return this.createUser({
-        email: normalizedEmail,
-        name: payload.name,
-        role: UserRole.GENERAL,
-        passwordHash: await bcrypt.hash(crypto.randomUUID(), 10),
-        authProvider: 'PASSWORD',
-        subscription: {
-          type: 'PHYSICAL',
-          status: payload.status,
-          expiryDate: ''
-        }
-      });
-    }
-
-    return this.updateUser(existing.id, {
-      name: payload.name,
-      subscription: {
-        type: 'PHYSICAL',
-        status: payload.status,
-        expiryDate: ''
-      }
-    });
-  }
-
-  async activateDigitalSubscription(payload: { email: string; name: string }) {
-    const normalizedEmail = payload.email.trim().toLowerCase();
-    const expiryDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
-    const existing = this.findUserByEmail(normalizedEmail);
-
-    if (!existing) {
-      return this.createUser({
-        email: normalizedEmail,
-        name: payload.name,
-        role: UserRole.GENERAL,
-        passwordHash: await bcrypt.hash(crypto.randomUUID(), 10),
-        authProvider: 'PASSWORD',
-        subscription: {
-          type: 'DIGITAL',
-          status: 'ACTIVE',
-          expiryDate
-        }
-      });
-    }
-
-    return this.updateUser(existing.id, {
-      name: payload.name,
-      role: existing.role,
-      subscription: {
-        type: 'DIGITAL',
-        status: 'ACTIVE',
-        expiryDate
-      }
-    });
+    const [deleted] = data.subscriptionRequests.splice(index, 1);
+    await this.persist();
+    return deleted;
   }
 
   async upsertGoogleUser(payload: { googleId: string; email: string; name: string; avatarUrl?: string }) {
@@ -595,7 +520,7 @@ export class FileStore {
     return this.createUser({
       email: normalizedEmail,
       name: payload.name,
-      role: UserRole.GENERAL,
+      role: UserRole.EDITOR,
       passwordHash: await bcrypt.hash(crypto.randomUUID(), 10),
       authProvider: 'GOOGLE',
       googleId: payload.googleId,
@@ -603,46 +528,121 @@ export class FileStore {
     });
   }
 
-  async updatePhysicalSubscriptionStatus(email: string, status: SubscriptionStatus) {
-    const user = this.findUserByEmail(email);
-    if (!user) {
-      return null;
-    }
-
-    return this.updateUser(user.id, {
-      subscription: {
-        type: 'PHYSICAL',
-        status,
-        expiryDate: status === 'ACTIVE' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : ''
-      }
+  async recordAudit(input: {
+    actor: UserRecord;
+    action: AuditAction;
+    targetType: AuditLog['targetType'];
+    targetId: string;
+    details?: Record<string, unknown>;
+  }) {
+    this.requireData().auditLogs.unshift({
+      id: createId('audit'),
+      actorId: input.actor.id,
+      actorEmail: input.actor.email,
+      actorRole: input.actor.role,
+      action: input.action,
+      targetType: input.targetType,
+      targetId: input.targetId,
+      details: input.details,
+      createdAt: nowIso()
     });
+    await this.persist();
+  }
+
+  listAuditLogs() {
+    return sortByNewest(this.requireData().auditLogs);
+  }
+
+  getDashboardStats(user: UserRecord): DashboardStats {
+    const articles = user.role === UserRole.EDITOR ? this.listArticles({ authorId: user.id }) : this.listArticles();
+    const magazines = user.role === UserRole.EDITOR ? this.listMagazines({ authorId: user.id }) : this.listMagazines();
+    const allUsers = this.listUsers();
+
+    return {
+      totalArticles: articles.length,
+      pendingArticles: articles.filter((article) => article.status === 'IN_REVIEW').length,
+      totalMagazines: magazines.length,
+      pendingMagazines: magazines.filter((magazine) => magazine.status === 'IN_REVIEW').length,
+      pendingSubscribers: this.listSubscriptionRequests().filter((request) => request.status === 'PENDING').length,
+      activeUsers: allUsers.filter((userRecord) => userRecord.isActive !== false).length,
+      editors: allUsers.filter((userRecord) => userRecord.role === UserRole.EDITOR).length,
+      admins: allUsers.filter((userRecord) => [UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(userRecord.role)).length,
+      auditLogCount: user.role === UserRole.SUPER_ADMIN ? this.listAuditLogs().length : 0
+    };
+  }
+
+  async clearUsers() {
+    this.requireData().users = [];
+    await this.persist();
+  }
+
+  private normalizeDatabase(value: Partial<PersistedDatabase>): PersistedDatabase {
+    return {
+      users: (value.users ?? []).map((user) => ({
+        ...user,
+        role: normalizeRole(user.role),
+        isActive: user.isActive !== false,
+        createdAt: user.createdAt ?? nowIso(),
+        updatedAt: user.updatedAt ?? user.createdAt ?? nowIso()
+      })) as UserRecord[],
+      articles: (value.articles ?? []).map((article) => ({
+        ...article,
+        status: normalizeContentStatus(article.status),
+        createdAt: article.createdAt ?? nowIso(),
+        updatedAt: article.updatedAt ?? article.createdAt ?? nowIso()
+      })),
+      magazines: (value.magazines ?? []).map((magazine) => ({
+        ...magazine,
+        status: normalizeContentStatus(magazine.status),
+        createdAt: magazine.createdAt ?? nowIso(),
+        updatedAt: magazine.updatedAt ?? magazine.createdAt ?? nowIso()
+      })),
+      ads: (value.ads ?? []).map((ad) => ({
+        ...ad,
+        createdAt: ad.createdAt ?? nowIso(),
+        updatedAt: ad.updatedAt ?? ad.createdAt ?? nowIso()
+      })),
+      media: (value.media ?? []).map((item) => ({
+        ...item,
+        createdAt: item.createdAt ?? nowIso(),
+        updatedAt: item.updatedAt ?? item.createdAt ?? nowIso()
+      })),
+      subscriptionRequests: (value.subscriptionRequests ?? []).map((request) => ({
+        ...request,
+        status: normalizeSubscriptionStatus(request.status),
+        createdAt: request.createdAt ?? nowIso(),
+        updatedAt: request.updatedAt ?? request.createdAt ?? nowIso()
+      })),
+      auditLogs: (value.auditLogs ?? []).map((log) => ({
+        ...log,
+        actorRole: normalizeRole(log.actorRole),
+        createdAt: log.createdAt ?? nowIso()
+      }))
+    };
   }
 
   private requireData() {
-    if (!this.data) {
-      throw new Error('File store has not been initialized.');
-    }
-
+    if (!this.data) throw new Error('File store has not been initialized.');
     return this.data;
   }
 
-  private async ensureSystemUsers() {
+  private async ensureDefaultAccounts() {
     const data = this.requireData();
     let changed = false;
 
-    for (const [index, systemUser] of SYSTEM_USERS.entries()) {
-      const existing = data.users.find((user) => user.email.toLowerCase() === systemUser.email.toLowerCase());
-
+    for (const [index, account] of DEFAULT_ACCOUNTS.entries()) {
+      const existing = data.users.find((user) => user.email.toLowerCase() === account.email.toLowerCase());
       if (!existing) {
         data.users.push(
           withTimestamps<UserRecord>(
             {
               id: createId('user'),
-              email: systemUser.email,
-              name: systemUser.name,
-              role: systemUser.role,
+              email: account.email,
+              name: account.name,
+              role: account.role,
               authProvider: 'PASSWORD',
-              passwordHash: await bcrypt.hash(systemUser.password, 10)
+              isActive: true,
+              passwordHash: await bcrypt.hash(account.password, 10)
             },
             new Date(Date.now() - index * 60000).toISOString()
           )
@@ -651,32 +651,23 @@ export class FileStore {
         continue;
       }
 
-      const passwordMatches = await bcrypt.compare(systemUser.password, existing.passwordHash).catch(() => false);
-      if (
-        existing.name !== systemUser.name ||
-        existing.role !== systemUser.role ||
-        existing.authProvider !== 'PASSWORD' ||
-        !passwordMatches
-      ) {
-        existing.name = systemUser.name;
-        existing.role = systemUser.role;
+      const matches = await bcrypt.compare(account.password, existing.passwordHash).catch(() => false);
+      if (!matches || existing.role !== account.role || existing.name !== account.name || existing.isActive === false) {
+        existing.name = account.name;
+        existing.role = account.role;
+        existing.isActive = true;
         existing.authProvider = 'PASSWORD';
-        existing.passwordHash = passwordMatches ? existing.passwordHash : await bcrypt.hash(systemUser.password, 10);
+        existing.passwordHash = matches ? existing.passwordHash : await bcrypt.hash(account.password, 10);
         existing.updatedAt = nowIso();
         changed = true;
       }
     }
 
-    if (changed) {
-      await this.persist();
-    }
+    if (changed) await this.persist();
   }
 
   private async persist() {
-    if (!this.data) {
-      return;
-    }
-
+    if (!this.data) return;
     await fs.writeFile(DB_FILE, JSON.stringify(this.data, null, 2), 'utf8');
   }
 }

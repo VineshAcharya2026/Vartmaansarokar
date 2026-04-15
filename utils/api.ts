@@ -54,5 +54,12 @@ export async function parseApiResponse<T>(response: Response): Promise<T> {
 
 export async function fetchApi<T>(input: RequestInfo | URL, init?: RequestInit) {
   const response = await fetch(input, init);
+
+  if (response.status === 401 && typeof window !== 'undefined') {
+    window.localStorage.removeItem('vartmaan-auth-token');
+    window.location.href = '/staff-login';
+    throw new Error('Unauthorized. Redirecting to login.');
+  }
+
   return parseApiResponse<T>(response);
 }

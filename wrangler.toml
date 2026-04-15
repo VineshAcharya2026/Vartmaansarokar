@@ -5,37 +5,21 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 NODE_ENV = "production"
-
-# File Upload
 MAX_UPLOAD_SIZE_BYTES = "15728640"
-
-# OpenAI Model (safe to expose)
 OPENAI_MODEL = "gpt-4o-mini"
+ALLOWED_ORIGINS = "https://main.vartmaan-sarokar-pages.pages.dev,https://vartmaan-sarokaar-pages.pages.dev,https://vartmaan-sarokaar.pages.dev,https://vartmaan-sarokaar-api.vineshjm.workers.dev"
 
-# CORS - Update with your actual domain after deployment
-ALLOWED_ORIGINS = "https://vineshacharya2026.github.io,https://vartmaan-sarokaar.pages.dev"
-
-# D1 Database Binding
 [[d1_databases]]
 binding = "DB"
 database_name = "vartmaan-sarokar-db"
-# IMPORTANT: Replace with your actual D1 database ID from Cloudflare dashboard
-# Get it by running: wrangler d1 create vartmaan-sarokar-db
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "22be003e-a1b0-40d1-a356-c0d88155c36b"
 
-# R2 Bucket for Media Storage
 [[r2_buckets]]
 binding = "MEDIA_BUCKET"
 bucket_name = "vartmaan-media"
 
-# Secrets (set via wrangler secret put):
-# JWT_SECRET - Run: wrangler secret put JWT_SECRET
-# OPENAI_API_KEY - Run: wrangler secret put OPENAI_API_KEY  
-# GOOGLE_CLIENT_ID - Run: wrangler secret put GOOGLE_CLIENT_ID
-# STAFF_PASSWORD - Run: wrangler secret put STAFF_PASSWORD
+[ai]
+binding = "AI"
 
-[build]
-command = "npm run build"
-
-[build.upload]
-format = "modules"
+# Pages configuration
+pages_build_output_dir = "dist"

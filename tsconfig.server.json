@@ -6,8 +6,21 @@
     "moduleResolution": "NodeNext",
     "outDir": "./dist-server",
     "rootDir": ".",
-    "types": ["node"],
+    "types": ["node", "./worker-configuration.d.ts"],
+    "strict": true,
     "noEmit": false
   },
-  "include": ["server/**/*.ts", "types.ts"]
+  "include": [
+    "server/index.new.ts",
+    "server/store.ts",
+    "server/controllers/**/*.ts",
+    "server/middlewares/**/*.ts",
+    "server/routes/**/*.ts",
+    "server/services/**/*.ts",
+    "server/utils/**/*.ts",
+    "scripts/**/*.ts",
+    "types.ts",
+    "worker-configuration.d.ts"
+  ],
+  "exclude": ["server/index.ts", "server/workers-entry.ts", "server/oauth-worker.ts", "server/d1-store.ts", "server/jwt-crypto.ts"]
 }

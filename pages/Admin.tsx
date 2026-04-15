@@ -1,584 +1,889 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Navigate } from 'react-router-dom';
-import styled from 'styled-components';
-import {
-  LayoutDashboard, FileText, Book, Image as ImageIcon, Settings, Users,
-  Trash2, FileUp, Lock, Globe, Save, FolderOpen
+import { 
+  LayoutDashboard, 
+  Book, 
+  FileText, 
+  Settings, 
+  Plus, 
+  Trash2, 
+  Check, 
+  X, 
+  Clock, 
+  ChevronRight, 
+  FolderOpen, 
+  Users,
+  ImageIcon,
+  Eye,
+  ExternalLink,
+  Edit2,
+  Megaphone,
+  Layout,
+  Upload,
+  Copy,
+  AlertCircle,
+  RefreshCw,
+  EyeOff,
+  ArrowLeft,
+  ShieldCheck
 } from 'lucide-react';
 import { useApp } from '../AppContext';
-import { MagazineIssue, NewsPost, UserRole } from '../types';
-import { NEWS_CATEGORIES } from '../constants';
-import { API_BASE, getAuthHeaders, resolveAssetUrl } from '../utils/app';
-import { translateCategory, translateRole } from '../utils/i18n';
-import MediaManager, { AdminMediaItem } from '../components/admin/MediaManager';
+import { UserRole, ContentStatus, NewsItem, MagazineItem, AdItem, MediaItem } from '../types';
+import { formatCurrencyINR, resolveAssetUrl } from '../utils/app';
+import { translateRole } from '../utils/i18n';
+import toast from 'react-hot-toast';
+import styled from 'styled-components';
+import api from '../lib/api';
 
-const Admin: React.FC = () => {
-  const {
-    news,
-    magazines,
-    ads,
-    users,
-    currentUser,
-    addNews,
-    updateNews,
-    deleteNews,
-    addMagazine,
-    updateMagazine,
-    deleteMagazine,
-    updateUserRole,
-    updateAds
-  } = useApp();
-  const { t } = useTranslation();
-
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'news' | 'magazines' | 'media' | 'ads' | 'users' | 'settings'>('dashboard');
-  const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
-  const [isSavingAds, setIsSavingAds] = useState(false);
-  const magazinePdfInputRef = useRef<HTMLInputElement>(null);
-
-  const [newsForm, setNewsForm] = useState<Partial<NewsPost>>({
-    title: '',
-    category: NEWS_CATEGORIES[0],
-    excerpt: '',
-    content: '',
-    image: '',
-    author: '',
-    featured: false,
-    requiresSubscription: false
-  });
-
-  const [newIssue, setNewIssue] = useState<Partial<MagazineIssue>>({
-    title: '',
-    issueNumber: '',
-    coverImage: '',
-    pdfUrl: '',
-    pages: [],
-    priceDigital: 0,
-    pricePhysical: 499,
-    gatedPage: 2,
-    isFree: false,
-    blurPaywall: false
-  });
-
-  const [editableAds, setEditableAds] = useState(ads);
-
-  React.useEffect(() => {
-    setEditableAds(ads);
-  }, [ads]);
-
-  if (!currentUser || ![UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.MAGAZINE].includes(currentUser.role)) {
-    return <Navigate to="/" replace />;
+const StyledAdminNav = styled.aside`
+  .radio-inputs-vertical {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    background-color: transparent;
+    width: 100%;
+    user-select: none;
   }
 
-  const isMaster = currentUser.role === UserRole.SUPER_ADMIN;
+  .radio-inputs-vertical .radio-vertical {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
 
-  const stats = useMemo(() => ([
-    { label: t('admin.activeIssues'), value: magazines.length, icon: Book },
-    { label: t('admin.newsArticles'), value: news.length, icon: FileText },
-    { label: t('admin.subscribers'), value: users.length, icon: Users },
-    { label: t('admin.activeAds'), value: ads.length, icon: ImageIcon }
-  ]), [ads.length, magazines.length, news.length, t, users.length]);
+  .radio-inputs-vertical .radio-vertical input {
+    display: none;
+  }
 
-  const resetNewsForm = () => {
-    setEditingNewsId(null);
-    setNewsForm({
-      title: '',
-      category: NEWS_CATEGORIES[0],
-      excerpt: '',
-      content: '',
-      image: '',
-      author: '',
-      featured: false,
-      requiresSubscription: false
-    });
-  };
+  .radio-inputs-vertical .radio-vertical .name {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    width: 100%;
+    padding: 12px 16px;
+    color: #94a3b8;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 600;
+  }
 
-  const handleStoryImageSelected = (item: AdminMediaItem) => {
-    if (item.kind !== 'image') return;
-    setNewsForm((prev) => ({ ...prev, image: item.url }));
-  };
+  .radio-inputs-vertical .radio-vertical input:checked + .name {
+    background-color: #1e293b;
+    color: #ffffff;
+    border-radius: 12px;
+  }
+`;
 
-  const handleMagazineCoverSelected = (item: AdminMediaItem) => {
-    if (item.kind !== 'image') return;
-    setNewIssue((prev) => ({ ...prev, coverImage: item.url }));
-  };
+const Admin: React.FC = () => {
+  const navigate = useNavigate();
+  const { 
+    currentUser, magazines, news, ads, users,
+    heroData, siteSettings,
+    fetchNews, addNews, updateNews, deleteNews, approveNews, rejectNews, reworkNews,
+    fetchMagazines, addMagazine, deleteMagazine,
+    fetchUsers, approveUser, rejectUser, deleteUser,
+    fetchAdminAds, createAd, updateAd, deleteAd,
+    updateHero, updateSettings
+  } = useApp();
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isAdminAdsLoading, setIsAdminAdsLoading] = useState(false);
+  const [adminAds, setAdminAds] = useState<AdItem[]>([]);
+  
+  // New States for modules
+  const [tickerItems, setTickerItems] = useState<any[]>([]);
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleMagazinePageSelected = (item: AdminMediaItem) => {
-    if (item.kind !== 'image') return;
-    setNewIssue((prev) => ({ ...prev, pages: [...(prev.pages || []), item.url] }));
-  };
+  const isMaster = currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPER_ADMIN;
 
-  const handleMagazinePdfSelected = (item: AdminMediaItem) => {
-    if (item.kind !== 'pdf') return;
-    setNewIssue((prev) => ({ ...prev, pdfUrl: item.url }));
-  };
+  useEffect(() => {
+    if (activeTab === 'ads') loadAdminAds();
+    if (activeTab === 'ticker') loadTicker();
+    if (activeTab === 'media') loadMedia();
+  }, [activeTab]);
 
-  const handleMagazinePdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-
+  const loadAdminAds = async () => {
+    setIsAdminAdsLoading(true);
     try {
-      const resp = await fetch(API_BASE + '/api/uploads', {
-        method: 'POST',
-        headers: { ...getAuthHeaders() },
-        body: formData
-      });
-      const data = await resp.json();
-      if (!resp.ok) {
-        throw new Error(data?.error || 'Failed to upload PDF');
-      }
-
-      if (data.media?.url) {
-        setNewIssue((prev) => ({ ...prev, pdfUrl: data.media.url }));
-      }
-    } catch (error) {
-      console.error('Failed to upload magazine PDF', error);
+      const data = await fetchAdminAds();
+      setAdminAds(data);
+    } catch (e) {
+      console.error(e);
     } finally {
-      if (magazinePdfInputRef.current) {
-        magazinePdfInputRef.current.value = '';
+      setIsAdminAdsLoading(false);
+    }
+  };
+
+  const loadTicker = async () => {
+    try {
+      const { data } = await api.get('/ticker');
+      setTickerItems(data.items || []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const loadMedia = async () => {
+    try {
+      const { data } = await api.get('/media');
+      setMediaItems(data.media || []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Ad Form State
+  const [isAddingAd, setIsAddingAd] = useState(false);
+  const [editingAdId, setEditingAdId] = useState<string | null>(null);
+  const [adForm, setAdForm] = useState({ title: '', description: '', image: '', redirect_url: '', status: 'ACTIVE' });
+
+  const resetAdForm = () => {
+    setAdForm({ title: '', description: '', image: '', redirect_url: '', status: 'ACTIVE' });
+    setIsAddingAd(false);
+    setEditingAdId(null);
+  };
+
+  const handleAdSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adForm.title) { toast.error('Ad title is required'); return; }
+    try {
+      if (editingAdId) {
+        await updateAd(editingAdId, adForm);
+      } else {
+        await createAd(adForm);
       }
+      resetAdForm();
+      loadAdminAds();
+    } catch (err) {
+      toast.error('Failed to save ad');
     }
   };
 
-  const submitNews = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const payload: NewsPost = {
-      id: editingNewsId ?? Date.now().toString(),
-      title: newsForm.title || 'Untitled Story',
-      category: newsForm.category || NEWS_CATEGORIES[0],
-      excerpt: newsForm.excerpt || '',
-      content: newsForm.content || '',
-      image: newsForm.image || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=500&fit=crop',
-      author: newsForm.author || currentUser.name,
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-      featured: Boolean(newsForm.featured),
-      requiresSubscription: Boolean(newsForm.requiresSubscription)
-    };
-
-    if (editingNewsId) {
-      await updateNews(editingNewsId, payload);
-    } else {
-      await addNews(payload);
-    }
-
-    resetNewsForm();
-  };
-
-  const handleUploadMagazine = () => {
-    const mag: MagazineIssue = {
-      id: 'm' + Date.now(),
-      title: newIssue.title || 'Untitled Issue',
-      issueNumber: newIssue.issueNumber || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      coverImage: newIssue.coverImage || 'https://images.unsplash.com/photo-1504711434969-e33886168d8c?w=400&h=600&fit=crop',
-      pages: newIssue.pages?.length
-        ? newIssue.pages
-        : Array.from({ length: 10 }, (_, index) => `https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=1200&fit=crop&q=${60 + index}`),
-      date: new Date().toISOString().split('T')[0],
-      priceDigital: newIssue.priceDigital || 0,
-      pricePhysical: newIssue.pricePhysical || 499,
-      isFree: Boolean(newIssue.isFree),
-      gatedPage: newIssue.gatedPage || 2,
-      blurPaywall: Boolean(newIssue.blurPaywall)
-    };
-
-    void addMagazine(mag);
-    setNewIssue({
-      title: '',
-      issueNumber: '',
-      coverImage: '',
-      pages: [],
-      priceDigital: 0,
-      pricePhysical: 499,
-      gatedPage: 2,
-      isFree: false,
-      blurPaywall: false
+  const handleEditAd = (ad: AdItem) => {
+    setAdForm({
+      title: ad.title || '',
+      description: ad.description || '',
+      image: ad.image || ad.imageUrl || '',
+      redirect_url: ad.redirect_url || ad.link || '',
+      status: ad.status || 'ACTIVE'
     });
+    setEditingAdId(ad.id);
+    setIsAddingAd(true);
   };
 
-  const saveAds = async () => {
-    setIsSavingAds(true);
-    await updateAds(editableAds);
-    setIsSavingAds(false);
+  const handleDeleteAd = async (id: string) => {
+    if (!confirm('Delete this ad?')) return;
+    await deleteAd(id);
+    loadAdminAds();
   };
 
   const renderDashboard = () => (
-    <div className="space-y-8">
-      <div className="bg-gradient-to-r from-[#001f3f] to-[#800000] p-8 rounded-3xl text-white shadow-xl">
-        <h1 className="text-3xl font-black serif mb-2">{t('admin.welcomeBack', { name: currentUser.name })}</h1>
-        <p className="text-blue-100">{t('admin.dashboardBody')}</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {stats.map((item) => {
-          const Icon = item.icon;
-          return (
-            <div key={item.label} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm min-w-0">
-              <div className="flex items-center justify-between mb-4">
-                <Icon className="text-[#800000]" size={24} />
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{item.label}</span>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Articles', count: news.length, color: 'blue', icon: FileText },
+          { label: 'Issues', count: magazines.length, color: 'red', icon: Book },
+          { label: 'Members', count: users.length, color: 'green', icon: Users },
+          { label: 'Live Ads', count: ads.length, color: 'amber', icon: ImageIcon },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100">
+            <div className="flex items-center gap-4">
+              <div className={`w-12 h-12 bg-${stat.color}-50 text-${stat.color === 'blue' ? '[#001f3f]' : stat.color === 'red' ? '[#800000]' : stat.color + '-600'} rounded-2xl flex items-center justify-center`}>
+                <stat.icon size={24} />
               </div>
-              <h3 className="text-3xl font-black text-[#001f3f] serif">{item.value}</h3>
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{stat.label}</p>
+                <p className="text-2xl font-black text-[#001f3f]">{stat.count}</p>
+              </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
+      </div>
+      
+      <div className="bg-[#001f3f] text-white p-10 rounded-[32px] shadow-2xl relative overflow-hidden">
+         <div className="relative z-10 max-w-xl">
+            <h2 className="text-3xl font-black serif mb-4 underline decoration-[#800000] decoration-4">Master Dashboard</h2>
+            <p className="text-white/70 leading-relaxed font-medium">Manage your digital publication's users, content, and revenue from one central interface. Ensure all subscription requests are reviewed promptly.</p>
+         </div>
+         <div className="absolute top-0 right-0 p-10 opacity-10">
+            <LayoutDashboard size={180} />
+         </div>
       </div>
     </div>
   );
 
   const renderNews = () => (
-    <div className="grid grid-cols-1 xl:grid-cols-[420px,minmax(0,1fr)] gap-8 items-start">
-      <form onSubmit={submitNews} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4 xl:sticky xl:top-6">
-        <div>
-          <h2 className="text-2xl font-black text-[#001f3f] serif">{editingNewsId ? t('admin.editStory') : t('admin.publishStory')}</h2>
-          <p className="text-sm text-gray-500 mt-1">{t('admin.newsFormBody')}</p>
-        </div>
-        <input value={newsForm.title || ''} onChange={(e) => setNewsForm({ ...newsForm, title: e.target.value })} placeholder={t('admin.storyTitle')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" required />
-        <select value={newsForm.category || NEWS_CATEGORIES[0]} onChange={(e) => setNewsForm({ ...newsForm, category: e.target.value })} className="w-full bg-gray-50 px-4 py-3 rounded-2xl">
-          {NEWS_CATEGORIES.map((category) => <option key={category} value={category}>{translateCategory(t, category)}</option>)}
-        </select>
-        <div className="space-y-3">
-          <div className="flex gap-3">
-            <input value={newsForm.image || ''} onChange={(e) => setNewsForm({ ...newsForm, image: e.target.value })} placeholder={t('admin.imageUrl')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
-            <button type="button" onClick={() => setActiveTab('media')} className="px-4 py-3 rounded-2xl bg-gray-100 text-[#001f3f] font-bold whitespace-nowrap">
-              Media
-            </button>
-          </div>
-          {newsForm.image && (
-            <img src={resolveAssetUrl(newsForm.image)} alt="Story preview" className="h-32 w-full object-cover rounded-2xl border border-gray-100" />
-          )}
-        </div>
-        <input value={newsForm.author || ''} onChange={(e) => setNewsForm({ ...newsForm, author: e.target.value })} placeholder={t('admin.authorName')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
-        <textarea value={newsForm.excerpt || ''} onChange={(e) => setNewsForm({ ...newsForm, excerpt: e.target.value })} placeholder={t('admin.shortExcerpt')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl min-h-[100px]" required />
-        <textarea value={newsForm.content || ''} onChange={(e) => setNewsForm({ ...newsForm, content: e.target.value })} placeholder={t('admin.fullArticleContent')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl min-h-[180px]" required />
-        <label className="flex items-center gap-3 text-sm font-bold text-[#001f3f]">
-          <input type="checkbox" checked={Boolean(newsForm.featured)} onChange={(e) => setNewsForm({ ...newsForm, featured: e.target.checked })} />
-          {t('admin.featureHomepage')}
-        </label>
-        <label className="flex items-center gap-3 text-sm font-bold text-[#001f3f]">
-          <input type="checkbox" checked={Boolean(newsForm.requiresSubscription)} onChange={(e) => setNewsForm({ ...newsForm, requiresSubscription: e.target.checked })} />
-          {t('admin.requireSubscription')}
-        </label>
-        <div className="flex gap-3">
-          <button type="submit" className="flex-1 bg-[#800000] text-white py-3 rounded-2xl font-bold hover:bg-red-800 transition-colors">
-            {editingNewsId ? t('admin.updateStory') : t('admin.publishStory')}
-          </button>
-          {editingNewsId && (
-            <button type="button" onClick={resetNewsForm} className="px-5 py-3 rounded-2xl font-bold bg-gray-100 text-[#001f3f]">{t('common.cancel')}</button>
-          )}
-        </div>
-      </form>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-black text-[#0f172a] serif">News Editor</h2>
+        <button 
+          onClick={() => navigate('/admin/news/new')} // Assuming routing exists
+          className="bg-[#800000] text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-red-900 transition-all shadow-lg"
+        >
+          <Plus size={20} /> Write Article
+        </button>
+      </div>
 
-      <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm min-w-0">
-        <h3 className="text-2xl font-black text-[#001f3f] serif mb-6">{t('admin.publishedStories')}</h3>
-        <div className="space-y-4">
-          {news.map((item) => (
-            <div key={item.id} className="border border-gray-100 rounded-3xl p-5 flex flex-col xl:flex-row gap-4 xl:items-center xl:justify-between min-w-0">
-              <div className="flex gap-4 items-start min-w-0">
-                <img src={resolveAssetUrl(item.image)} alt={item.title} className="w-24 h-24 object-cover rounded-2xl bg-gray-100 shrink-0" />
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-[#800000]">{translateCategory(t, item.category)}</span>
-                    {item.featured && <span className="text-[10px] uppercase tracking-widest font-bold text-green-600">{t('admin.featured')}</span>}
-                    {item.requiresSubscription && <span className="text-[10px] uppercase tracking-widest font-bold text-[#001f3f]">{t('admin.subscriber')}</span>}
+      <div className="bg-white rounded-[24px] shadow-xl border border-gray-100 overflow-hidden">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-100">
+              <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Title</th>
+              <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Category</th>
+              <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Status</th>
+              <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {news.map(item => (
+              <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                <td className="px-6 py-4">
+                  <div className="font-bold text-[#0f172a] text-sm truncate max-w-xs">{item.title}</div>
+                  <div className="text-[10px] text-gray-400 font-bold mt-1 uppercase tracking-widest">{item.author}</div>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest">{item.category}</span>
+                </td>
+                <td className="px-6 py-4">
+                  <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${
+                    item.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 
+                    item.status === 'PENDING_REVIEW' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {item.status}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    {isMaster && item.status === 'PENDING_REVIEW' && (
+                      <button onClick={() => approveNews(item.id)} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><Check size={18}/></button>
+                    )}
+                    <button 
+                      onClick={() => navigate(`/admin/news/edit/${item.id}`)}
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                      <Edit2 size={18}/>
+                    </button>
+                    <button onClick={() => deleteNews(item.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18}/></button>
                   </div>
-                  <h4 className="text-lg font-bold text-[#001f3f] truncate">{item.title}</h4>
-                  <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.excerpt}</p>
-                  <p className="text-xs text-gray-400 mt-2">{item.author} • {item.date}</p>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const [isAddingMag, setIsAddingMag] = useState(false);
+  const [magForm, setMagForm] = useState({
+    title: '',
+    issueNumber: '',
+    date: new Date().toISOString().split('T')[0],
+    coverImage: '',
+    pdfUrl: '',
+    gatedPage: 2,
+    price: 499,
+    blurPaywall: true
+  });
+
+  const handleMagSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await addMagazine(magForm);
+    setIsAddingMag(false);
+    setMagForm({ title: '', issueNumber: '', date: new Date().toISOString().split('T')[0], coverImage: '', pdfUrl: '', gatedPage: 2, price: 499, blurPaywall: true });
+  };
+
+  const renderMagazines = () => (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-black text-[#0f172a] serif">Magazines</h2>
+        <button 
+          onClick={() => setIsAddingMag(!isAddingMag)}
+          className="bg-[#001f3f] text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-900 transition-all shadow-lg"
+        >
+          {isAddingMag ? <ArrowLeft size={20}/> : <Plus size={20}/>}
+          {isAddingMag ? 'Back to Library' : 'Add New Issue'}
+        </button>
+      </div>
+
+      {isAddingMag ? (
+        <form onSubmit={handleMagSubmit} className="max-w-4xl bg-white p-8 rounded-[32px] shadow-xl border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Issue Title</label>
+                <input value={magForm.title} onChange={e => setMagForm({...magForm, title: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:border-[#800000] focus:ring-0 font-bold" placeholder="e.g. October 2024 Special" required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Issue #</label>
+                  <input value={magForm.issueNumber} onChange={e => setMagForm({...magForm, issueNumber: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0 font-bold" placeholder="e.g. VOL 42" required />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Publish Date</label>
+                  <input type="date" value={magForm.date} onChange={e => setMagForm({...magForm, date: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0 font-bold text-sm" required />
                 </div>
               </div>
-              <div className="flex gap-3 shrink-0">
-                <button onClick={() => { setEditingNewsId(item.id); setNewsForm(item); }} className="px-4 py-2 rounded-xl bg-gray-100 text-[#001f3f] font-bold">{t('common.edit')}</button>
-                <button onClick={() => void deleteNews(item.id)} className="px-4 py-2 rounded-xl bg-red-50 text-[#800000] font-bold">{t('common.delete')}</button>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Cover Image (URL or Media ID)</label>
+                <input value={magForm.coverImage} onChange={e => setMagForm({...magForm, coverImage: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0" placeholder="/media/id-name.jpg" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">PDF URL</label>
+                <input value={magForm.pdfUrl} onChange={e => setMagForm({...magForm, pdfUrl: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0" placeholder="/media/october.pdf" required />
+              </div>
+           </div>
+           
+           <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1 text-red-600">Gated Page #</label>
+                  <input type="number" value={magForm.gatedPage} onChange={e => setMagForm({...magForm, gatedPage: parseInt(e.target.value)})} className="w-full bg-red-50/50 p-4 rounded-xl border-transparent focus:ring-0 font-bold" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Print Price (₹)</label>
+                  <input type="number" value={magForm.price} onChange={e => setMagForm({...magForm, price: parseInt(e.target.value)})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0 font-bold" />
+                </div>
+              </div>
+              
+              <div className="p-4 bg-gray-50 rounded-2xl flex items-center justify-between">
+                <div>
+                   <h4 className="text-sm font-bold text-[#001f3f]">Blur Paywall</h4>
+                   <p className="text-[10px] text-gray-400 font-medium">Blurs gated pages instead of blocking</p>
+                </div>
+                <input type="checkbox" checked={magForm.blurPaywall} onChange={e => setMagForm({...magForm, blurPaywall: e.target.checked})} className="w-6 h-6 rounded text-[#800000] focus:ring-0" />
+              </div>
+
+              <div className="pt-6">
+                <button type="submit" className="w-full bg-[#800000] text-white py-4 rounded-2xl font-black shadow-xl hover:bg-red-900 transition-all">
+                  Create Magazine Issue
+                </button>
+              </div>
+           </div>
+        </form>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {magazines.map(mag => (
+            <div key={mag.id} className="bg-white rounded-[24px] border border-gray-100 p-5 shadow-sm group hover:shadow-xl transition-all">
+              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-4 bg-gray-50 shadow-inner">
+                <img src={resolveAssetUrl(mag.coverImage)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur shadow px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest text-[#800000]">
+                  #{mag.issueNumber}
+                </div>
+                {mag.gatedPage > 0 && (
+                  <div className="absolute bottom-4 left-4 bg-[#001f3f] text-white px-3 py-1 rounded-lg text-[10px] font-black flex items-center gap-1.5">
+                    <ShieldCheck size={12}/> GATED @ PAGE {mag.gatedPage}
+                  </div>
+                )}
+              </div>
+              <h3 className="font-bold text-[#0f172a] line-clamp-1">{mag.title}</h3>
+              <div className="flex justify-between items-center mt-4">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{mag.date}</div>
+                <div className="flex gap-1">
+                  <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"><Edit2 size={16}/></button>
+                  <button onClick={() => deleteMagazine(mag.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16}/></button>
+                </div>
               </div>
             </div>
           ))}
+          {magazines.length === 0 && (
+            <div className="col-span-full p-20 bg-gray-50 rounded-[32px] text-center">
+              <Book size={48} className="mx-auto text-gray-200 mb-4" />
+              <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No Issues In Library</p>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 
-  const renderMagazines = () => (
-    <div className="grid grid-cols-1 xl:grid-cols-[420px,minmax(0,1fr)] gap-8 items-start">
-      <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4 xl:sticky xl:top-6">
-        <div>
-          <h2 className="text-2xl font-black text-[#001f3f] serif">{t('admin.publishIssue')}</h2>
-          <p className="text-sm text-gray-500 mt-1">{t('admin.magazineFormBody')}</p>
-        </div>
-        <input type="file" ref={magazinePdfInputRef} accept="application/pdf" className="hidden" onChange={(e) => void handleMagazinePdfUpload(e)} />
-        <button onClick={() => magazinePdfInputRef.current?.click()} className="w-full bg-gray-100 text-[#001f3f] py-3 rounded-2xl font-bold flex items-center justify-center gap-3">
-          <FileUp size={18} /> {t('admin.uploadPdf')}
+  const renderTicker = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-black text-[#0f172a] serif">News Ticker</h2>
+        <button 
+          onClick={async () => {
+            const text = prompt('Ticker Message?');
+            if (text) {
+              await api.post('/ticker', { text });
+              loadTicker();
+            }
+          }}
+          className="bg-green-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-green-700 transition-all shadow-lg"
+        >
+          <Plus size={20} /> Add Ticker
         </button>
-        <input value={newIssue.title || ''} onChange={(e) => setNewIssue({ ...newIssue, title: e.target.value })} placeholder={t('admin.issueTitle')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
-        <input value={newIssue.issueNumber || ''} onChange={(e) => setNewIssue({ ...newIssue, issueNumber: e.target.value })} placeholder={t('admin.issueNumber')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
-        <div className="space-y-3">
-          <div className="flex gap-3">
-            <input value={newIssue.coverImage || ''} onChange={(e) => setNewIssue({ ...newIssue, coverImage: e.target.value })} placeholder={t('admin.coverImageUrl')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
-            <button type="button" onClick={() => setActiveTab('media')} className="px-4 py-3 rounded-2xl bg-gray-100 text-[#001f3f] font-bold whitespace-nowrap">
-              Media
-            </button>
-          </div>
-          {newIssue.coverImage && (
-            <img src={resolveAssetUrl(newIssue.coverImage)} alt="Cover preview" className="h-40 w-full object-cover rounded-2xl border border-gray-100" />
-          )}
-        </div>
-        <input value={newIssue.pdfUrl || ''} onChange={(e) => setNewIssue({ ...newIssue, pdfUrl: e.target.value })} placeholder="PDF asset URL" className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
-        <textarea value={(newIssue.pages || []).join('\n')} onChange={(e) => setNewIssue({ ...newIssue, pages: e.target.value.split('\n').map((item) => item.trim()).filter(Boolean) })} placeholder={t('admin.pagesHint')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl min-h-[140px]" />
-        {(newIssue.pages || []).length > 0 && (
-          <div className="grid grid-cols-3 gap-2">
-            {(newIssue.pages || []).slice(0, 6).map((page, index) => (
-              <img key={`${page}-${index}`} src={resolveAssetUrl(page)} alt={`Page ${index + 1}`} className="h-24 w-full object-cover rounded-xl border border-gray-100" />
-            ))}
-          </div>
-        )}
-        <div className="grid grid-cols-2 gap-3">
-          <input type="number" value={newIssue.priceDigital || 0} onChange={(e) => setNewIssue({ ...newIssue, priceDigital: Number(e.target.value) })} placeholder={t('admin.digitalPrice')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
-          <input type="number" value={newIssue.pricePhysical || 0} onChange={(e) => setNewIssue({ ...newIssue, pricePhysical: Number(e.target.value) })} placeholder={t('admin.physicalPrice')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <input type="number" value={newIssue.gatedPage || 2} onChange={(e) => setNewIssue({ ...newIssue, gatedPage: Number(e.target.value) })} placeholder={t('admin.gatedPage')} className="w-full bg-gray-50 px-4 py-3 rounded-2xl" />
-          <label className="flex items-center gap-3 bg-gray-50 px-4 py-3 rounded-2xl font-bold text-sm text-[#001f3f]">
-            <input type="checkbox" checked={Boolean(newIssue.isFree)} onChange={(e) => setNewIssue({ ...newIssue, isFree: e.target.checked })} />
-            {t('admin.freeIssue')}
-          </label>
-        </div>
-        <label className="flex items-center gap-3 bg-gray-50 px-4 py-3 rounded-2xl font-bold text-sm text-[#001f3f]">
-          <input type="checkbox" checked={Boolean(newIssue.blurPaywall)} onChange={(e) => setNewIssue({ ...newIssue, blurPaywall: e.target.checked })} />
-          {t('admin.enableBlurPaywall')}
-        </label>
-        <div className="rounded-2xl bg-[#001f3f]/5 px-4 py-4 text-sm text-gray-600">
-          {t('admin.magazineHelper')}
-        </div>
-        <button onClick={handleUploadMagazine} className="w-full bg-[#800000] text-white py-3 rounded-2xl font-bold hover:bg-red-800 transition-colors">{t('admin.publishIssue')}</button>
       </div>
 
-      <div className="space-y-6 min-w-0">
-        {magazines.map((magazine) => (
-          <div key={magazine.id} className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm flex flex-col xl:flex-row gap-8 min-w-0">
-            <div className="w-44 shrink-0 relative overflow-hidden rounded-3xl shadow-xl">
-              <img src={resolveAssetUrl(magazine.coverImage)} className="w-full h-64 object-cover" alt={magazine.title} />
-            </div>
-            <div className="flex-1 flex flex-col gap-5 min-w-0">
-              <div>
-                <h4 className="text-xl font-bold text-[#001f3f] serif leading-tight">{magazine.title}</h4>
-                <div className="flex items-center gap-3 mt-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  <Globe size={14} />
-                  <span>{magazine.pages.length} {t('admin.pages')}</span>
-                </div>
+      <div className="bg-white rounded-[24px] shadow-xl border border-gray-100 overflow-hidden">
+        <div className="divide-y divide-gray-50">
+          {tickerItems.map(item => (
+            <div key={item.id} className="p-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className={`w-3 h-3 rounded-full ${item.active ? 'bg-green-500' : 'bg-gray-300'}`} />
+                <span className="text-sm font-medium text-[#0f172a]">{item.text}</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gray-50 p-5 rounded-3xl border border-gray-100">
-                  <label className="flex items-center text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">
-                    <Lock size={12} className="mr-2" /> {t('admin.gatedPage')}
-                  </label>
-                  <input type="number" value={magazine.gatedPage || 2} onChange={(e) => void updateMagazine(magazine.id, { gatedPage: Number(e.target.value) })} className="w-full bg-white px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold text-[#800000]" />
-                </div>
-                <div className="bg-gray-50 p-5 rounded-3xl border border-gray-100">
-                  <label className="flex items-center text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">{t('admin.digitalAccess')}</label>
-                  <button onClick={() => void updateMagazine(magazine.id, { isFree: !magazine.isFree })} className={`w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${magazine.isFree ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                    {magazine.isFree ? t('common.public') : t('common.premium')}
-                  </button>
-                </div>
-                <div className="bg-gray-50 p-5 rounded-3xl border border-gray-100">
-                  <label className="flex items-center text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">{t('admin.blurPaywall')}</label>
-                  <button onClick={() => void updateMagazine(magazine.id, { blurPaywall: !magazine.blurPaywall })} className={`w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${magazine.blurPaywall ? 'bg-[#001f3f] text-white' : 'bg-white text-[#001f3f] border border-gray-200'}`}>
-                    {magazine.blurPaywall ? t('common.enabled') : t('common.disabled')}
-                  </button>
-                </div>
-              </div>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <p className="text-sm text-gray-500">
-                  {t('admin.previewUntil', { page: magazine.gatedPage || 2, price: magazine.pricePhysical })}
-                </p>
-                <button onClick={() => void deleteMagazine(magazine.id)} className="px-4 py-2 rounded-xl bg-red-50 text-[#800000] font-bold flex items-center gap-2 shrink-0">
-                  <Trash2 size={16} /> {t('common.delete')}
+              <div className="flex gap-2">
+                <button 
+                  onClick={async () => {
+                    await api.put(`/ticker/${item.id}`, { active: !item.active });
+                    loadTicker();
+                  }}
+                  className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg"
+                >
+                  {item.active ? <Eye size={18}/> : <EyeOff size={18}/>}
+                </button>
+                <button 
+                  onClick={async () => {
+                    await api.delete(`/ticker/${item.id}`);
+                    loadTicker();
+                  }}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                >
+                  <Trash2 size={18}/>
                 </button>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderAds = () => (
-    <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-black text-[#001f3f] serif">{t('admin.advertisingSlots')}</h2>
-          <p className="text-sm text-gray-500 mt-1">{t('admin.adsBody')}</p>
+          ))}
+          {tickerItems.length === 0 && (
+            <div className="p-10 text-center text-gray-400 font-bold uppercase tracking-widest text-xs">No Ticker Items</div>
+          )}
         </div>
-        <button onClick={() => void saveAds()} className="bg-[#800000] text-white px-5 py-3 rounded-2xl font-bold flex items-center gap-2">
-          <Save size={16} /> {isSavingAds ? t('common.save') : t('admin.saveAds')}
-        </button>
-      </div>
-      <div className="space-y-4">
-        {editableAds.map((ad, index) => (
-          <div key={ad.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-5 rounded-3xl border border-gray-100">
-            <input value={ad.title} onChange={(e) => setEditableAds((prev) => prev.map((item, itemIndex) => itemIndex === index ? { ...item, title: e.target.value } : item))} placeholder={t('admin.adTitle')} className="bg-gray-50 px-4 py-3 rounded-2xl" />
-            <input value={ad.imageUrl} onChange={(e) => setEditableAds((prev) => prev.map((item, itemIndex) => itemIndex === index ? { ...item, imageUrl: e.target.value } : item))} placeholder={t('admin.imageUrl')} className="bg-gray-50 px-4 py-3 rounded-2xl" />
-            <input value={ad.link} onChange={(e) => setEditableAds((prev) => prev.map((item, itemIndex) => itemIndex === index ? { ...item, link: e.target.value } : item))} placeholder={t('admin.destinationUrl')} className="bg-gray-50 px-4 py-3 rounded-2xl" />
-            <select value={ad.position} onChange={(e) => setEditableAds((prev) => prev.map((item, itemIndex) => itemIndex === index ? { ...item, position: e.target.value as typeof ad.position } : item))} className="bg-gray-50 px-4 py-3 rounded-2xl">
-              <option value="SIDEBAR_TOP">{t('admin.sidebarTop')}</option>
-              <option value="SIDEBAR_MID">{t('admin.sidebarMid')}</option>
-              <option value="SIDEBAR_BOTTOM">{t('admin.sidebarBottom')}</option>
-              <option value="HOMEPAGE_BANNER">{t('admin.homepageBanner')}</option>
-            </select>
-          </div>
-        ))}
       </div>
     </div>
   );
 
   const renderMedia = () => (
-    <MediaManager
-      onSelectForNewsImage={(item) => {
-        handleStoryImageSelected(item);
-        setActiveTab('news');
-      }}
-      onSelectForMagazineCover={(item) => {
-        handleMagazineCoverSelected(item);
-        setActiveTab('magazines');
-      }}
-      onSelectForMagazinePage={(item) => {
-        handleMagazinePageSelected(item);
-        setActiveTab('magazines');
-      }}
-      onSelectForMagazinePdf={(item) => {
-        handleMagazinePdfSelected(item);
-        setActiveTab('magazines');
-      }}
-    />
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-black text-[#0f172a] serif">Media Library</h2>
+        <label className="bg-[#001f3f] text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-900 transition-all shadow-lg cursor-pointer">
+          <Upload size={20} /> {isUploading ? 'Uploading...' : 'Upload Media'}
+          <input 
+            type="file" 
+            className="hidden" 
+            onChange={async (e) => {
+              if (e.target.files?.[0]) {
+                const file = e.target.files[0];
+                const formData = new FormData();
+                formData.append('file', file);
+                setIsUploading(true);
+                try {
+                  await api.post('/media', formData);
+                  toast.success('Uploaded successfully');
+                  loadMedia();
+                } catch (err) {
+                  toast.error('Upload failed');
+                } finally {
+                  setIsUploading(false);
+                }
+              }
+            }}
+          />
+        </label>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {mediaItems.map(item => (
+          <div key={item.id} className="bg-white p-2 rounded-2xl border border-gray-100 shadow-sm group">
+            <div className="aspect-square bg-gray-50 rounded-xl overflow-hidden relative mb-2">
+               <img src={resolveAssetUrl(item.url)} className="w-full h-full object-cover" />
+               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <button onClick={() => {
+                    navigator.clipboard.writeText(resolveAssetUrl(item.url));
+                    toast.success('URL Copied');
+                  }} className="p-2 bg-white rounded-lg text-gray-900 group/btn"><Copy size={16}/></button>
+               </div>
+            </div>
+            <p className="text-[10px] font-bold text-gray-500 truncate px-1">{item.originalName}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 
-  const renderUsers = () => (
-    <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4">
-      <div>
-        <h2 className="text-2xl font-black text-[#001f3f] serif">{t('admin.userRoles')}</h2>
-        <p className="text-sm text-gray-500 mt-1">{t('admin.userRolesBody')}</p>
-      </div>
-      {users.map((user) => (
-        <div key={user.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 rounded-3xl border border-gray-100">
-          <div>
-            <h4 className="font-bold text-[#001f3f]">{user.name}</h4>
-            <p className="text-sm text-gray-500">{user.email}</p>
-          </div>
-          <select value={user.role} disabled={!isMaster} onChange={(e) => void updateUserRole(user.id, e.target.value as UserRole)} className="bg-gray-50 px-4 py-3 rounded-2xl min-w-[180px]">
-            <option value={UserRole.GENERAL}>{translateRole(t, UserRole.GENERAL)}</option>
-            <option value={UserRole.MAGAZINE}>{translateRole(t, UserRole.MAGAZINE)}</option>
-            <option value={UserRole.ADMIN}>{translateRole(t, UserRole.ADMIN)}</option>
-            <option value={UserRole.SUPER_ADMIN}>{translateRole(t, UserRole.SUPER_ADMIN)}</option>
-          </select>
+  const [heroForm, setHeroForm] = useState(heroData);
+  const [settingsForm, setSettingsForm] = useState(siteSettings);
+
+  useEffect(() => { setHeroForm(heroData); }, [heroData]);
+  useEffect(() => { setSettingsForm(siteSettings); }, [siteSettings]);
+
+  const renderHero = () => (
+    <div className="space-y-6 max-w-2xl">
+      <h2 className="text-2xl font-black text-[#0f172a] serif">Hero Section</h2>
+      <div className="bg-white p-8 rounded-[32px] shadow-xl border border-gray-100 space-y-6">
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase text-gray-400 tracking-widest px-1">Homepage Headline</label>
+          <input 
+            value={heroForm.headline} 
+            onChange={e => setHeroForm({...heroForm, headline: e.target.value})}
+            className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:border-[#800000] focus:ring-0 text-lg font-bold" 
+            placeholder="Headline" 
+          />
         </div>
-      ))}
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase text-gray-400 tracking-widest px-1">Subtitle / Bio</label>
+          <textarea 
+            value={heroForm.subtitle} 
+            onChange={e => setHeroForm({...heroForm, subtitle: e.target.value})}
+            className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:border-[#800000] focus:ring-0 resize-none h-32 font-medium" 
+            placeholder="Tell your story..." 
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase text-gray-400 tracking-widest px-1">Background Image URL</label>
+          <input 
+            value={heroForm.bg_image} 
+            onChange={e => setHeroForm({...heroForm, bg_image: e.target.value})}
+            className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:border-[#800000] focus:ring-0" 
+            placeholder="https://..." 
+          />
+        </div>
+        <button 
+          onClick={() => updateHero(heroForm)}
+          className="w-full bg-[#800000] text-white py-4 rounded-2xl font-black shadow-xl hover:bg-red-900 transition-all flex items-center justify-center gap-2"
+        >
+          <Check size={20} /> Update Hero Section
+        </button>
+      </div>
     </div>
   );
 
   const renderSettings = () => (
-    <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4">
-      <h2 className="text-2xl font-black text-[#001f3f] serif">{t('admin.publishingNotes')}</h2>
-      <p className="text-sm text-gray-600">{t('admin.settingsLineOne')}</p>
-      <p className="text-sm text-gray-600">{t('admin.settingsLineTwo')}</p>
-      <p className="text-sm text-gray-600">{t('admin.settingsLineThree')}</p>
+    <div className="space-y-6 max-w-3xl">
+      <h2 className="text-2xl font-black text-[#0f172a] serif">Site Settings</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 space-y-4">
+          <h3 className="font-black text-[#001f3f] flex items-center gap-2"><Layout size={18}/> Branding</h3>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase text-gray-400">Site Name</label>
+              <input 
+                value={settingsForm.site_name} 
+                onChange={e => setSettingsForm({...settingsForm, site_name: e.target.value})}
+                className="w-full bg-gray-50 px-4 py-2 rounded-lg border-transparent focus:ring-0 font-bold" 
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase text-gray-400">Organization Name</label>
+              <input 
+                value={settingsForm.org_name} 
+                onChange={e => setSettingsForm({...settingsForm, org_name: e.target.value})}
+                className="w-full bg-gray-50 px-4 py-2 rounded-lg border-transparent focus:ring-0 font-bold" 
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 space-y-4">
+          <h3 className="font-black text-[#001f3f] flex items-center gap-2"><Megaphone size={18}/> Social Links</h3>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase text-gray-400">Twitter (X)</label>
+              <input 
+                value={settingsForm.twitter_link} 
+                onChange={e => setSettingsForm({...settingsForm, twitter_link: e.target.value})}
+                className="w-full bg-gray-50 px-4 py-2 rounded-lg border-transparent focus:ring-0" 
+                placeholder="@username" 
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase text-gray-400">Instagram</label>
+              <input 
+                value={settingsForm.instagram_link} 
+                onChange={e => setSettingsForm({...settingsForm, instagram_link: e.target.value})}
+                className="w-full bg-gray-50 px-4 py-2 rounded-lg border-transparent focus:ring-0" 
+                placeholder="@username" 
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex justify-end">
+         <button 
+           onClick={() => updateSettings(settingsForm)}
+           className="bg-[#001f3f] text-white px-10 py-4 rounded-2xl font-black shadow-xl hover:bg-black transition-all"
+         >
+           Save All Site Settings
+         </button>
+      </div>
+
+      <div className="bg-red-50 p-6 rounded-3xl border border-red-100">
+         <div className="flex items-center gap-3 text-[#800000] mb-2 font-black italic">
+            <AlertCircle size={20} /> Danger Zone
+         </div>
+         <p className="text-xs text-red-600/70 mb-4">Actions in this section are permanent and affect the entire production environment.</p>
+         <button className="bg-red-600 text-white px-6 py-2.5 rounded-xl text-xs font-bold hover:bg-red-700 transition-colors">Wipe Site Cache</button>
+      </div>
     </div>
   );
 
+  const renderUsers = () => (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-black text-[#0f172a] serif">Subscription Approvals</h2>
+        <div className="text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-100 px-4 py-2 rounded-full">
+           {users.length} Total Users
+        </div>
+      </div>
+
+      <div className="bg-white rounded-[24px] border border-gray-100 shadow-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-[#f8fafc] border-b border-gray-100">
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Name</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Email</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Plan</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Proof</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {users.map((user) => (
+                <tr key={user.id} className="hover:bg-[#fafafa] transition-colors">
+                  <td className="px-6 py-5">
+                    <div className="font-bold text-[#0f172a] text-sm">{user.name || 'Anonymous Reader'}</div>
+                    <div className="text-[10px] text-gray-400 font-bold uppercase mt-1 tracking-widest">{user.phone || 'No Phone'}</div>
+                  </td>
+                  <td className="px-6 py-5 text-gray-500 text-sm">{user.email}</td>
+                  <td className="px-6 py-5">
+                    <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${user.subscription_plan === 'PRINT' ? 'bg-blue-100 text-[#001f3f]' : 'bg-green-100 text-green-700'}`}>
+                      {user.subscription_plan || 'Digital'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-5">
+                    <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex w-fit items-center gap-1 ${
+                      user.subscription_status === 'ACTIVE' ? 'bg-green-50 text-green-700' :
+                      user.subscription_status === 'REJECTED' ? 'bg-red-50 text-red-700' :
+                      'bg-amber-50 text-amber-600'
+                    }`}>
+                       {user.subscription_status === 'PENDING' && <Clock size={10} />}
+                       {user.subscription_status || 'PENDING'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-5">
+                    {user.payment_proof ? (
+                      <a 
+                        href={resolveAssetUrl(user.payment_proof)} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="flex items-center gap-2 text-[#800000] hover:text-red-900 font-bold text-xs"
+                      >
+                         <Eye size={14} />
+                         <span>View Proof</span>
+                      </a>
+                    ) : (
+                      <span className="text-[10px] text-gray-300 font-bold uppercase">No Receipt</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-5 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                       {user.subscription_status === 'PENDING' && (
+                         <>
+                           <button onClick={() => approveUser(user.id)} className="bg-green-600 text-white px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-green-700 shadow-md">Approve</button>
+                           <button onClick={() => rejectUser(user.id, 'Payment issue')} className="bg-gray-100 text-gray-500 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-gray-200">Reject</button>
+                         </>
+                       )}
+                       <button onClick={() => deleteUser(user.id)} className="p-2 text-gray-300 hover:text-red-600 transition-colors">
+                          <Trash2 size={16} />
+                       </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderAds = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-black text-[#0f172a] serif">Ads Management</h2>
+        <button 
+          onClick={() => { resetAdForm(); setIsAddingAd(!isAddingAd); }}
+          className="bg-amber-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-amber-700 transition-all shadow-lg"
+        >
+          {isAddingAd ? <ArrowLeft size={20}/> : <Plus size={20}/>}
+          {isAddingAd ? 'Back to Ads' : 'Create New Ad'}
+        </button>
+      </div>
+
+      {isAddingAd ? (
+        <form onSubmit={handleAdSubmit} className="max-w-3xl bg-white p-8 rounded-[32px] shadow-xl border border-gray-100 space-y-6">
+          <h3 className="text-lg font-black text-[#001f3f]">{editingAdId ? 'Edit Ad' : 'New Ad'}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Ad Title</label>
+              <input value={adForm.title} onChange={e => setAdForm({...adForm, title: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:border-[#800000] focus:ring-0 font-bold" placeholder="e.g. Summer Sale Banner" required />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Status</label>
+              <select value={adForm.status} onChange={e => setAdForm({...adForm, status: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0 font-bold">
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Description</label>
+            <textarea value={adForm.description} onChange={e => setAdForm({...adForm, description: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0 resize-none h-24" placeholder="Brief description of the ad..." />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Image URL</label>
+              <input value={adForm.image} onChange={e => setAdForm({...adForm, image: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0" placeholder="https://..." />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Redirect URL</label>
+              <input value={adForm.redirect_url} onChange={e => setAdForm({...adForm, redirect_url: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0" placeholder="https://..." />
+            </div>
+          </div>
+          {adForm.image && (
+            <div className="rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 aspect-[3/1] max-w-md">
+              <img src={adForm.image} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            </div>
+          )}
+          <button type="submit" className="w-full bg-[#800000] text-white py-4 rounded-2xl font-black shadow-xl hover:bg-red-900 transition-all">
+            {editingAdId ? 'Update Ad' : 'Create Ad'}
+          </button>
+        </form>
+      ) : (
+        <div className="bg-white rounded-[24px] shadow-xl border border-gray-100 overflow-hidden">
+          {isAdminAdsLoading ? (
+            <div className="p-10 text-center text-gray-400 font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2">
+              <RefreshCw size={16} className="animate-spin" /> Loading Ads...
+            </div>
+          ) : adminAds.length === 0 ? (
+            <div className="p-10 text-center text-gray-400 font-bold uppercase tracking-widest text-xs">No Ads Created Yet</div>
+          ) : (
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-100">
+                  <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Title</th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Status</th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">Redirect</th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {adminAds.map(ad => (
+                  <tr key={ad.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        {(ad.image || ad.imageUrl) && (
+                          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                            <img src={resolveAssetUrl(ad.image || ad.imageUrl || '')} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-bold text-[#0f172a] text-sm">{ad.title}</div>
+                          {ad.description && <div className="text-[10px] text-gray-400 font-medium mt-0.5 truncate max-w-xs">{ad.description}</div>}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${ad.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        {ad.status || 'ACTIVE'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {(ad.redirect_url || ad.link) ? (
+                        <a href={ad.redirect_url || ad.link} target="_blank" rel="noreferrer" className="text-blue-600 text-xs hover:underline flex items-center gap-1">
+                          <ExternalLink size={12} /> Link
+                        </a>
+                      ) : (
+                        <span className="text-[10px] text-gray-300 font-bold">No Link</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => handleEditAd(ad)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 size={16}/></button>
+                        <button onClick={() => handleDeleteAd(ad.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'dashboard': return renderDashboard();
+      case 'users': return renderUsers();
+      case 'ads': return renderAds();
+      case 'news': return renderNews();
+      case 'magazines': return renderMagazines();
+      case 'ticker': return renderTicker();
+      case 'media': return renderMedia();
+      case 'hero': return renderHero();
+      case 'settings': return renderSettings();
+      default: return renderDashboard();
+    }
+  };
+
   const navItems = [
-    { key: 'dashboard', label: t('common.overview'), icon: LayoutDashboard },
-    { key: 'magazines', label: t('common.digitalLibrary'), icon: Book },
-    { key: 'news', label: t('common.newsEditor'), icon: FileText },
-    { key: 'media', label: t('common.media'), icon: FolderOpen },
-    { key: 'ads', label: 'Ads', icon: ImageIcon },
-    { key: 'users', label: t('common.crm'), icon: Users },
-    { key: 'settings', label: t('common.settings'), icon: Settings }
-  ].filter((item) => isMaster || item.key !== 'users');
+    { key: 'dashboard', label: 'Overview', icon: LayoutDashboard },
+    { key: 'users', label: 'User Management', icon: Users },
+    { key: 'news', label: 'News Editor', icon: FileText },
+    { key: 'magazines', label: 'Magazines', icon: Book },
+    { key: 'hero', label: 'Hero Section', icon: Layout },
+    { key: 'ticker', label: 'News Ticker', icon: Megaphone },
+    { key: 'media', label: 'Media Library', icon: ImageIcon },
+    { key: 'ads', label: 'Ads Management', icon: Edit2 },
+    { key: 'settings', label: 'Site Settings', icon: Settings }
+  ];
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 -mx-4 -my-8 md:-my-16 overflow-hidden">
-      <StyledAdminNav className="w-full lg:w-72 bg-[#001f3f] text-white p-6 md:p-8 flex flex-col shrink-0">
-        <div className="flex items-center space-x-4 mb-12">
-          <div className="w-12 h-12 bg-[#800000] rounded-2xl flex items-center justify-center text-2xl font-black shadow-lg">VS</div>
-          <h2 className="font-black text-xl serif">{t('admin.masterPanel')}</h2>
+    <div className="flex flex-col lg:flex-row min-h-screen bg-[#f8fafc] overflow-hidden">
+      <StyledAdminNav className="hidden lg:flex w-[240px] bg-[#0f172a] text-white p-6 flex-col shrink-0">
+        <div className="mb-10 text-center">
+          <h1 className="text-xl font-black serif uppercase tracking-widest text-[#800000]">Vartmaan</h1>
+          <p className="text-[8px] font-bold text-gray-500 uppercase tracking-[0.3em]">Master Console</p>
         </div>
-        <div className="flex-1">
-          <div className="radio-inputs-vertical">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <label key={item.key} className="radio-vertical">
-                  <input
-                    type="radio"
-                    name="admin-nav"
-                    checked={activeTab === item.key}
-                    onChange={() => setActiveTab(item.key as typeof activeTab)}
-                  />
-                  <span className="name-vertical">
-                    <Icon size={18} />
-                    <span>{item.label}</span>
-                  </span>
-                </label>
-              );
-            })}
-          </div>
+        
+        <div className="radio-inputs-vertical flex-1 overflow-y-auto">
+          {navItems.map(item => (
+             <label key={item.key} className="radio-vertical">
+               <input 
+                 type="radio" 
+                 name="admin-tab" 
+                 checked={activeTab === item.key}
+                 onChange={() => setActiveTab(item.key)}
+               />
+               <span className="name">
+                 <item.icon size={18} />
+                 <span>{item.label}</span>
+               </span>
+             </label>
+          ))}
+        </div>
+
+        <div className="pt-6 border-t border-white/5">
+           <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1">Logged in as</p>
+           <p className="text-xs font-bold text-white truncate">{currentUser?.name}</p>
         </div>
       </StyledAdminNav>
 
-      <main className="flex-1 min-w-0 p-6 md:p-10 overflow-y-auto">
-        {activeTab === 'dashboard' && renderDashboard()}
-        {activeTab === 'news' && renderNews()}
-        {activeTab === 'magazines' && renderMagazines()}
-        {activeTab === 'media' && renderMedia()}
-        {activeTab === 'ads' && renderAds()}
-        {activeTab === 'users' && renderUsers()}
-        {activeTab === 'settings' && renderSettings()}
+      <main className="flex-1 overflow-y-auto p-6 md:p-12">
+         {renderContent()}
       </main>
     </div>
   );
 };
-
-const StyledAdminNav = styled.nav`
-  .radio-inputs-vertical {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .radio-inputs-vertical input {
-    display: none;
-  }
-
-  .radio-inputs-vertical .radio-vertical .name-vertical {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    cursor: pointer;
-    padding: 0.75rem 1rem;
-    border-radius: 0.75rem;
-    color: #e0e0e0;
-    font-weight: 600;
-    font-size: 14px;
-    transition: all 0.15s ease-in-out;
-    position: relative;
-  }
-
-  .radio-inputs-vertical input:checked + .name-vertical {
-    background-color: #800000;
-    color: #ffffff;
-    font-weight: 700;
-  }
-
-  .radio-inputs-vertical input + .name-vertical:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
-  }
-
-  .radio-inputs-vertical input:checked + .name-vertical:hover {
-    background-color: #800000;
-    color: #ffffff;
-  }
-`;
 
 export default Admin;

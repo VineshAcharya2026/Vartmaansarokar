@@ -46,26 +46,26 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onOpenAuthModal }) => {
             </div>
             <div>
               <p className="text-[10px] uppercase tracking-[0.28em] text-gray-400 font-black mb-3">
-                {t('auth.staffShortcuts', { defaultValue: 'Staff Login' })}
+                {t('auth.staffShortcuts')}
               </p>
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={() => openStaffLogin(t('auth.superAdminLogin', { defaultValue: 'Super Admin Login' }), STAFF_LOGIN_EMAILS.superAdmin)}
+                  onClick={() => openStaffLogin(t('auth.superAdminLogin'), STAFF_LOGIN_EMAILS.superAdmin)}
                   className="rounded-full border border-white/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white/85 transition-colors hover:bg-white/10"
                 >
-                  {t('auth.superAdmin', { defaultValue: 'Super Admin' })}
+                  {t('auth.superAdmin')}
                 </button>
                 <button
                   type="button"
-                  onClick={() => openStaffLogin(t('auth.adminLogin', { defaultValue: 'Admin Login' }), STAFF_LOGIN_EMAILS.admin)}
+                  onClick={() => openStaffLogin(t('auth.adminLogin'), STAFF_LOGIN_EMAILS.admin)}
                   className="rounded-full border border-white/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white/85 transition-colors hover:bg-white/10"
                 >
-                  {t('auth.admin', { defaultValue: 'Admin' })}
+                  {t('auth.admin')}
                 </button>
                 <button
                   type="button"
-                  onClick={() => openStaffLogin(t('auth.editorLogin', { defaultValue: 'Editor Login' }), STAFF_LOGIN_EMAILS.editor)}
+                  onClick={() => openStaffLogin(t('auth.editorLogin'), STAFF_LOGIN_EMAILS.editor)}
                   className="rounded-full border border-white/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white/85 transition-colors hover:bg-white/10"
                 >
                   {t('common.editorLogin')}
@@ -137,7 +137,10 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onOpenAuthModal }) => {
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row gap-3 md:items-center md:justify-between text-xs uppercase tracking-[0.25em] text-gray-400">
           <p>{t('footer.copyright')}</p>
-          <p>{t('footer.tagline')}</p>
+          <div className="flex gap-4">
+            <Link to="/staff-login" className="hover:text-white transition-colors">{t('footer.staffLogin', 'Staff Login')}</Link>
+            <span>{t('footer.tagline')}</span>
+          </div>
         </div>
       </div>
     </footer>

@@ -5,36 +5,25 @@ function normalizeBaseUrl(value: string | undefined) {
 
 const ENV = import.meta.env as Record<string, string | undefined>;
 
-// Production API URL (update after deploying Workers)
-const PRODUCTION_API_URL = 'https://vartmaan-sarokaar-api.your-subdomain.workers.dev';
-
 // Determine API base URL
 function getApiBaseUrl(): string {
-  // If explicitly set, use it
   if (ENV.VITE_API_BASE_URL || ENV.VITE_API_BASE) {
     return normalizeBaseUrl(ENV.VITE_API_BASE_URL ?? ENV.VITE_API_BASE);
   }
-  
-  // In production, use the deployed Workers URL
-  // Update this after deploying your Workers
-  if (ENV.NODE_ENV === 'production' || ENV.PROD) {
-    return PRODUCTION_API_URL;
-  }
-  
-  // Development fallback
-  return '';
+
+  return 'https://vartmaan-sarokaar-api.vineshjm.workers.dev';
 }
 
 export const API_BASE = getApiBaseUrl();
 export const APP_BASE = import.meta.env.BASE_URL || '/';
 export const SESSION_STORAGE_KEY = 'vartmaan-current-user';
-export const AUTH_TOKEN_KEY = 'vartmaan-auth-token';
+export const AUTH_TOKEN_KEY = 'token';
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
-export const STAFF_LOGIN_PASSWORD = import.meta.env.VITE_STAFF_PASSWORD ?? 'PassworD@2026';
+export const STAFF_LOGIN_PASSWORD = import.meta.env.VITE_STAFF_PASSWORD ?? '';
 export const STAFF_LOGIN_EMAILS = {
-  superAdmin: import.meta.env.VITE_SUPER_ADMIN_EMAIL ?? 'superadmin@vartmaansarokar.com',
-  admin: import.meta.env.VITE_ADMIN_EMAIL ?? 'admin@vartmaansarokar.com',
-  editor: import.meta.env.VITE_EDITOR_EMAIL ?? 'editor@vartmaansarokar.com'
+  superAdmin: import.meta.env.VITE_SUPER_ADMIN_EMAIL ?? 'superadmin@cms.com',
+  admin: import.meta.env.VITE_ADMIN_EMAIL ?? 'admin@cms.com',
+  editor: import.meta.env.VITE_EDITOR_EMAIL ?? 'editor@cms.com'
 } as const;
 
 export function buildCategorySlug(category: string) {
@@ -49,12 +38,13 @@ export function categoryFromSlug(slug: string) {
     .join(' ');
 }
 
-export function formatCurrencyINR(value: number) {
+export function formatCurrencyINR(value: number | undefined | null) {
+  const num = Number(value) || 0;
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
     maximumFractionDigits: 0
-  }).format(value);
+  }).format(num);
 }
 
 export function getAuthToken() {

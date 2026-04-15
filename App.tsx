@@ -1,23 +1,56 @@
 import React, { Suspense, useLayoutEffect, useRef, useState } from 'react';
-import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { useTranslation } from 'react-i18next';
 import { AppProvider, useApp } from './AppContext';
+import { TranslationProvider } from './context/TranslationContext';
 import Home from './pages/Home';
 import Sidebar from './components/Sidebar';
-import LanguageSwitcher from './components/LanguageSwitcher';
 import AuthAccessModal, { AuthAccessModalLaunchOptions, AuthModalView, AccessType } from './components/AuthAccessModal';
 import SiteNavbar from './components/SiteNavbar';
 import SiteFooter from './components/SiteFooter';
 import ErrorBoundary from './components/ErrorBoundary';
+import ToastProvider from './components/ToastProvider';
 
 const Magazine = React.lazy(() => import('./pages/Magazine'));
 const Admin = React.lazy(() => import('./pages/Admin'));
+const StaffLogin = React.lazy(() => import('./pages/StaffLogin'));
 const NewsDetail = React.lazy(() => import('./pages/NewsDetail'));
 const Category = React.lazy(() => import('./pages/Category'));
+const Verify = React.lazy(() => import('./pages/Verify'));
 const About = React.lazy(() => import('./pages/About'));
 const Contact = React.lazy(() => import('./pages/Contact'));
 const ChatBot = React.lazy(() => import('./components/ChatBot'));
+const Profile = React.lazy(() => import('./pages/Profile'));
+const Articles = React.lazy(() => import('./pages/Articles'));
+const Subscribe = React.lazy(() => import('./pages/Subscribe'));
+const ArticleEditor = React.lazy(() => import('./pages/ArticleEditor'));
+
+const AdsPage = React.lazy(() => import('./pages/AdsPage'));
+const AdDetail = React.lazy(() => import('./pages/AdDetail'));
+
+/**
+ * ProtectedRoute — redirects to /staff-login if the user is not authenticated
+ * or lacks a required role. Preserves the attempted path for post-login redirect.
+ */
+const STAFF_ROLES = ['ADMIN', 'SUPER_ADMIN', 'EDITOR'] as const;
+type StaffRole = typeof STAFF_ROLES[number];
+
+const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRoles?: StaffRole[] }> = ({ children, requiredRoles }) => {
+  const { currentUser } = useApp();
+  const location = useLocation();
+
+  if (!currentUser) {
+    return <Navigate to="/staff-login" state={{ from: location }} replace />;
+  }
+
+  if (requiredRoles && !requiredRoles.includes(currentUser.role as StaffRole)) {
+    // Authenticated but wrong role — send home
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 const NewsTicker: React.FC = () => {
   const { news } = useApp();
@@ -44,7 +77,7 @@ const NewsTicker: React.FC = () => {
   if (tickerItems.length === 0) return null;
 
   return (
-    <div className="sticky top-[72px] md:top-[88px] z-[120] bg-[#001f3f] text-white border-b border-white/10 shadow-lg">
+    <div className="sticky top-14 lg:top-[76px] z-[109] bg-[#1A1A2E] text-white border-b border-white/10 shadow-lg">
       <div className="max-w-[1600px] mx-auto flex items-center">
         <div className="shrink-0 bg-[#800000] px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.35em]">
           {t('ticker.newsflash')}
@@ -52,8 +85,8 @@ const NewsTicker: React.FC = () => {
         <div className="overflow-hidden py-2.5 flex-1">
           <div ref={trackRef} className="flex items-center whitespace-nowrap">
             {[...tickerItems, ...tickerItems].map((item, index) => (
-              <Link key={`${item.id}-${index}`} to={`/news/${item.id}`} className="inline-flex items-center px-6 text-sm text-white/85 hover:text-white transition-colors">
-                <span className="mr-3 text-[#f7c66b]">&bull;</span>
+              <Link key={`${item.id}-${index}`} to={`/news/${item.id}`} className="inline-flex items-center px-6 text-sm text-white/90 hover:text-white transition-colors">
+                <span className="mr-3 text-[#800000]">&bull;</span>
                 <span className="font-semibold">{item.title}</span>
               </Link>
             ))}
@@ -157,13 +190,22 @@ const AppContent: React.FC = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/chat" element={<ChatBot />} />
                 <Route path="/news/:id" element={<NewsDetail />} />
+                <Route path="/articles" element={<Articles />} />
                 <Route path="/category/:slug" element={<Category />} />
                 <Route path="/magazine" element={<Magazine />} />
+                <Route path="/subscribe" element={<Subscribe />} />
+                <Route path="/staff-login" element={<StaffLogin />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/admin/news/new" element={<ArticleEditor />} />
+                <Route path="/admin/news/edit/:id" element={<ArticleEditor />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/verify" element={<Verify />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route path="/advertisers" element={<div className="bg-white p-12 rounded-2xl shadow-xl text-center max-w-4xl mx-auto"><h1 className="text-4xl font-bold serif mb-6 text-[#001f3f]">{t('routes.advertisers.title')}</h1><p className="text-gray-600">{t('routes.advertisers.body')}</p></div>} />
                 <Route path="/gallery" element={<div className="bg-white p-8 rounded-xl shadow-xl text-center"><h1 className="text-3xl font-bold serif mb-4">{t('routes.gallery.title')}</h1><p>{t('routes.gallery.body')}</p></div>} />
+                <Route path="/ads" element={<AdsPage />} />
+                <Route path="/ads/:id" element={<AdDetail />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
@@ -173,18 +215,20 @@ const AppContent: React.FC = () => {
       </main>
       <SiteFooter onOpenAuthModal={openAuthModal} />
       <AuthAccessModal {...authModalState} onClose={closeAuthModal} />
-      <LanguageSwitcher />
     </div>
   );
 };
 
 const App: React.FC = () => (
   <ErrorBoundary>
-    <AppProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </AppProvider>
+    <TranslationProvider>
+      <AppProvider>
+        <Router>
+          <ToastProvider />
+          <AppContent />
+        </Router>
+      </AppProvider>
+    </TranslationProvider>
   </ErrorBoundary>
 );
 

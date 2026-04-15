@@ -43,8 +43,8 @@ const Contact: React.FC = () => {
     {
       key: 'general',
       icon: MessageSquare,
-      color: 'bg-blue-50 text-blue-700',
-      borderColor: 'border-blue-200'
+      color: 'bg-red-50 text-[#800000]',
+      borderColor: 'border-red-200'
     },
     {
       key: 'subscriptions',
@@ -67,7 +67,7 @@ const Contact: React.FC = () => {
     {
       key: 'technical',
       icon: Zap,
-      color: 'bg-red-50 text-red-700',
+      color: 'bg-red-50 text-[#800000]',
       borderColor: 'border-red-200'
     }
   ];
@@ -253,9 +253,9 @@ const Contact: React.FC = () => {
           </div>
 
           {/* Newsletter */}
-          <div className="rounded-2xl border border-blue-200 bg-blue-50/50 p-6 shadow-lg">
+          <div className="rounded-2xl border border-red-200 bg-red-50/50 p-6 shadow-lg">
             <div className="flex items-center gap-3 mb-4">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 text-blue-700">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-red-100 text-[#800000]">
                 <Bell size={24} />
               </div>
               <h3 className="text-xl font-bold text-[#001f3f]">
@@ -269,7 +269,7 @@ const Contact: React.FC = () => {
 
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              className="inline-flex items-center gap-2 text-[#800000] hover:text-[#600000] font-medium transition-colors"
             >
               {t('contact.social.newsletter.action')}
               <ArrowRight size={16} />

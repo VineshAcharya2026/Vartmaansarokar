@@ -63,7 +63,7 @@ const ChatBot: React.FC = () => {
         {messages.length === 0 && <div className="text-gray-400">{t('chat.emptyState')}</div>}
         {messages.map((message, index) => (
           <div key={index} className={`mb-3 ${message.from === 'user' ? 'text-right' : ''}`}>
-            <div className={`inline-block p-3 rounded-lg ${message.from === 'user' ? 'bg-blue-600 text-white' : message.from === 'bot' ? 'bg-white text-gray-900 border' : 'bg-yellow-50 text-gray-800'}`}>
+            <div className={`inline-block p-3 rounded-lg ${message.from === 'user' ? 'bg-[#800000] text-white' : message.from === 'bot' ? 'bg-white text-gray-900 border' : 'bg-yellow-50 text-gray-800'}`}>
               {message.text}
             </div>
           </div>

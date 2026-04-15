@@ -9,37 +9,54 @@ export interface AuthenticatedRequest extends Request {
   user?: UserRecord;
 }
 
-export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+const ROLE_RANK: Record<UserRole, number> = {
+  [UserRole.READER]: 0,
+  [UserRole.SUBSCRIBER]: 0,
+  [UserRole.EDITOR]: 1,
+  [UserRole.ADMIN]: 2,
+  [UserRole.SUPER_ADMIN]: 3
+};
+
+/**
+ * Extract a bearer token from:
+ *   1. Authorization: Bearer <token> header
+ *   2. auth_token httpOnly cookie (for browser-side flows)
+ */
+function extractToken(req: Request): string {
   const authorization = req.headers.authorization ?? '';
-  const token = authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
+  if (authorization.startsWith('Bearer ')) {
+    return authorization.slice(7).trim();
+  }
+  // Fallback: httpOnly cookie
+  const cookies = (req as any).cookies as Record<string, string> | undefined;
+  if (cookies?.auth_token) {
+    return cookies.auth_token;
+  }
+  return '';
+}
+
+/**
+ * requireAuth: verify JWT, attach user to req.user.
+ * Reads from Authorization header OR auth_token cookie.
+ */
+export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  const token = extractToken(req);
 
   if (!token) {
-    res.status(401).json({
-      success: false,
-      message: 'Authentication required.',
-      error: 'Missing bearer token'
-    });
+    res.status(401).json({ success: false, message: 'Authentication required.', error: 'Missing bearer token' });
     return;
   }
 
   try {
     const payload = jwt.verify(token, JWT_SECRET) as { userId?: string };
     if (!payload.userId) {
-      res.status(401).json({
-        success: false,
-        message: 'Invalid token.',
-        error: 'Missing user identifier'
-      });
+      res.status(401).json({ success: false, message: 'Invalid token.', error: 'Missing user identifier' });
       return;
     }
 
     const user = store.getUserById(payload.userId);
-    if (!user) {
-      res.status(401).json({
-        success: false,
-        message: 'Invalid token.',
-        error: 'User no longer exists'
-      });
+    if (!user || user.isActive === false) {
+      res.status(401).json({ success: false, message: 'Invalid token.', error: 'User not found or deactivated' });
       return;
     }
 
@@ -54,24 +71,59 @@ export const authenticate = (req: AuthenticatedRequest, res: Response, next: Nex
   }
 };
 
-export const authorize = (roles: UserRole[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-    const rank: Record<UserRole, number> = {
-      [UserRole.GENERAL]: 0,
-      [UserRole.MAGAZINE]: 1,
-      [UserRole.ADMIN]: 2,
-      [UserRole.SUPER_ADMIN]: 3
-    };
+/** Alias — consistent name used across controllers */
+export const requireAuth = authenticate;
 
-    const minimumRank = Math.min(...roles.map((role) => rank[role as UserRole]));
-    if (!req.user || rank[req.user.role as UserRole] < minimumRank) {
-      res.status(403).json({
-        success: false,
-        message: 'Insufficient permissions.'
-      });
+/**
+ * requireRole(...roles): user must have at least the minimum rank of the listed roles.
+ * SUPER_ADMIN always passes.
+ */
+export const requireRole = (...roles: UserRole[]) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Authentication required.' });
+      return;
+    }
+
+    if (req.user.role === UserRole.SUPER_ADMIN) {
+      next();
+      return;
+    }
+
+    const allowed = roles.some((role) => ROLE_RANK[req.user!.role] >= ROLE_RANK[role]);
+    if (!allowed) {
+      res.status(403).json({ success: false, message: 'Insufficient permissions.' });
       return;
     }
 
     next();
   };
 };
+
+/**
+ * requireAnyRole(...roles): user must have EXACTLY one of the listed roles.
+ * SUPER_ADMIN passes only when SUPER_ADMIN is in the list.
+ */
+export const requireAnyRole = (...roles: UserRole[]) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Authentication required.' });
+      return;
+    }
+
+    // SUPER_ADMIN bypasses all non-public role checks
+    if (req.user.role === UserRole.SUPER_ADMIN) {
+      next();
+      return;
+    }
+
+    if (!roles.includes(req.user.role)) {
+      res.status(403).json({ success: false, message: 'Insufficient permissions.' });
+      return;
+    }
+
+    next();
+  };
+};
+
+export const authorize = (roles: UserRole[]) => requireRole(...roles);

@@ -5,26 +5,43 @@ import {
   googleLogin,
   quickLogin,
   activateDigitalSubscription,
-  getCurrentUser
+  getCurrentUser,
+  refreshToken,
+  logout
 } from '../controllers/AuthController.js';
-import { validateAuth, validateSubscription } from '../middlewares/validation.js';
-import { authenticate, authorize } from '../middlewares/auth.js';
+import { authenticate } from '../middlewares/auth.js';
 import { authLimiter } from '../middlewares/security.js';
-import { UserRole } from '../../types.js';
 
 const router = Router();
 
-// Apply rate limiting to auth routes
+// Apply stricter rate-limiting to all auth endpoints
 router.use(authLimiter);
 
-// Public auth routes
-router.post('/signup', validateAuth, signup);
-router.post('/login', validateAuth, login);
-router.post('/google', googleLogin);
-router.post('/users/login', quickLogin);
-router.post('/subscriptions/digital', validateSubscription, activateDigitalSubscription);
+/** POST /api/auth/register  — create a new staff account */
+router.post('/register', signup);
 
-// Protected auth routes
+/** POST /api/auth/signup  — alias */
+router.post('/signup', signup);
+
+/** POST /api/auth/login  — validate email+password → JWT + httpOnly cookie */
+router.post('/login', login);
+
+/** POST /api/auth/logout  — clear httpOnly cookie */
+router.post('/logout', logout);
+
+/** GET  /api/auth/me  — verify JWT, return logged-in user */
 router.get('/me', authenticate, getCurrentUser);
+
+/** POST /api/auth/refresh  — reissue a fresh JWT */
+router.post('/refresh', authenticate, refreshToken);
+
+/** POST /api/auth/google  — Google OAuth login */
+router.post('/google', googleLogin);
+
+/** POST /api/auth/users/login  — quick passwordless reader login */
+router.post('/users/login', quickLogin);
+
+/** POST /api/auth/subscriptions/digital */
+router.post('/subscriptions/digital', activateDigitalSubscription);
 
 export default router;

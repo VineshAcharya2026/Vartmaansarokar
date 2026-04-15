@@ -10,7 +10,8 @@ import {
   Search,
   Trash2
 } from 'lucide-react';
-import { API_BASE, formatFileSize, getAuthHeaders, resolveAssetUrl } from '../../utils/app';
+import { formatFileSize, resolveAssetUrl } from '../../utils/app';
+import api from '../../lib/api';
 
 export type AdminMediaItem = {
   id: string;
@@ -35,7 +36,7 @@ const MEDIA_KIND_OPTIONS: Array<'all' | AdminMediaItem['kind']> = ['all', 'image
 const kindBadgeStyles: Record<AdminMediaItem['kind'], string> = {
   image: 'bg-emerald-100 text-emerald-700',
   pdf: 'bg-red-100 text-red-700',
-  audio: 'bg-blue-100 text-blue-700',
+  audio: 'bg-red-50 text-[#800000]',
   other: 'bg-gray-100 text-gray-700'
 };
 
@@ -45,8 +46,6 @@ const getKindLabel = (kind: AdminMediaItem['kind']) => {
   if (kind === 'image') return 'Image';
   return 'File';
 };
-
-const escapeQuery = (value: string) => encodeURIComponent(value.trim());
 
 const MediaManager: React.FC<Props> = ({
   onSelectForNewsImage,
@@ -69,22 +68,14 @@ const MediaManager: React.FC<Props> = ({
     setError('');
 
     try {
-      const queryParts = [
-        search.trim() ? `search=${escapeQuery(search)}` : '',
-        kindFilter !== 'all' ? `kind=${kindFilter}` : ''
-      ].filter(Boolean);
+      const params: any = {};
+      if (search.trim()) params.search = search.trim();
+      if (kindFilter !== 'all') params.kind = kindFilter;
 
-      const response = await fetch(`${API_BASE}/api/media${queryParts.length ? `?${queryParts.join('&')}` : ''}`, {
-        headers: { ...getAuthHeaders() }
-      });
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        throw new Error(data?.error || 'Failed to load media library');
-      }
-
+      const { data } = await api.get('/api/media', { params });
       setMedia(data?.media ?? []);
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : 'Failed to load media library');
+    } catch (loadError: any) {
+      setError(loadError.response?.data?.error || 'Failed to load media library');
     } finally {
       setIsLoading(false);
     }
@@ -121,22 +112,17 @@ const MediaManager: React.FC<Props> = ({
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch(`${API_BASE}/api/uploads`, {
-        method: 'POST',
-        headers: { ...getAuthHeaders() },
-        body: formData
+      const { data } = await api.post('/api/uploads', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        throw new Error(data?.error || 'Upload failed');
-      }
-
       if (data?.media) {
         setMedia((prev) => [data.media, ...prev.filter((item) => item.id !== data.media.id)]);
         setSuccess(`Uploaded ${data.media.originalName}`);
       }
-    } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : 'Upload failed');
+    } catch (uploadError: any) {
+      setError(uploadError.response?.data?.error || 'Upload failed');
     } finally {
       setIsUploading(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -149,19 +135,11 @@ const MediaManager: React.FC<Props> = ({
     setSuccess('');
 
     try {
-      const response = await fetch(`${API_BASE}/api/media/${id}`, {
-        method: 'DELETE',
-        headers: { ...getAuthHeaders() }
-      });
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        throw new Error(data?.error || 'Failed to delete media');
-      }
-
+      await api.delete(`/api/media/${id}`);
       setMedia((prev) => prev.filter((item) => item.id !== id));
       setSuccess('Media deleted successfully.');
-    } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : 'Failed to delete media');
+    } catch (deleteError: any) {
+      setError(deleteError.response?.data?.error || 'Failed to delete media');
     } finally {
       setIsDeletingId(null);
     }
@@ -195,7 +173,7 @@ const MediaManager: React.FC<Props> = ({
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black text-[#001f3f] serif">Media Library</h2>
-          <p className="text-sm text-gray-500 mt-1">Upload images, PDFs, and audio files, then reuse them directly across stories and magazine publishing.</p>
+          <p className="text-sm text-gray-500 mt-1">Upload images, PDFs, and audio files, then reuse them directly across articles and magazine publishing.</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <input ref={inputRef} type="file" className="hidden" onChange={(event) => void handleUpload(event)} />
@@ -268,7 +246,7 @@ const MediaManager: React.FC<Props> = ({
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {item.kind === 'image' && onSelectForNewsImage && (
-                    <button onClick={() => onSelectForNewsImage(item)} className="rounded-xl bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700">Use In Story</button>
+                    <button onClick={() => onSelectForNewsImage(item)} className="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-[#800000]">Use In Article</button>
                   )}
                   {item.kind === 'image' && onSelectForMagazineCover && (
                     <button onClick={() => onSelectForMagazineCover(item)} className="rounded-xl bg-purple-50 px-3 py-2 text-xs font-bold text-purple-700">Use As Cover</button>
@@ -299,7 +277,7 @@ const MediaManager: React.FC<Props> = ({
 
       <div className="rounded-2xl bg-[#001f3f]/5 px-4 py-3 text-sm text-gray-600 flex items-start gap-3">
         <CheckCircle2 size={18} className="mt-0.5 text-[#800000]" />
-        <p>Tip: assets uploaded here can be copied as URLs or sent directly into story images, magazine covers, magazine pages, and attached magazine PDFs.</p>
+        <p>Tip: assets uploaded here can be copied as URLs or sent directly into article images, magazine covers, magazine pages, and attached magazine PDFs.</p>
       </div>
     </div>
   );

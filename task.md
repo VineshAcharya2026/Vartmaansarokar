@@ -1,0 +1,24 @@
+- [x] Step 1: Database Migration
+    - [x] Create `migrations/verify-users.sql`
+    - [x] Execute migration on D1
+- [x] Step 2: Backend Hardening (CORS & Auth)
+    - [x] Fix preflight `OPTIONS` headers in `workers-entry.ts`
+    - [x] Update `handleLogin` with better status codes (401)
+- [x] Step 3: Google OAuth Backend
+    - [x] Implement `POST /api/auth/google` handler
+    - [x] Add Google ID token verification logic
+- [x] Step 4: Reader Verification Backend
+    - [x] Implement `POST /api/auth/register-reader`
+    - [x] Implement `GET /api/auth/verify-reader`
+    - [x] Add email sending stub/logic (using env vars)
+- [x] Step 5: Frontend Infrastructure
+    - [x] Install `react-hot-toast`
+    - [x] Create `ToastProvider.tsx`
+    - [x] Update `App.tsx` with `<Toaster />`
+- [x] Step 6: Frontend Context & Logic
+    - [x] Update `AppContext.tsx` with G-OAuth and Verification methods
+    - [x] Refactor `StaffLogin.tsx` and `AuthAccessModal.tsx` for new logic
+- [x] Step 7: Final Verification
+    - [x] Verify Staff Login in browser
+    - [x] Verify Google Auth popup
+    - [x] Verify Reader flow

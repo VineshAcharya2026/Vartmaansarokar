@@ -1,42 +1,267 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import gsap from 'gsap';
-import { Menu, X, User, LogOut, ChevronDown, BookOpen, ShieldCheck, ArrowUpRight, Newspaper } from 'lucide-react';
+import { Menu, X, BookOpen, Search, Mail, User, LogOut } from 'lucide-react';
 import { useApp } from '../AppContext';
 import { UserRole } from '../types';
-import { NEWS_CATEGORIES } from '../constants';
-import { APP_BASE, buildCategorySlug } from '../utils/app';
-import { translateCategory, translateRole } from '../utils/i18n';
+import { APP_BASE } from '../utils/app';
 import { AuthAccessModalLaunchOptions } from './AuthAccessModal';
+import LanguageSwitcher from './LanguageSwitcher';
+import DashboardToggle from './DashboardToggle';
 
 interface SiteNavbarProps {
   onOpenAuthModal: (options?: AuthAccessModalLaunchOptions) => void;
 }
 
+// Brand Colors Only:
+// Maroon: #800000
+// Deep/Ink: #1A1A2E, #0F0F1A
+// Cream: #FAF7F2
+// Gold: #C9952A
+// Border: #E2DDD6
+
+const navStyles = `
+  .navbar-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 110;
+  }
+  .top-strip {
+    background: #0F0F1A;
+    color: #aaa;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .top-strip span { color: #800000; font-weight: 600; }
+  .top-strip-right { display: flex; gap: 20px; }
+  .top-strip-right a {
+    color: #aaa;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .top-strip-right a:hover { color: #800000; }
+
+  header {
+    background: #FAF7F2;
+    border-bottom: 1px solid #E2DDD6;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+    position: relative;
+    z-index: 100;
+  }
+
+  .desktop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 40px;
+    gap: 20px;
+  }
+
+  .desktop-header .left-section {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .desktop-header .center-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+  }
+
+  .desktop-header .right-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .logo-img {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  nav { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; }
+
+  nav a {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    text-decoration: none;
+    padding: 10px 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    position: relative;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 14px;
+    right: 14px;
+    height: 2px;
+    background: #800000;
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
+  }
+
+  nav a:hover { color: #800000; }
+  nav a:hover::after { transform: scaleX(1); }
+
+  nav a.active {
+    color: #800000;
+    font-weight: 700;
+  }
+  nav a.active::after { transform: scaleX(1); }
+
+  .nav-divider {
+    width: 1px;
+    height: 14px;
+    background: #E2DDD6;
+    margin: 0 4px;
+  }
+
+  .search-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #1A1A2E;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+  .search-btn:hover { color: #800000; }
+
+  .btn-combined {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-combined .part-subscribe {
+    background: #800000;
+    color: #fff;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s ease;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  .btn-combined .part-subscribe:hover { background: #600000; }
+
+  .btn-combined .divider-line {
+    width: 1px;
+    height: 100%;
+    background: rgba(255,255,255,0.3);
+    align-self: stretch;
+  }
+
+  .btn-combined .part-signin {
+    background: transparent;
+    color: #800000;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    border: 1px solid #800000;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .btn-combined .part-signin:hover { background: #800000; color: #fff; }
+
+  /* Desktop Header shown > 1024px */
+  @media (max-width: 1024px) {
+    .desktop-header { display: none; }
+    .top-strip { display: none; }
+  }
+
+  .mobile-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100vh;
+    background: #FAF7F2;
+    z-index: 200;
+    padding: 20px;
+    box-shadow: -2px 0 20px rgba(0,0,0,0.1);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  .mobile-menu.open { transform: translateX(0); }
+
+  .mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 199;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+  .mobile-overlay.open { opacity: 1; visibility: visible; }
+`;
+
 const SiteNavbar: React.FC<SiteNavbarProps> = ({ onOpenAuthModal }) => {
   const { currentUser, logout, isReady } = useApp();
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const [isArticlesOpen, setIsArticlesOpen] = React.useState(false);
-  const [isAccountOpen, setIsAccountOpen] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState('');
 
-  const navRootRef = React.useRef<HTMLDivElement | null>(null);
-  const navShellRef = React.useRef<HTMLDivElement | null>(null);
-  const navLinksRef = React.useRef<HTMLDivElement | null>(null);
-  const actionsRef = React.useRef<HTMLDivElement | null>(null);
-  const sectionsTriggerRef = React.useRef<HTMLDivElement | null>(null);
-  const sectionsPanelRef = React.useRef<HTMLDivElement | null>(null);
-  const accountTriggerRef = React.useRef<HTMLDivElement | null>(null);
-  const accountPanelRef = React.useRef<HTMLDivElement | null>(null);
-  const drawerBackdropRef = React.useRef<HTMLDivElement | null>(null);
-  const drawerPanelRef = React.useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const date = new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+    setCurrentDate(date);
+  }, []);
 
-  const isActive = (path: string) => (path === '/' ? location.pathname === '/' : location.pathname === path);
-  const isCategoryActive = location.pathname.startsWith('/category');
-  const hasActiveSubscription = currentUser?.subscription?.status === 'ACTIVE';
+  const isActive = (path: string) => location.pathname === path;
 
   const primaryNavItems = [
     { label: t('common.home'), path: '/' },
@@ -46,86 +271,13 @@ const SiteNavbar: React.FC<SiteNavbarProps> = ({ onOpenAuthModal }) => {
     { label: t('common.contactUs'), path: '/contact' }
   ];
 
-  const accountButtonTitle = currentUser
-    ? currentUser.name
-    : `${t('common.subscribe')} / ${isReady ? t('common.signIn') : t('common.loading')}`;
+  const handleSubscribe = () => {
+    onOpenAuthModal({ initialView: 'subscribe', initialAccessType: 'DIGITAL' });
+  };
 
-  const accountButtonLabel = currentUser
-    ? hasActiveSubscription
-      ? `${t('common.premium')} ${t('common.account', { defaultValue: 'Account' })}`
-      : `${translateRole(t, currentUser.role)} ${t('common.account', { defaultValue: 'Account' })}`
-    : `${t('common.subscribe')} / ${t('common.signIn')}`;
-
-  // ── GSAP intro animation ──
-  React.useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      const navLinks = navLinksRef.current ? Array.from(navLinksRef.current.children) : [];
-      const actionItems = actionsRef.current ? Array.from(actionsRef.current.children) : [];
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-
-      tl.fromTo(navShellRef.current, { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.85 });
-      if (navLinks.length > 0) tl.fromTo(navLinks, { y: -14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.06 }, '-=0.45');
-      if (actionItems.length > 0) tl.fromTo(actionItems, { y: -14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.08 }, '-=0.38');
-    }, navRootRef);
-    return () => { ctx.revert(); };
-  }, []);
-
-  // ── Close everything on route change ──
-  React.useEffect(() => {
-    setIsMenuOpen(false);
-    setIsArticlesOpen(false);
-    setIsAccountOpen(false);
-  }, [location.pathname]);
-
-  // ── Click-outside for desktop dropdowns ──
-  React.useEffect(() => {
-    if (isMenuOpen) return;
-    const handlePointerDown = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (sectionsTriggerRef.current && !sectionsTriggerRef.current.contains(target)) setIsArticlesOpen(false);
-      if (accountTriggerRef.current && !accountTriggerRef.current.contains(target)) setIsAccountOpen(false);
-    };
-    document.addEventListener('mousedown', handlePointerDown);
-    return () => { document.removeEventListener('mousedown', handlePointerDown); };
-  }, [isMenuOpen]);
-
-  // ── Animate Articles dropdown ──
-  React.useEffect(() => {
-    if (isArticlesOpen && sectionsPanelRef.current) {
-      gsap.fromTo(sectionsPanelRef.current, { y: 16, opacity: 0, scale: 0.96 }, { y: 0, opacity: 1, scale: 1, duration: 0.22, ease: 'power2.out' });
-    }
-  }, [isArticlesOpen]);
-
-  // ── Animate Account dropdown ──
-  React.useEffect(() => {
-    if (isAccountOpen && !isMenuOpen && accountPanelRef.current) {
-      gsap.fromTo(accountPanelRef.current, { y: 16, opacity: 0, scale: 0.96 }, { y: 0, opacity: 1, scale: 1, duration: 0.22, ease: 'power2.out' });
-    }
-  }, [isAccountOpen, isMenuOpen]);
-
-  // ── Mobile drawer animation ──
-  React.useEffect(() => {
-    if (!drawerBackdropRef.current || !drawerPanelRef.current) return;
-    if (isMenuOpen) {
-      gsap.set(drawerBackdropRef.current, { pointerEvents: 'auto' });
-      gsap.to(drawerBackdropRef.current, { autoAlpha: 1, duration: 0.2, ease: 'power2.out' });
-      gsap.to(drawerPanelRef.current, { xPercent: 0, duration: 0.42, ease: 'power3.out' });
-      document.body.style.overflow = 'hidden';
-      return () => { document.body.style.overflow = ''; };
-    }
-    gsap.to(drawerBackdropRef.current, {
-      autoAlpha: 0, duration: 0.2, ease: 'power2.inOut',
-      onComplete: () => { if (drawerBackdropRef.current) gsap.set(drawerBackdropRef.current, { pointerEvents: 'none' }); }
-    });
-    gsap.to(drawerPanelRef.current, { xPercent: 100, duration: 0.34, ease: 'power3.inOut' });
-    document.body.style.overflow = '';
-    return () => { document.body.style.overflow = ''; };
-  }, [isMenuOpen]);
-
-  const handleAccountClick = () => {
+  const handleSignIn = () => {
     if (currentUser) {
-      setIsAccountOpen((o) => !o);
-      setIsArticlesOpen(false);
+      navigate('/profile');
     } else {
       onOpenAuthModal({ initialView: 'login', initialAccessType: 'DIGITAL' });
     }
@@ -133,289 +285,226 @@ const SiteNavbar: React.FC<SiteNavbarProps> = ({ onOpenAuthModal }) => {
 
   return (
     <>
-      <nav className="sticky top-0 z-[130] w-full bg-white/95 shadow-[0_4px_20px_-6px_rgba(0,31,63,0.25)] backdrop-blur-md">
-        {/* Brand accent strip */}
-        <div className="h-1 w-full bg-gradient-to-r from-[#800000] via-[#a11f2d] to-[#001f3f]" />
-        <div ref={navRootRef} className="w-full">
-          <div ref={navShellRef} className="relative flex flex-nowrap items-center gap-4 px-4 py-2.5 sm:px-5 md:gap-5 md:px-6 md:py-3">
+      <style>{navStyles}</style>
+      
+      {/* STICKY NAVBAR WRAPPER */}
+      <div className="navbar-wrapper">
+        {/* TOP STRIP */}
+        <div className="top-strip">
+          <div>
+            <span>{currentDate}</span> &nbsp;·&nbsp; {t('navbar.currentConcerns')}
+          </div>
+          <div className="top-strip-right">
+            <a href="#">{t('navbar.hindi')}</a>
+            <a href="#">{t('navbar.english')}</a>
+            <a href="#">{t('navbar.newsletter')}</a>
+            <a href="#">{t('navbar.advertise')}</a>
+          </div>
+        </div>
 
-            {/* ── Logo ── */}
-            <Link to="/" className="group flex shrink-0 items-center" data-brand>
-              <img src={`${APP_BASE}logo.png`} alt="Vartmaan Sarokar" className="h-14 w-14 object-contain transition-transform duration-500 group-hover:scale-105 md:h-[72px] md:w-[72px]" />
-            </Link>
+        {/* MAIN HEADER */}
+        <header>
+          {/* DESKTOP HEADER (> 1024px) */}
+          <div className="desktop-header">
+            <div className="left-section">
+              <Link to="/" className="w-full h-full block">
+                <img src={`${APP_BASE}logo.png`} alt="वर्तमान सरोकार" className="logo-img" />
+              </Link>
+            </div>
 
-            {/* ── Desktop Navigation ── */}
-            <div className="hidden xl:flex min-w-0 flex-1 justify-center px-3">
-              <div ref={navLinksRef} className="flex min-w-0 flex-nowrap items-center gap-0.5 whitespace-nowrap bg-[#001f3f]/[0.03] border border-[#001f3f]/8 p-1">
+            <div className="center-section">
+              <nav>
                 {primaryNavItems.map((item) => (
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`inline-flex items-center px-3.5 py-2.5 text-[13px] font-semibold transition-all ${
-                      isActive(item.path)
-                        ? 'bg-[#001f3f] text-white'
-                        : 'text-[#001f3f]/70 hover:bg-[#001f3f]/10 hover:text-[#001f3f]'
-                    }`}
+                    className={isActive(item.path) ? 'active' : ''}
                   >
                     {item.label}
                   </Link>
                 ))}
-
-                {/* Articles dropdown trigger — prominent with brand accent */}
-                <div ref={sectionsTriggerRef} className="relative">
-                  <button
-                    type="button"
-                    onClick={() => { setIsArticlesOpen((o) => !o); setIsAccountOpen(false); }}
-                    className={`inline-flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-bold transition-all ${
-                      isCategoryActive || isArticlesOpen
-                        ? 'bg-[#800000] text-white'
-                        : 'text-[#800000] hover:bg-[#800000]/10'
-                    }`}
-                    aria-expanded={isArticlesOpen}
-                  >
-                    <Newspaper size={15} />
-                    <span>{t('common.articles')}</span>
-                    <ChevronDown size={15} className={`transition-transform duration-300 ${isArticlesOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {isArticlesOpen && (
-                    <div ref={sectionsPanelRef} className="absolute left-1/2 top-[calc(100%+12px)] z-[150] w-[340px] -translate-x-1/2 border border-gray-200 bg-white p-2 shadow-[0_20px_50px_-20px_rgba(0,31,63,0.4)]">
-                      <div className="mb-2 bg-gradient-to-r from-[#800000] to-[#001f3f] px-4 py-3">
-                        <p className="text-[10px] font-black uppercase tracking-[0.34em] text-white/80">{t('common.articles')}</p>
-                        <p className="mt-1 text-sm text-white/60">{t('footer.tagline')}</p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-0.5">
-                        {NEWS_CATEGORIES.map((cat) => (
-                          <Link
-                            key={cat}
-                            to={`/category/${buildCategorySlug(cat)}`}
-                            className="px-3 py-2.5 text-sm font-semibold text-[#001f3f]/80 transition-all hover:bg-[#800000] hover:text-white"
-                          >
-                            {translateCategory(t, cat)}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+                <div className="nav-divider"></div>
+                {/* Articles - Brand Maroon */}
+                <Link to="/articles" style={{
+                  color: '#fff',
+                  background: '#800000',
+                  marginLeft: '4px',
+                  borderRadius: '3px',
+                  padding: '8px 16px',
+                  fontWeight: 600,
+                  letterSpacing: '0.05em',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  fontSize: '12px',
+                  textTransform: 'uppercase'
+                }}>
+                  Articles
+                </Link>
+                {/* Magazine - Brand Dark */}
+                <Link to="/magazine" style={{
+                  color: '#fff',
+                  background: '#1A1A2E',
+                  marginLeft: '6px',
+                  borderRadius: '3px',
+                  padding: '8px 16px',
+                  fontWeight: 600,
+                  letterSpacing: '0.05em',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  fontSize: '12px',
+                  textTransform: 'uppercase'
+                }}>
+                  <BookOpen size={13} style={{ marginRight: '6px' }} />
+                  Magazine
+                </Link>
+              </nav>
             </div>
 
-            {/* ── Action Buttons ── */}
-            <div ref={actionsRef} className="ml-auto flex shrink-0 items-center gap-2 xl:gap-2.5">
-
-              {/* Magazine button — desktop */}
-              <Link
-                to="/magazine"
-                className={`hidden items-center gap-2.5 border px-4 py-2.5 transition-all duration-300 md:flex ${
-                  isActive('/magazine')
-                    ? 'border-[#001f3f] bg-[#001f3f] text-white'
-                    : 'border-[#001f3f] bg-[#001f3f] text-white hover:bg-[#001f3f]/90'
-                }`}
-              >
-                <BookOpen size={18} />
-                <span className="text-sm font-bold">{t('common.digitalMagazine')}</span>
-                <ArrowUpRight size={14} className="shrink-0 opacity-60" />
-              </Link>
-
-              {/* Account / Subscribe button — desktop */}
-              <div ref={accountTriggerRef} className="relative hidden sm:block">
-                <button
-                  disabled={!isReady && !currentUser}
-                  onClick={handleAccountClick}
-                  className="flex items-center gap-2.5 border border-[#800000] bg-[#800000] px-4 py-2.5 text-left text-white transition-all duration-300 hover:bg-[#800000]/90 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <User size={18} />
-                  <span className="min-w-0">
-                    <span className="block text-[10px] font-black uppercase tracking-[0.2em] text-white/70">{accountButtonLabel}</span>
-                    <span className="flex items-center gap-2 text-sm font-semibold text-white">
-                      <span className="truncate">{accountButtonTitle}</span>
-                      {currentUser && <ChevronDown size={14} className={`shrink-0 transition-transform duration-300 ${isAccountOpen ? 'rotate-180' : ''}`} />}
-                    </span>
-                  </span>
+            <div className="right-section">
+              <div className="btn-combined">
+                <button onClick={handleSubscribe} className="part-subscribe">
+                  <Mail size={13} />
+                  Subscribe
                 </button>
-
-                {isAccountOpen && currentUser && (
-                  <div ref={accountPanelRef} className="absolute right-0 top-[calc(100%+8px)] z-[150] w-[280px] border border-gray-200 bg-white p-2 shadow-[0_20px_50px_-20px_rgba(0,31,63,0.4)]">
-                    <div className="mb-2 bg-gradient-to-r from-[#001f3f] to-[#800000] p-4">
-                      <p className="text-[10px] font-black uppercase tracking-[0.34em] text-white/70">{hasActiveSubscription ? t('common.premium') : translateRole(t, currentUser.role)}</p>
-                      <p className="mt-2 truncate text-lg font-bold text-white">{currentUser.name}</p>
-                      <p className="mt-1 text-sm text-white/60">{currentUser.email}</p>
-                    </div>
-
-                    {(currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.MAGAZINE || currentUser.role === UserRole.SUPER_ADMIN) && (
-                      <Link
-                        to="/admin"
-                        className="flex items-center justify-between px-4 py-3 text-sm font-semibold text-[#001f3f] transition-all hover:bg-[#001f3f] hover:text-white"
-                      >
-                        <span className="flex items-center gap-3">
-                          <ShieldCheck size={18} />
-                          <span>{t('common.dashboardPanel')}</span>
-                        </span>
-                        <ArrowUpRight size={16} />
-                      </Link>
-                    )}
-
-                    <button
-                      onClick={logout}
-                      className="mt-0.5 flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-[#800000] transition-all hover:bg-red-50"
-                    >
-                      <span className="flex items-center gap-3">
-                        <LogOut size={18} />
-                        <span>{t('common.signOut')}</span>
-                      </span>
-                      <ArrowUpRight size={16} />
-                    </button>
-                  </div>
-                )}
+                <div className="divider-line"></div>
+                <button onClick={handleSignIn} className="part-signin">
+                  <User size={13} />
+                  {currentUser ? currentUser.name : t('navbar.signIn')}
+                </button>
               </div>
+              
+              {currentUser && (
+                <button 
+                  onClick={() => logout()}
+                  className="p-2 text-gray-400 hover:text-red-700 hover:bg-red-50 rounded-full transition-all duration-200"
+                  title="Logout"
+                  aria-label="Logout"
+                >
+                  <LogOut size={18} />
+                </button>
+              )}
 
-              {/* Magazine icon — mobile only */}
-              <Link
-                to="/magazine"
-                className={`flex h-10 w-10 items-center justify-center border text-[#001f3f] transition-all md:hidden ${
-                  isActive('/magazine')
-                    ? 'border-[#001f3f] bg-[#001f3f] text-white'
-                    : 'border-[#001f3f]/20 bg-white hover:bg-[#001f3f] hover:text-white'
-                }`}
-                aria-label={t('common.digitalMagazine')}
-              >
-                <BookOpen size={18} />
-              </Link>
-
-              {/* Hamburger — mobile only */}
-              <button
-                onClick={() => setIsMenuOpen((o) => !o)}
-                className="flex h-10 w-10 items-center justify-center border border-[#001f3f]/20 bg-white text-[#001f3f] transition-all hover:bg-[#001f3f] hover:text-white xl:hidden"
-                aria-label="Toggle menu"
-              >
-                {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              <DashboardToggle />
+              <LanguageSwitcher />
+              <button className="search-btn" aria-label="Search">
+                <Search size={16} />
               </button>
             </div>
           </div>
-        </div>
-      </nav>
 
-      {/* ── Mobile Drawer Backdrop ── */}
-      <div ref={drawerBackdropRef} className="pointer-events-none fixed inset-0 z-[140] bg-[#001f3f]/45 opacity-0 backdrop-blur-sm xl:hidden" onClick={() => setIsMenuOpen(false)} />
+          {/* MOBILE HEADER (<= 1024px) */}
+          <div className="flex items-center justify-between h-14 px-4 lg:hidden">
+            <Link to="/">
+              <img src={`${APP_BASE}logo.png`} alt="Logo" className="h-8 object-contain" />
+            </Link>
 
-      {/* ── Mobile Drawer Panel ── */}
-      <div ref={drawerPanelRef} className="fixed right-0 top-0 z-[150] flex h-full w-[min(92vw,360px)] translate-x-full flex-col overflow-hidden border-l border-white/20 bg-[#f7f2eb]/95 shadow-[0_0_60px_rgba(0,31,63,0.32)] backdrop-blur-xl xl:hidden">
-        <div className="flex items-start justify-between border-b border-[#001f3f]/10 px-5 py-5">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.34em] text-[#800000]">{t('common.digitalLibrary')}</p>
-            <div className="mt-2 flex flex-col leading-none">
-              <span className="text-lg font-black uppercase tracking-[0.22em] text-[#001f3f]">{t('brand.lineOne')}</span>
-              <span className="text-base font-black uppercase tracking-[0.32em] text-[#800000]">{t('brand.lineTwo')}</span>
-            </div>
+            <button 
+              onClick={() => setIsMenuOpen(true)} 
+              className="text-[#1A1A2E] p-1"
+              aria-label="Menu"
+            >
+              <Menu size={24} />
+            </button>
           </div>
-          <button onClick={() => setIsMenuOpen(false)} className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[#001f3f]/10 bg-white text-[#001f3f] shadow-sm transition-colors hover:bg-[#001f3f] hover:text-white" aria-label={t('common.close')}>
-            <X size={20} />
+        </header>
+      </div>
+
+      {/* MOBILE OVERLAY */}
+      <div 
+        className={`mobile-overlay ${isMenuOpen ? 'open' : ''}`}
+        onClick={() => setIsMenuOpen(false)}
+      />
+
+      {/* MOBILE MENU */}
+      <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div className="logo-hindi" style={{ color: '#800000', fontWeight: 700 }}>वर्तमान सरोकार</div>
+          <button 
+            onClick={() => setIsMenuOpen(false)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            <X size={24} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-6">
-          {/* Drawer: Magazine + Account cards */}
-          <div className="grid gap-3">
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {primaryNavItems.map((item) => (
             <Link
-              to="/magazine"
+              key={item.path}
+              to={item.path}
               onClick={() => setIsMenuOpen(false)}
-              className="flex items-center gap-3 rounded-[24px] bg-[linear-gradient(135deg,#0a274d_0%,#001f3f_55%,#16355a_100%)] px-4 py-4 text-white shadow-[0_20px_40px_-26px_rgba(0,31,63,0.7)]"
-            >
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] bg-white/12">
-                <BookOpen size={20} />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-[10px] font-black uppercase tracking-[0.32em] text-white/65">E-Magazine</span>
-                <span className="flex items-center gap-2 text-sm font-semibold text-white">
-                  <span className="truncate">{t('common.readMagazine')}</span>
-                  <ArrowUpRight size={16} className="shrink-0" />
-                </span>
-              </span>
-            </Link>
-
-            <button
-              disabled={!isReady && !currentUser}
-              onClick={() => {
-                if (currentUser) {
-                  setIsAccountOpen((o) => !o);
-                } else {
-                  setIsMenuOpen(false);
-                  onOpenAuthModal({ initialView: 'login', initialAccessType: 'DIGITAL' });
-                }
+              style={{
+                padding: '12px 16px',
+                textDecoration: 'none',
+                color: isActive(item.path) ? '#800000' : '#1A1A2E',
+                fontWeight: isActive(item.path) ? 600 : 500,
+                borderRadius: '4px',
+                background: isActive(item.path) ? '#fff' : 'transparent',
+                border: isActive(item.path) ? '1px solid #E2DDD6' : 'none'
               }}
-              className="flex items-center gap-3 rounded-[24px] bg-[linear-gradient(135deg,#a11f2d_0%,#800000_48%,#661010_100%)] px-4 py-4 text-left text-white shadow-[0_20px_40px_-26px_rgba(128,0,0,0.75)] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] bg-white/12">
-                <User size={20} />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-[10px] font-black uppercase tracking-[0.32em] text-white/65">{accountButtonLabel}</span>
-                <span className="flex items-center gap-2 text-sm font-semibold text-white">
-                  <span className="truncate">{accountButtonTitle}</span>
-                  {currentUser && <ChevronDown size={16} className={`shrink-0 transition-transform duration-300 ${isAccountOpen ? 'rotate-180' : ''}`} />}
-                </span>
-              </span>
-            </button>
-          </div>
+              {item.label}
+            </Link>
+          ))}
+          
+          {/* Mobile Magazine - Brand Dark */}
+          <Link 
+            to="/magazine" 
+            onClick={() => setIsMenuOpen(false)}
+            style={{
+              padding: '12px 16px',
+              textDecoration: 'none',
+              color: '#fff',
+              background: '#1A1A2E',
+              borderRadius: '4px',
+              marginTop: '10px',
+              fontWeight: 600
+            }}
+          >
+            Magazine
+          </Link>
 
-          {/* Drawer: Account panel (logged in) */}
-          {isAccountOpen && currentUser && (
-            <div className="mt-4 rounded-[28px] border border-[#001f3f]/10 bg-white/80 p-3 shadow-[0_20px_30px_-26px_rgba(0,31,63,0.45)]">
-              <div className="mb-3 rounded-[20px] bg-[#f7f2eb] p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.34em] text-[#800000]">{hasActiveSubscription ? t('common.premium') : translateRole(t, currentUser.role)}</p>
-                <p className="mt-2 text-lg font-bold text-[#001f3f]">{currentUser.name}</p>
-                <p className="mt-1 text-sm text-[#001f3f]/65">{currentUser.email}</p>
-              </div>
-              {(currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.MAGAZINE || currentUser.role === UserRole.SUPER_ADMIN) && (
-                <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between rounded-[18px] px-4 py-3 text-sm font-semibold text-[#001f3f] transition-all hover:bg-[#001f3f] hover:text-white">
-                  <span className="flex items-center gap-3"><ShieldCheck size={18} /><span>{t('common.dashboardPanel')}</span></span>
-                  <ArrowUpRight size={16} />
-                </Link>
-              )}
-              <button onClick={() => { logout(); setIsMenuOpen(false); }} className="mt-1 flex w-full items-center justify-between rounded-[18px] px-4 py-3 text-left text-sm font-semibold text-[#800000] transition-all hover:bg-red-50">
-                <span className="flex items-center gap-3"><LogOut size={18} /><span>{t('common.signOut')}</span></span>
-                <ArrowUpRight size={16} />
-              </button>
-            </div>
+          {/* Mobile Admin - Brand Saffron */}
+          {currentUser && [UserRole.EDITOR, UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(currentUser.role) && (
+            <Link 
+              to="/admin" 
+              onClick={() => setIsMenuOpen(false)}
+              style={{
+                padding: '12px 16px',
+                textDecoration: 'none',
+                color: '#fff',
+                background: '#800000',
+                borderRadius: '4px',
+                marginTop: '10px',
+                fontWeight: 600
+              }}
+            >
+              {t('navbar.adminDashboard')}
+            </Link>
           )}
 
-          {/* Drawer: Primary nav links */}
-          <nav className="mt-8 space-y-2">
-            {primaryNavItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setIsMenuOpen(false)}
-                className={`flex items-center justify-between rounded-[20px] px-4 py-4 text-sm font-semibold transition-all ${
-                  isActive(item.path)
-                    ? 'bg-[#001f3f] text-white shadow-[0_16px_30px_-24px_rgba(0,31,63,0.6)]'
-                    : 'bg-white/65 text-[#001f3f] hover:bg-white'
-                }`}
-              >
-                <span>{item.label}</span>
-                <ArrowUpRight size={16} className="shrink-0" />
-              </Link>
-            ))}
-          </nav>
-
-          {/* Drawer: Article categories */}
-          <div className="mt-8 rounded-[28px] border border-[#001f3f]/10 bg-white/70 p-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.34em] text-[#800000]">{t('common.articles')}</p>
-            <div className="mt-4 grid grid-cols-1 gap-2">
-              {NEWS_CATEGORIES.map((cat) => (
-                <Link
-                  key={cat}
-                  to={`/category/${buildCategorySlug(cat)}`}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="rounded-[18px] px-4 py-3 text-sm font-semibold text-[#001f3f]/78 transition-all hover:bg-[#001f3f] hover:text-white"
-                >
-                  {translateCategory(t, cat)}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
+          {currentUser && (
+            <button
+              onClick={() => { logout(); setIsMenuOpen(false); }}
+              style={{
+                padding: '12px 16px',
+                textDecoration: 'none',
+                color: '#800000',
+                background: '#fff',
+                border: '1px solid #800000',
+                borderRadius: '4px',
+                marginTop: '20px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                fontWeight: 600
+              }}
+            >
+              {t('navbar.signOut')}
+            </button>
+          )}
+        </nav>
       </div>
     </>
   );

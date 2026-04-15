@@ -10,16 +10,38 @@ import { resolveAssetUrl } from '../utils/app';
 
 const NewsDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { news, currentUser } = useApp();
-  const { t } = useTranslation();
+  const { news, currentUser, translateNewsContent } = useApp();
+  const { t, i18n } = useTranslation();
   const [showSubscriptionWall, setShowSubscriptionWall] = React.useState(false);
+  const [isTranslating, setIsTranslating] = React.useState(false);
 
   const article = news.find((n) => n.id === id);
-  const relatedStories = news.filter((n) => n.category === article?.category && n.id !== article?.id).slice(0, 3);
+  const relatedArticles = news.filter((n) => n.category === article?.category && n.id !== article?.id).slice(0, 3);
+
+  React.useEffect(() => {
+    const autoTranslate = async () => {
+      if (!article || isTranslating) return;
+      // If language is Gujarati or Marathi, and the content doesn't seem to be in that language yet
+      // (Simplified check: if it's not 'en' or 'hi' and we want it to be 'gu' or 'mr')
+      if (['gu', 'mr'].includes(i18n.language)) {
+        setIsTranslating(true);
+        try {
+          await translateNewsContent(article.id, i18n.language === 'gu' ? 'gujarati' : 'marathi');
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setIsTranslating(false);
+        }
+      }
+    };
+    autoTranslate();
+  }, [i18n.language, id, article?.id]);
+
   const hasSubscriptionAccess =
-    currentUser?.role === UserRole.MAGAZINE ||
+    currentUser?.role === UserRole.EDITOR ||
     currentUser?.role === UserRole.ADMIN ||
     currentUser?.role === UserRole.SUPER_ADMIN ||
+    currentUser?.subscription_status === 'ACTIVE' ||
     currentUser?.subscription?.status === 'ACTIVE';
   const canReadFullArticle = article ? !article.requiresSubscription || hasSubscriptionAccess : false;
 
@@ -47,7 +69,7 @@ const NewsDetail: React.FC = () => {
           {article.requiresSubscription && (
             <span className="inline-flex items-center gap-2 bg-[#001f3f] text-white text-[10px] px-3 py-1 rounded uppercase font-bold tracking-widest">
               <Lock size={12} />
-              {t('newsDetail.subscriberStory')}
+              {t('newsDetail.subscriberArticle', 'Subscriber Article')}
             </span>
           )}
         </div>
@@ -110,34 +132,12 @@ const NewsDetail: React.FC = () => {
         )}
       </div>
 
-      {relatedStories.length > 0 && (
-        <section className="pt-12 border-t border-gray-100">
-          <h3 className="text-2xl font-bold text-[#001f3f] serif mb-8">{t('newsDetail.relatedStories')}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {relatedStories.map((story) => (
-              <Link key={story.id} to={`/news/${story.id}`} className="group block">
-                <div className="aspect-video rounded-xl overflow-hidden mb-3">
-                  <img src={resolveAssetUrl(story.image)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={story.title} />
-                </div>
-                <h4 className="font-bold text-[#001f3f] serif group-hover:text-[#800000] transition-colors line-clamp-2">
-                  {story.title}
-                </h4>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Removed related articles as requested */}
 
       <SubscriptionWall
         isOpen={showSubscriptionWall}
         onClose={() => setShowSubscriptionWall(false)}
-        onAccessGranted={() => setShowSubscriptionWall(false)}
-        resourceId={article.id}
         resourceTitle={article.title}
-        resourceType="NEWS"
-        digitalPrice={0}
-        physicalPrice={499}
-        digitalLabel={t('flipbook.digitalLabel')}
       />
     </div>
   );

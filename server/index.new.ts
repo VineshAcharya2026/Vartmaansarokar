@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,6 +19,8 @@ import contentRoutes from './routes/content.js';
 import mediaRoutes from './routes/media.js';
 import subscriptionRoutes from './routes/subscription.js';
 import userRoutes from './routes/user.js';
+import { authenticate, requireRole, AuthenticatedRequest } from './middlewares/auth.js';
+import { UserRole } from '../types.js';
 
 // Import utilities
 import { load } from 'cheerio';
@@ -63,10 +66,15 @@ async function start() {
   app.use(securityHeaders);
 
   // CORS configuration
+  const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
   app.use(
     cors({
       origin: process.env.NODE_ENV === 'production'
-        ? process.env.ALLOWED_ORIGINS?.split(',') || false
+        ? (origin, callback) => callback(null, !origin || allowedOrigins.includes(origin))
         : true,
       credentials: true
     })
@@ -78,10 +86,17 @@ async function start() {
   // Body parsing
   app.use(express.json({ limit: '15mb' }));
 
+  // Cookie parsing (required for httpOnly auth_token cookie)
+  app.use(cookieParser());
+
   // Static files
   app.use('/uploads', express.static(UPLOADS_DIR));
 
   // Health check
+  app.get('/health', (_req, res) => {
+    res.json({ status: 'ok' });
+  });
+
   app.get('/api/health', (req, res) => {
     res.json({
       success: true,
@@ -110,6 +125,20 @@ async function start() {
   app.use('/api', mediaRoutes);
   app.use('/api', subscriptionRoutes);
   app.use('/api', userRoutes);
+  app.get('/api/dashboard/stats', authenticate, (req: AuthenticatedRequest, res: Response) => {
+    res.json({
+      success: true,
+      message: 'Dashboard stats loaded.',
+      data: { stats: store.getDashboardStats(req.user!) }
+    });
+  });
+  app.get('/api/audit-logs', authenticate, requireRole(UserRole.SUPER_ADMIN), (_req: AuthenticatedRequest, res: Response) => {
+    res.json({
+      success: true,
+      message: 'Audit logs loaded.',
+      data: { logs: store.listAuditLogs() }
+    });
+  });
 
   // Web scraping utility
   app.get('/api/scrape', asyncHandler(async (req: Request, res: Response) => {

@@ -1,398 +1,349 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import {
-  Ad,
-  AdsPayload,
-  AppState,
-  AppStatePayload,
-  AuthMePayload,
-  AuthPayload,
-  MagazineIssue,
-  MagazinesPayload,
-  NewsPost,
-  User,
-  UserRole,
-  UsersPayload
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from './lib/api';
+import { 
+  NewsItem, 
+  MagazineItem, 
+  User, 
+  AdItem, 
+  MediaItem, 
+  UserRole, 
+  NewsStatus 
 } from './types';
-import { INITIAL_ADS, INITIAL_MAGAZINES, INITIAL_NEWS } from './constants';
-import { API_BASE, AUTH_TOKEN_KEY, SESSION_STORAGE_KEY, STAFF_LOGIN_EMAILS, getAuthHeaders } from './utils/app';
-import { fetchApi, parseApiResponse } from './utils/api';
+import toast from 'react-hot-toast';
+import { SESSION_STORAGE_KEY, AUTH_TOKEN_KEY } from './utils/app';
 
-interface AppContextType extends AppState {
+interface SiteSettings {
+  site_name: string;
+  org_name: string;
+  twitter_link: string;
+  instagram_link: string;
+  facebook_link: string;
+}
+
+interface HeroData {
+  headline: string;
+  subtitle: string;
+  bg_image: string;
+}
+
+interface AppContextType {
   isReady: boolean;
-  login: (payload: { email: string; password: string } | string) => Promise<User | null>;
-  loginWithGoogle: (credential: string) => Promise<User | null>;
+  currentUser: User | null;
+  news: NewsItem[];
+  staffArticles: NewsItem[];
+  magazines: MagazineItem[];
+  ads: AdItem[];
+  media: MediaItem[];
+  users: User[];
+  siteSettings: SiteSettings;
+  heroData: HeroData;
+  
+  // Auth
+  login: (email: string, pass: string) => Promise<User>;
+  loginWithGoogle: (credential: string) => Promise<User>;
+  registerReader: (data: any) => Promise<void>;
   logout: () => void;
-  activateDigitalSubscription: (payload: { name: string; email: string; phone: string }) => Promise<User | null>;
-  addNews: (post: NewsPost) => Promise<void>;
-  updateNews: (id: string, updates: Partial<NewsPost>) => Promise<void>;
+
+  // News
+  fetchNews: () => Promise<void>;
+  fetchStaffArticles: () => Promise<void>;
+  addNews: (news: Partial<NewsItem>) => Promise<void>;
+  updateNews: (id: string, news: Partial<NewsItem>) => Promise<void>;
   deleteNews: (id: string) => Promise<void>;
-  addMagazine: (magazine: MagazineIssue) => Promise<void>;
-  updateMagazine: (id: string, updates: Partial<MagazineIssue>) => Promise<void>;
+  approveNews: (id: string) => Promise<void>;
+  rejectNews: (id: string, reason: string) => Promise<void>;
+  reworkNews: (id: string, reason: string) => Promise<void>;
+
+  // Magazines
+  fetchMagazines: () => Promise<void>;
+  addMagazine: (mag: Partial<MagazineItem>) => Promise<void>;
   deleteMagazine: (id: string) => Promise<void>;
-  updateUserRole: (userId: string, role: UserRole) => Promise<void>;
-  updateAds: (ads: Ad[]) => Promise<void>;
+
+  // Ads
+  fetchAds: () => Promise<void>;
+  fetchAdminAds: () => Promise<AdItem[]>;
+  createAd: (ad: Partial<AdItem>) => Promise<void>;
+  updateAd: (id: string, ad: Partial<AdItem>) => Promise<void>;
+  deleteAd: (id: string) => Promise<void>;
+
+  // Media
+  fetchMedia: () => Promise<void>;
+  uploadFile: (file: File) => Promise<{ url: string }>;
+
+  // Users
+  fetchUsers: () => Promise<void>;
+  approveUser: (id: string) => Promise<void>;
+  rejectUser: (id: string, reason: string) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
+
+  // Global Config
+  updateSettings: (data: Partial<SiteSettings>) => Promise<void>;
+  updateHero: (data: Partial<HeroData>) => Promise<void>;
+  fetchSettings: () => Promise<void>;
+  fetchHero: () => Promise<void>;
 }
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext<AppContextType | null>(null);
 
-const DEFAULT_USERS: User[] = [
-  { id: '1', name: 'Super Admin', email: STAFF_LOGIN_EMAILS.superAdmin, role: UserRole.SUPER_ADMIN, authProvider: 'PASSWORD' },
-  { id: '2', name: 'Admin', email: STAFF_LOGIN_EMAILS.admin, role: UserRole.ADMIN, authProvider: 'PASSWORD' },
-  { id: '3', name: 'Editor', email: STAFF_LOGIN_EMAILS.editor, role: UserRole.MAGAZINE, authProvider: 'PASSWORD' }
-];
-
-function mergeById<T extends { id: string }>(primary: T[] = [], fallback: T[] = []) {
-  const map = new Map<string, T>();
-  [...fallback, ...primary].forEach((item) => {
-    map.set(item.id, item);
-  });
-  return Array.from(map.values());
-}
-
-function storeAuthenticatedUser(user: User | null, token?: string) {
-  if (user?.id) {
-    window.localStorage.setItem(SESSION_STORAGE_KEY, user.id);
-  }
-
-  if (token) {
-    window.localStorage.setItem(AUTH_TOKEN_KEY, token);
-  }
-}
-
-function clearStoredAuth() {
-  window.localStorage.removeItem(SESSION_STORAGE_KEY);
-  window.localStorage.removeItem(AUTH_TOKEN_KEY);
-}
-
-export const AppProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isReady, setIsReady] = useState(false);
-  const [state, setState] = useState<AppState>({
-    news: INITIAL_NEWS,
-    magazines: INITIAL_MAGAZINES,
-    ads: INITIAL_ADS,
-    users: DEFAULT_USERS,
-    currentUser: null
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    const saved = localStorage.getItem(SESSION_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : null;
+  });
+  
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [staffArticles, setStaffArticles] = useState<NewsItem[]>([]);
+  const [magazines, setMagazines] = useState<MagazineItem[]>([]);
+  const [ads, setAds] = useState<AdItem[]>([]);
+  const [media, setMedia] = useState<MediaItem[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({
+    site_name: 'Vartmaan Sarokaar',
+    org_name: 'Vinesh Acharya Foundation',
+    twitter_link: '',
+    instagram_link: '',
+    facebook_link: ''
+  });
+  const [heroData, setHeroData] = useState<HeroData>({
+    headline: 'Investigating The Truth.',
+    subtitle: 'Premium independent journalism from the heart of India.',
+    bg_image: ''
   });
 
-  useEffect(() => {
-    const loadAppState = async () => {
-      try {
-        const mePromise = fetch(API_BASE + '/api/auth/me', {
-          headers: {
-            ...getAuthHeaders()
-          }
-        })
-          .then((response) => (response.ok ? parseApiResponse<AuthMePayload>(response) : null))
-          .catch(() => null);
-
-        const [appStateData, meData] = await Promise.all([
-          fetchApi<AppStatePayload>(API_BASE + '/api/app-state'),
-          mePromise
-        ]);
-
-        const mergedNews = mergeById(
-          appStateData.news.map((item) => {
-            const fallback = INITIAL_NEWS.find((entry) => entry.id === item.id);
-            return {
-              ...fallback,
-              ...item,
-              featured: item.featured ?? fallback?.featured ?? false,
-              requiresSubscription: item.requiresSubscription ?? fallback?.requiresSubscription ?? false
-            };
-          }),
-          INITIAL_NEWS
-        );
-        const mergedMagazines = mergeById(appStateData.magazines, INITIAL_MAGAZINES);
-        const mergedAds = mergeById(appStateData.ads, INITIAL_ADS);
-        const mergedUsers = mergeById(appStateData.users, DEFAULT_USERS);
-        const storedUserId = window.localStorage.getItem(SESSION_STORAGE_KEY);
-
-        setState((prev) => ({
-          ...prev,
-          news: mergedNews,
-          magazines: mergedMagazines,
-          ads: mergedAds,
-          users: mergedUsers,
-          currentUser: meData?.user ?? mergedUsers.find((user) => user.id === storedUserId) ?? null
-        }));
-      } catch (error) {
-        console.warn('Using local fallback app state:', error);
-      } finally {
-        setIsReady(true);
-      }
-    };
-
-    void loadAppState();
-  }, []);
-
-  const syncAuthenticatedState = (payload: AuthPayload) => {
-    setState((prev) => ({
-      ...prev,
-      users: payload.users
-        ? payload.users
-        : payload.user
-          ? prev.users.some((user) => user.id === payload.user.id)
-            ? prev.users.map((user) => (user.id === payload.user.id ? payload.user : user))
-            : [...prev.users, payload.user]
-          : prev.users,
-      currentUser: payload.user ?? prev.currentUser
-    }));
-    storeAuthenticatedUser(payload.user ?? null, payload.token);
-  };
-
-  const login = async (payload: { email: string; password: string } | string) => {
-    if (typeof payload === 'string') {
-      const email = payload.trim().toLowerCase();
-      const data = await fetchApi<AuthPayload>(API_BASE + '/api/auth/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-
-      syncAuthenticatedState(data);
-      return data.user ?? null;
-    }
-
-    const data = await fetchApi<AuthPayload>(API_BASE + '/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: payload.email.trim().toLowerCase(), password: payload.password })
-    });
-
-    syncAuthenticatedState(data);
-    return data.user ?? null;
+  const login = async (email: string, password?: string) => {
+    const { data: resp } = await api.post('/auth/login', { email, password });
+    // Server wraps payload in { success, data: { token, user } }
+    const token: string = resp.data?.token ?? resp.token;
+    const user = resp.data?.user ?? resp.user;
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
+    setCurrentUser(user);
+    toast.success(`Welcome, ${user.name}`);
+    return user;
   };
 
   const loginWithGoogle = async (credential: string) => {
-    const data = await fetchApi<AuthPayload>(API_BASE + '/api/auth/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential })
-    });
-
-    syncAuthenticatedState(data);
-    return data.user ?? null;
+    const { data: resp } = await api.post('/auth/google', { credential });
+    const token: string = resp.data?.token ?? resp.token;
+    const user = resp.data?.user ?? resp.user;
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
+    setCurrentUser(user);
+    toast.success(`Welcome!`);
+    return user;
   };
 
   const logout = () => {
-    clearStoredAuth();
-    setState((prev) => ({ ...prev, currentUser: null }));
+    // Attempt server-side cookie/session cleanup (fire and forget)
+    api.post('/auth/logout').catch(() => {});
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+    setCurrentUser(null);
+    toast.info('Logged out');
   };
 
-  const activateDigitalSubscription = async ({
-    name,
-    email,
-    phone
-  }: {
-    name: string;
-    email: string;
-    phone: string;
-  }) => {
-    const normalizedEmail = email.trim().toLowerCase();
-    try {
-      const data = await fetchApi<AuthPayload>(API_BASE + '/api/subscriptions/digital', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email: normalizedEmail, phone })
-      });
-
-      const user = data.user ?? null;
-      setState((prev) => ({
-        ...prev,
-        users: data.users ?? prev.users,
-        currentUser: user ?? prev.currentUser
-      }));
-      storeAuthenticatedUser(user, data.token);
-      return user;
-    } catch (error) {
-      const fallbackUser =
-        state.users.find((user) => user.email.toLowerCase() === normalizedEmail) ?? {
-          id: Date.now().toString(),
-          email: normalizedEmail,
-          name,
-          role: UserRole.GENERAL,
-          subscription: {
-            type: 'DIGITAL' as const,
-            status: 'ACTIVE' as const,
-            expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
-          }
-        };
-
-      setState((prev) => ({
-        ...prev,
-        users: prev.users.some((user) => user.email.toLowerCase() === normalizedEmail)
-          ? prev.users.map((user) =>
-              user.email.toLowerCase() === normalizedEmail
-                ? {
-                    ...user,
-                    name,
-                    role: user.role,
-                    subscription: {
-                      type: 'DIGITAL',
-                      status: 'ACTIVE',
-                      expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
-                    }
-                  }
-                : user
-            )
-          : [...prev.users, fallbackUser],
-        currentUser: fallbackUser
-      }));
-      storeAuthenticatedUser(fallbackUser);
-      return fallbackUser;
-    }
+  const registerReader = async (formData: any) => {
+    await api.post('/auth/register', formData);
   };
 
-  const addNews = async (post: NewsPost) => {
+  const fetchNews = async () => {
     try {
-      const data = await fetchApi<{ news?: NewsPost[] }>(API_BASE + '/api/news', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify(post)
-      });
-      setState((prev) => ({ ...prev, news: data.news ?? prev.news }));
-    } catch (error) {
-      setState((prev) => ({ ...prev, news: [post, ...prev.news] }));
-    }
+      const { data: resp } = await api.get('/articles');
+      setNews(resp.data?.articles ?? resp.news ?? []);
+    } catch (e) { console.error('Articles fetch failed'); }
   };
 
-  const updateNews = async (id: string, updates: Partial<NewsPost>) => {
+  const fetchStaffArticles = async () => {
     try {
-      const data = await fetchApi<{ news?: NewsPost[] }>(API_BASE + `/api/news/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify(updates)
-      });
-      setState((prev) => ({ ...prev, news: data.news ?? prev.news }));
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        news: prev.news.map((item) => (item.id === id ? { ...item, ...updates } : item))
-      }));
-    }
+      // /articles returns all articles for authenticated staff via the modular server
+      const { data: resp } = await api.get('/articles');
+      setStaffArticles(resp.data?.articles ?? resp.news ?? []);
+    } catch (e) { console.error('Staff articles fetch failed'); }
+  };
+
+  const addNews = async (item: Partial<NewsItem>) => {
+    await api.post('/articles', item);
+    toast.success('Article saved');
+    fetchNews();
+    if (['ADMIN', 'SUPER_ADMIN', 'EDITOR'].includes(currentUser?.role || '')) fetchStaffArticles();
+  };
+
+  const updateNews = async (id: string, item: Partial<NewsItem>) => {
+    await api.put(`/articles/${id}`, item);
+    toast.success('Article updated');
+    fetchNews();
+    fetchStaffArticles();
   };
 
   const deleteNews = async (id: string) => {
-    try {
-      const data = await fetchApi<{ news?: NewsPost[] }>(API_BASE + `/api/news/${id}`, {
-        method: 'DELETE',
-        headers: { ...getAuthHeaders() }
-      });
-      setState((prev) => ({ ...prev, news: data.news ?? prev.news }));
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        news: prev.news.filter((item) => item.id !== id)
-      }));
-    }
+    await api.delete(`/articles/${id}`);
+    toast.success('Deleted');
+    fetchStaffArticles();
   };
 
-  const addMagazine = async (magazine: MagazineIssue) => {
-    try {
-      const data = await fetchApi<MagazinesPayload>(API_BASE + '/api/magazines', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify(magazine)
-      });
-      setState((prev) => ({ ...prev, magazines: data.magazines ?? prev.magazines }));
-    } catch (error) {
-      setState((prev) => ({ ...prev, magazines: [magazine, ...prev.magazines] }));
-    }
+  const approveNews = async (id: string) => {
+    await api.post(`/articles/${id}/approve`);
+    toast.success('Approved');
+    fetchStaffArticles();
   };
 
-  const updateMagazine = async (id: string, updates: Partial<MagazineIssue>) => {
+  const rejectNews = async (id: string, reason: string) => {
+    await api.post(`/articles/${id}/reject`, { reason });
+    toast.info('Rejected');
+    fetchStaffArticles();
+  };
+
+  const reworkNews = async (id: string, reason: string) => {
+    await api.post(`/articles/${id}/rework`, { reason });
+    toast.info('Sent for rework');
+    fetchStaffArticles();
+  };
+
+  const fetchMagazines = async () => {
     try {
-      const data = await fetchApi<MagazinesPayload>(API_BASE + `/api/magazines/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify(updates)
-      });
-      setState((prev) => ({ ...prev, magazines: data.magazines ?? prev.magazines }));
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        magazines: prev.magazines.map((magazine) => (magazine.id === id ? { ...magazine, ...updates } : magazine))
-      }));
-    }
+      const { data: resp } = await api.get('/magazines');
+      setMagazines(resp.data?.magazines ?? resp.magazines ?? []);
+    } catch (e) { console.error('Magazines fetch failed'); }
+  };
+
+  const addMagazine = async (mag: Partial<MagazineItem>) => {
+    await api.post('/magazines', mag);
+    toast.success('Magazine added');
+    fetchMagazines();
   };
 
   const deleteMagazine = async (id: string) => {
-    try {
-      const data = await fetchApi<MagazinesPayload>(API_BASE + `/api/magazines/${id}`, {
-        method: 'DELETE',
-        headers: { ...getAuthHeaders() }
-      });
-      setState((prev) => ({ ...prev, magazines: data.magazines ?? prev.magazines }));
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        magazines: prev.magazines.filter((magazine) => magazine.id !== id)
-      }));
-    }
+    await api.delete(`/magazines/${id}`);
+    toast.success('Deleted');
+    fetchMagazines();
   };
 
-  const updateUserRole = async (userId: string, role: UserRole) => {
+  const fetchAds = async () => {
     try {
-      const data = await fetchApi<UsersPayload>(API_BASE + `/api/users/${userId}/role`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify({ role })
-      });
-      setState((prev) => ({
-        ...prev,
-        users: data.users ?? prev.users,
-        currentUser: prev.currentUser?.id === userId ? { ...prev.currentUser, role } : prev.currentUser
-      }));
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        users: prev.users.map((user) => (user.id === userId ? { ...user, role } : user)),
-        currentUser: prev.currentUser?.id === userId ? { ...prev.currentUser, role } : prev.currentUser
-      }));
-    }
+      const { data: resp } = await api.get('/ads');
+      setAds(resp.data?.ads ?? resp.ads ?? []);
+    } catch (e) { console.error('Ads fetch failed'); }
   };
 
-  const updateAds = async (ads: Ad[]) => {
-    try {
-      const data = await fetchApi<AdsPayload>(API_BASE + '/api/ads', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify(ads)
-      });
-      setState((prev) => ({ ...prev, ads: data.ads ?? prev.ads }));
-    } catch (error) {
-      setState((prev) => ({ ...prev, ads }));
-    }
+  const fetchAdminAds = async () => {
+    const { data: resp } = await api.get('/ads');
+    return resp.data?.ads ?? resp.ads ?? [];
   };
 
-  return (
-    <AppContext.Provider
-      value={{
-        ...state,
-        isReady,
-        login,
-        loginWithGoogle,
-        logout,
-        activateDigitalSubscription,
-        addNews,
-        updateNews,
-        deleteNews,
-        addMagazine,
-        updateMagazine,
-        deleteMagazine,
-        updateUserRole,
-        updateAds
-      }}
-    >
-      {children}
-    </AppContext.Provider>
-  );
+  const createAd = async (ad: Partial<AdItem>) => {
+    await api.post('/ads', ad);
+    toast.success('Ad created');
+    fetchAds();
+  };
+
+  const updateAd = async (id: string, ad: Partial<AdItem>) => {
+    await api.put(`/ads/${id}`, ad);
+    toast.success('Ad updated');
+    fetchAds();
+  };
+
+  const deleteAd = async (id: string) => {
+    await api.delete(`/ads/${id}`);
+    toast.success('Ad deleted');
+    fetchAds();
+  };
+
+  const fetchMedia = async () => {
+    try {
+      const { data: resp } = await api.get('/media');
+      setMedia(resp.data?.media ?? resp.media ?? []);
+    } catch (e) { console.error('Media fetch failed'); }
+  };
+
+  const uploadFile = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data: resp } = await api.post('/uploads', formData);
+    const media = resp.data?.media ?? resp.media;
+    return { url: media?.url ?? '' };
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const { data: resp } = await api.get('/users');
+      setUsers(resp.data?.users ?? resp.users ?? []);
+    } catch (e) { console.error('Users fetch failed'); }
+  };
+
+  const approveUser = async (id: string) => {
+    await api.post(`/users/${id}/approve`);
+    toast.success('Approved');
+    fetchUsers();
+  };
+
+  const rejectUser = async (id: string, reason: string) => {
+    await api.post(`/users/${id}/reject`, { reason });
+    toast.info('Rejected');
+    fetchUsers();
+  };
+
+  const deleteUser = async (id: string) => {
+    await api.delete(`/users/${id}`);
+    toast.success('Deleted');
+    fetchUsers();
+  };
+
+  const fetchSettings = async () => {
+     try {
+       const { data: resp } = await api.get('/settings');
+       const s = resp.data?.settings ?? resp.settings;
+       if (s) setSiteSettings(s);
+     } catch(e) {}
+  };
+
+  const fetchHero = async () => {
+     try {
+       const { data: resp } = await api.get('/hero');
+       const h = resp.data?.hero ?? resp.hero;
+       if (h) setHeroData(h);
+     } catch(e) {}
+  };
+
+  const updateSettings = async (data: Partial<SiteSettings>) => {
+    await api.put('/settings', data);
+    toast.success('Settings Saved');
+    fetchSettings();
+  };
+
+  const updateHero = async (data: Partial<HeroData>) => {
+    await api.put('/hero', data);
+    toast.success('Hero Updated');
+    fetchHero();
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      await Promise.all([fetchNews(), fetchMagazines(), fetchAds(), fetchSettings(), fetchHero()]);
+      if (['ADMIN', 'SUPER_ADMIN', 'EDITOR'].includes(currentUser?.role || '')) {
+         await Promise.all([fetchStaffArticles(), fetchMedia(), fetchUsers()]);
+      }
+      setIsReady(true);
+    };
+    init();
+  }, [currentUser]);
+
+  const value = {
+    isReady, currentUser, news, staffArticles, magazines, ads, media, users, siteSettings, heroData,
+    login, loginWithGoogle, registerReader, logout,
+    fetchNews, fetchStaffArticles, addNews, updateNews, deleteNews, approveNews, rejectNews, reworkNews,
+    fetchMagazines, addMagazine, deleteMagazine,
+    fetchAds, fetchAdminAds, createAd, updateAd, deleteAd,
+    fetchMedia, uploadFile,
+    fetchUsers, approveUser, rejectUser, deleteUser,
+    updateSettings, updateHero, fetchSettings, fetchHero
+  };
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
 export const useApp = () => {
   const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useApp must be used within AppProvider');
-  }
+  if (!context) throw new Error('useApp must be used within AppProvider');
   return context;
 };

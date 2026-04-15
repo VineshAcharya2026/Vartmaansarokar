@@ -25,7 +25,7 @@ export const validateArticle = [
   body('content').trim().notEmpty().withMessage('Content is required'),
   body('image').trim().notEmpty().withMessage('Image is required'),
   body('author').trim().optional(),
-  body('date').optional().isISO8601().withMessage('Invalid date format'),
+  body('date').optional().isString(),
   body('featured').optional().isBoolean(),
   body('requiresSubscription').optional().isBoolean(),
   handleValidationErrors

@@ -7,12 +7,33 @@ import { translateCategory } from '../utils/i18n';
 
 const Category: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { news } = useApp();
-  const { t } = useTranslation();
+  const { news, batchTranslateNews } = useApp();
+  const { t, i18n } = useTranslation();
+  const [isTranslating, setIsTranslating] = React.useState(false);
 
   const categoryName = slug ? categoryFromSlug(slug) : 'Category';
   const translatedCategory = translateCategory(t, categoryName);
   const filteredNews = news.filter((item) => item.category.toLowerCase() === categoryName.toLowerCase());
+
+  React.useEffect(() => {
+    const autoTranslate = async () => {
+      if (['hi', 'gu', 'mr'].includes(i18n.language) && filteredNews.length > 0 && !isTranslating) {
+        setIsTranslating(true);
+        const ids = filteredNews.map(n => n.id);
+        try {
+          let target = 'hindi';
+          if (i18n.language === 'gu') target = 'gujarati';
+          if (i18n.language === 'mr') target = 'marathi';
+          await batchTranslateNews(ids, target);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setIsTranslating(false);
+        }
+      }
+    };
+    autoTranslate();
+  }, [i18n.language, slug, news.length]);
 
   return (
     <div className="space-y-12">

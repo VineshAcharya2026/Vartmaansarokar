@@ -19,11 +19,36 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 };
 
 const Home: React.FC = () => {
-  const { news, magazines, ads } = useApp();
-  const { t } = useTranslation();
+  const { news, magazines, ads, batchTranslateNews } = useApp();
+  const { t, i18n } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [adSlide, setAdSlide] = useState(0);
+  const [isTranslating, setIsTranslating] = useState(false);
   const pageRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const autoTranslate = async () => {
+      if (['hi', 'gu', 'mr'].includes(i18n.language) && news.length > 0 && !isTranslating) {
+        setIsTranslating(true);
+        // Translate featured + first few news
+        const featuredIds = news.filter(n => n.featured).map(n => n.id);
+        const latestIds = news.slice(0, 6).map(n => n.id);
+        const allIds = Array.from(new Set([...featuredIds, ...latestIds]));
+        try {
+          let target = 'hindi';
+          if (i18n.language === 'gu') target = 'gujarati';
+          if (i18n.language === 'mr') target = 'marathi';
+          await batchTranslateNews(allIds, target);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setIsTranslating(false);
+        }
+      }
+    };
+    autoTranslate();
+  }, [i18n.language, news.length]);
+
   const featuredNews = news.filter((item) => item.featured);
 
   /* ── Group articles by category for the 2-col grid ── */
@@ -126,11 +151,21 @@ const Home: React.FC = () => {
           </>
         ) : (
           <div className="h-full w-full flex items-center justify-center text-center text-white p-8">
-            <div>
-              <p className="text-sm tracking-[0.3em] uppercase text-red-200 font-bold mb-4">{t('home.featuredCoverage')}</p>
-              <h2 className="text-4xl font-bold serif mb-4">{t('home.emptyTitle')}</h2>
-              <p className="text-white/70 max-w-xl">{t('home.emptyBody')}</p>
+            <div data-reveal className="relative z-10">
+              <p className="text-sm tracking-[0.3em] uppercase text-red-200 font-black mb-4">{t('home.featuredCoverage')}</p>
+              <h2 className="text-4xl md:text-7xl font-black serif mb-6 tracking-tight leading-tight max-w-4xl">{heroData.headline}</h2>
+              <p className="text-white/70 max-w-xl mx-auto text-xl font-medium">{heroData.subtitle}</p>
+              <div className="mt-10 flex flex-wrap justify-center gap-4">
+                 <Link to="/subscribe" className="bg-[#800000] text-white px-10 py-4 rounded-2xl font-black hover:bg-red-800 transition-all shadow-xl">Join The Movement</Link>
+                 <Link to="/about" className="bg-white/10 backdrop-blur text-white border border-white/20 px-10 py-4 rounded-2xl font-black hover:bg-white/20 transition-all">Our Mission</Link>
+              </div>
             </div>
+            {heroData.bg_image && (
+               <div className="absolute inset-0 z-0">
+                  <div className="absolute inset-0 bg-black/60 z-10" />
+                  <img src={resolveAssetUrl(heroData.bg_image)} className="w-full h-full object-cover" />
+               </div>
+            )}
           </div>
         )}
       </section>
@@ -151,7 +186,7 @@ const Home: React.FC = () => {
               <img src={resolveAssetUrl(ad.imageUrl)} alt={ad.title} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
               <div className="absolute bottom-3 left-4 md:bottom-5 md:left-6 z-10">
-                <span className="bg-white/90 text-[#001f3f] text-[10px] md:text-xs font-bold px-3 py-1 rounded uppercase tracking-wider">{t('home.sponsored', { defaultValue: 'Sponsored' })}</span>
+                <span className="bg-white/90 text-[#001f3f] text-[10px] md:text-xs font-bold px-3 py-1 rounded uppercase tracking-wider">{t('home.sponsored')}</span>
                 <p className="text-white text-sm md:text-lg font-bold mt-1 drop-shadow-lg">{ad.title}</p>
               </div>
               {ad.ctaText && (
@@ -183,7 +218,7 @@ const Home: React.FC = () => {
         <div className="flex items-center mb-8 pb-4 border-b border-gray-100">
           <div className="flex items-center">
             <TrendingUp size={22} className="text-[#800000] mr-3" />
-            <h2 className="text-2xl md:text-3xl font-bold text-[#001f3f] serif">{t('home.trendingCategories', { defaultValue: 'Trending Categories' })}</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#001f3f] serif">{t('home.trendingCategories')}</h2>
           </div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -197,7 +232,7 @@ const Home: React.FC = () => {
                 <Flame size={20} />
               </div>
               <p className="text-sm font-bold text-[#001f3f] group-hover:text-[#800000] transition-colors">{translateCategory(t, item.name)}</p>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">{item.count} {t('home.articles', { defaultValue: 'Articles' })}</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">{item.count} {t('home.articles')}</p>
             </Link>
           ))}
         </div>
@@ -210,7 +245,7 @@ const Home: React.FC = () => {
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
           <div className="flex items-center">
             <div className="w-2 h-10 bg-[#800000] mr-4 rounded-full" />
-            <h2 className="text-2xl md:text-3xl font-bold text-[#001f3f] serif">{t('home.categorySpotlight', { defaultValue: 'Category Spotlight' })}</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#001f3f] serif">{t('home.categorySpotlight')}</h2>
           </div>
         </div>
 

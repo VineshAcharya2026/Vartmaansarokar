@@ -1,22 +1,28 @@
 import { Router } from 'express';
 import {
+  approveSubscriptionRequest,
   createSubscriptionRequest,
   createUnlockRequest,
+  deleteSubscriptionRequest,
   getSubscriptionRequests,
-  updateSubscriptionRequest
+  rejectSubscriptionRequest
 } from '../controllers/SubscriptionController.js';
 import { validateSubscription } from '../middlewares/validation.js';
-import { authenticate, authorize } from '../middlewares/auth.js';
+import { authenticate, requireAnyRole } from '../middlewares/auth.js';
 import { UserRole } from '../../types.js';
 
 const router = Router();
 
-// Public subscription routes
 router.post('/subscription-requests', validateSubscription, createSubscriptionRequest);
 router.post('/unlock-requests', createUnlockRequest);
 
-// Protected subscription routes
-router.get('/subscription-requests', authenticate, authorize([UserRole.ADMIN, UserRole.MAGAZINE]), getSubscriptionRequests);
-router.patch('/subscription-requests/:id', authenticate, authorize([UserRole.ADMIN]), updateSubscriptionRequest);
+router.get('/subscription-requests', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), getSubscriptionRequests);
+router.get('/subscribers', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), getSubscriptionRequests);
+router.post('/subscription-requests/:id/approve', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), approveSubscriptionRequest);
+router.post('/subscription-requests/:id/reject', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), rejectSubscriptionRequest);
+router.delete('/subscription-requests/:id', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), deleteSubscriptionRequest);
+router.post('/subscribers/:id/approve', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), approveSubscriptionRequest);
+router.post('/subscribers/:id/reject', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), rejectSubscriptionRequest);
+router.delete('/subscribers/:id', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), deleteSubscriptionRequest);
 
 export default router;

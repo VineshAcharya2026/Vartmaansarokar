@@ -1,45 +1,62 @@
 import { Router } from 'express';
 import {
-  getArticles,
-  getArticle,
+  approveArticle,
+  approveMagazine,
   createArticle,
-  updateArticle,
-  deleteArticle,
-  getMagazines,
   createMagazine,
-  updateMagazine,
+  deleteArticle,
   deleteMagazine,
   getAds,
-  updateAds
+  getArticle,
+  getArticles,
+  getMagazine,
+  getMagazines,
+  rejectArticle,
+  rejectMagazine,
+  reworkArticle,
+  submitArticle,
+  submitMagazine,
+  updateAds,
+  updateArticle,
+  updateMagazine
 } from '../controllers/ContentController.js';
 import { validateArticle, validateMagazine } from '../middlewares/validation.js';
-import { authenticate, authorize } from '../middlewares/auth.js';
+import { authenticate, requireAnyRole } from '../middlewares/auth.js';
 import { UserRole } from '../../types.js';
 
 const router = Router();
 
-// Public content routes
-router.get('/articles', getArticles);
-router.get('/articles/:id', getArticle);
-router.get('/magazines', getMagazines);
-router.get('/ads', getAds);
+router.get('/articles', authenticate, getArticles);
+router.get('/articles/:id', authenticate, getArticle);
+router.get('/news', authenticate, getArticles);
+router.get('/news/:id', authenticate, getArticle);
+router.get('/magazines', authenticate, getMagazines);
+router.get('/magazines/:id', authenticate, getMagazine);
+router.get('/ads', authenticate, getAds);
 
-// Protected content routes (require authentication)
-router.post('/articles', authenticate, authorize([UserRole.ADMIN, UserRole.MAGAZINE]), validateArticle, createArticle);
-router.patch('/articles/:id', authenticate, authorize([UserRole.ADMIN, UserRole.MAGAZINE]), updateArticle);
-router.delete('/articles/:id', authenticate, authorize([UserRole.ADMIN, UserRole.MAGAZINE]), deleteArticle);
+router.post('/articles', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), validateArticle, createArticle);
+router.patch('/articles/:id', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), updateArticle);
+router.delete('/articles/:id', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), deleteArticle);
+router.post('/articles/:id/submit', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), submitArticle);
+router.post('/articles/:id/approve', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), approveArticle);
+router.post('/articles/:id/reject', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), rejectArticle);
+router.post('/articles/:id/rework', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), reworkArticle);
 
-// Duplicate routes for /news (backward compatibility)
-router.post('/news', authenticate, authorize([UserRole.ADMIN, UserRole.MAGAZINE]), validateArticle, createArticle);
-router.patch('/news/:id', authenticate, authorize([UserRole.ADMIN, UserRole.MAGAZINE]), updateArticle);
-router.delete('/news/:id', authenticate, authorize([UserRole.ADMIN, UserRole.MAGAZINE]), deleteArticle);
+router.post('/news', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), validateArticle, createArticle);
+router.patch('/news/:id', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), updateArticle);
+router.delete('/news/:id', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), deleteArticle);
+router.post('/news/:id/submit', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), submitArticle);
+router.post('/news/:id/approve', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), approveArticle);
+router.post('/news/:id/reject', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), rejectArticle);
+router.post('/news/:id/rework', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), reworkArticle);
 
-// Magazine routes
-router.post('/magazines', authenticate, authorize([UserRole.ADMIN, UserRole.MAGAZINE]), validateMagazine, createMagazine);
-router.patch('/magazines/:id', authenticate, authorize([UserRole.ADMIN, UserRole.MAGAZINE]), updateMagazine);
-router.delete('/magazines/:id', authenticate, authorize([UserRole.ADMIN, UserRole.MAGAZINE]), deleteMagazine);
+router.post('/magazines', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), validateMagazine, createMagazine);
+router.patch('/magazines/:id', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), updateMagazine);
+router.delete('/magazines/:id', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), deleteMagazine);
+router.post('/magazines/:id/submit', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), submitMagazine);
+router.post('/magazines/:id/approve', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), approveMagazine);
+router.post('/magazines/:id/reject', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), rejectMagazine);
 
-// Ads routes
-router.put('/ads', authenticate, authorize([UserRole.ADMIN, UserRole.MAGAZINE]), updateAds);
+router.put('/ads', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), updateAds);
 
 export default router;

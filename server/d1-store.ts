@@ -111,9 +111,19 @@ function rowToArticle(row: any): NewsPost {
     content: row.content,
     image: row.image,
     author: row.author,
+    author_id: row.author_id,
     date: row.date,
     featured: Boolean(row.featured),
     requiresSubscription: Boolean(row.requires_subscription),
+    status: row.status,
+    submittedBy: row.submitted_by,
+    submittedAt: row.submitted_at,
+    approvedBy: row.approved_by_admin || row.approved_by,
+    approvedAt: row.admin_approved_at || row.approved_at,
+    published_at: row.published_at,
+    rejectedBy: row.rejected_by,
+    rejectedAt: row.rejected_at,
+    rejectionReason: row.rejection_reason,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -319,11 +329,19 @@ export class D1Store {
     return this.getUserById(id);
   }
 
-  // ============ Articles ============
+  // ============ News/Articles ============
   async listArticles(): Promise<NewsPost[]> {
     const db = this.requireDb();
     const result = await db.prepare(
-      'SELECT * FROM articles ORDER BY created_at DESC'
+      'SELECT * FROM news ORDER BY created_at DESC'
+    ).all<any>();
+    return result.results.map(rowToArticle);
+  }
+
+  async listPublishedArticles(): Promise<NewsPost[]> {
+    const db = this.requireDb();
+    const result = await db.prepare(
+      "SELECT * FROM news WHERE status = 'PUBLISHED' ORDER BY published_at DESC"
     ).all<any>();
     return result.results.map(rowToArticle);
   }
@@ -331,19 +349,19 @@ export class D1Store {
   async getArticleById(id: string): Promise<NewsPost | null> {
     const db = this.requireDb();
     const row = await db.prepare(
-      'SELECT * FROM articles WHERE id = ?'
+      'SELECT * FROM news WHERE id = ?'
     ).bind(id).first<any>();
     return row ? rowToArticle(row) : null;
   }
 
-  async createArticle(input: NewsPost): Promise<NewsPost> {
+  async createArticle(input: NewsPost, authorId?: string): Promise<NewsPost> {
     const db = this.requireDb();
     const id = input.id || createId('article');
     const now = nowIso();
 
     await db.prepare(`
-      INSERT INTO articles (id, title, category, excerpt, content, image, author, date, featured, requires_subscription, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO news (id, title, category, excerpt, content, image, author, author_id, date, featured, requires_subscription, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       id,
       input.title,
@@ -352,9 +370,11 @@ export class D1Store {
       input.content,
       input.image,
       input.author,
-      input.date,
+      authorId || null,
+      input.date || now,
       input.featured ? 1 : 0,
       input.requiresSubscription ? 1 : 0,
+      input.status || 'DRAFT',
       now,
       now
     ).run();
@@ -372,22 +392,29 @@ export class D1Store {
     const fields: string[] = [];
     const values: any[] = [];
 
-    if (updates.title) { fields.push('title = ?'); values.push(updates.title); }
-    if (updates.category) { fields.push('category = ?'); values.push(updates.category); }
-    if (updates.excerpt) { fields.push('excerpt = ?'); values.push(updates.excerpt); }
-    if (updates.content) { fields.push('content = ?'); values.push(updates.content); }
-    if (updates.image) { fields.push('image = ?'); values.push(updates.image); }
-    if (updates.author) { fields.push('author = ?'); values.push(updates.author); }
-    if (updates.date) { fields.push('date = ?'); values.push(updates.date); }
+    if (updates.title !== undefined) { fields.push('title = ?'); values.push(updates.title); }
+    if (updates.category !== undefined) { fields.push('category = ?'); values.push(updates.category); }
+    if (updates.excerpt !== undefined) { fields.push('excerpt = ?'); values.push(updates.excerpt); }
+    if (updates.content !== undefined) { fields.push('content = ?'); values.push(updates.content); }
+    if (updates.image !== undefined) { fields.push('image = ?'); values.push(updates.image); }
+    if (updates.author !== undefined) { fields.push('author = ?'); values.push(updates.author); }
+    if (updates.date !== undefined) { fields.push('date = ?'); values.push(updates.date); }
     if (updates.featured !== undefined) { fields.push('featured = ?'); values.push(updates.featured ? 1 : 0); }
     if (updates.requiresSubscription !== undefined) { fields.push('requires_subscription = ?'); values.push(updates.requiresSubscription ? 1 : 0); }
+    if (updates.status !== undefined) { fields.push('status = ?'); values.push(updates.status); }
+    if (updates.approvedBy !== undefined) { fields.push('approved_by_admin = ?'); values.push(updates.approvedBy); }
+    if (updates.approvedAt !== undefined) { fields.push('admin_approved_at = ?'); values.push(updates.approvedAt); }
+    if (updates.published_at !== undefined) { fields.push('published_at = ?'); values.push(updates.published_at); }
+    if (updates.rejectedBy !== undefined) { fields.push('rejected_by = ?'); values.push(updates.rejectedBy); }
+    if (updates.rejectedAt !== undefined) { fields.push('rejected_at = ?'); values.push(updates.rejectedAt); }
+    if (updates.rejectionReason !== undefined) { fields.push('rejection_reason = ?'); values.push(updates.rejectionReason); }
 
     fields.push('updated_at = ?');
     values.push(nowIso());
     values.push(id);
 
     await db.prepare(`
-      UPDATE articles SET ${fields.join(', ')} WHERE id = ?
+      UPDATE news SET ${fields.join(', ')} WHERE id = ?
     `).bind(...values).run();
 
     return this.getArticleById(id);
@@ -398,7 +425,7 @@ export class D1Store {
     const article = await this.getArticleById(id);
     if (!article) return null;
 
-    await db.prepare('DELETE FROM articles WHERE id = ?').bind(id).run();
+    await db.prepare('DELETE FROM news WHERE id = ?').bind(id).run();
     return article;
   }
 
@@ -772,6 +799,54 @@ export class D1Store {
     ]);
 
     return { news, magazines, ads, users };
+  }
+
+  // ============ Article Approvals ============
+  async createArticleApproval(input: { article_id: string; submitted_by: string }): Promise<any> {
+    const db = this.requireDb();
+    const id = createId('approval');
+    const now = nowIso();
+
+    await db.prepare(`
+      INSERT INTO article_approvals (id, article_id, submitted_by, submitted_at, final_status)
+      VALUES (?, ?, ?, ?, ?)
+    `).bind(id, input.article_id, input.submitted_by, now, 'PENDING').run();
+
+    return { id, ...input, final_status: 'PENDING', submitted_at: now };
+  }
+
+  async listArticleApprovals(): Promise<any[]> {
+    const db = this.requireDb();
+    const result = await db.prepare(
+      'SELECT * FROM article_approvals ORDER BY submitted_at DESC'
+    ).all<any>();
+    return result.results;
+  }
+
+  async updateArticleApproval(id: string, status: string, reviewed_by?: string, rejection_reason?: string): Promise<any> {
+    const db = this.requireDb();
+    const fields: string[] = ['final_status = ?'];
+    const values: any[] = [status];
+
+    if (reviewed_by) {
+      fields.push('admin_reviewed_by = ?');
+      values.push(reviewed_by);
+      fields.push('admin_reviewed_at = ?');
+      values.push(nowIso());
+    }
+    if (rejection_reason) {
+      fields.push('rejection_reason = ?');
+      values.push(rejection_reason);
+    }
+
+    values.push(id);
+
+    await db.prepare(`
+      UPDATE article_approvals SET ${fields.join(', ')} WHERE id = ?
+    `).bind(...values).run();
+
+    const result = await db.prepare('SELECT * FROM article_approvals WHERE id = ?').bind(id).first<any>();
+    return result;
   }
 }
 
