@@ -33,6 +33,32 @@ function splitOrigins(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
+async function ensureUsersTable(c: any) {
+  await c.env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT,
+      name TEXT NOT NULL DEFAULT '',
+      role TEXT NOT NULL DEFAULT 'READER',
+      phone TEXT DEFAULT '',
+      address TEXT DEFAULT '',
+      avatar_url TEXT DEFAULT '',
+      google_id TEXT DEFAULT '',
+      subscription_plan TEXT DEFAULT 'FREE',
+      subscription_status TEXT DEFAULT 'INACTIVE',
+      subscription_start TEXT DEFAULT '',
+      subscription_end TEXT DEFAULT '',
+      payment_verified INTEGER DEFAULT 0,
+      payment_screenshot_url TEXT DEFAULT '',
+      is_verified INTEGER DEFAULT 0,
+      verification_token TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    )`
+  ).run();
+}
+
 // CORS — strict allowlist from ALLOWED_ORIGINS only (configure dev origins in wrangler dev / .dev.vars)
 app.use('*', async (c, next) => {
   const origin = c.req.header('Origin') || '';
@@ -154,6 +180,7 @@ app.post('/api/translate/batch', async (c) => {
 // --- AUTH ---
 const handleLogin = async (c: any) => {
   try {
+    await ensureUsersTable(c);
     if (!rateLimitAllow(`login:${clientKey(c)}`, 30, 60_000)) {
       return fail(c, 'Too many login attempts', 429);
     }
@@ -233,6 +260,7 @@ const handleLogin = async (c: any) => {
 // --- GOOGLE AUTH ---
 const handleGoogleLogin = async (c: any) => {
   try {
+    await ensureUsersTable(c);
     const { credential } = await c.req.json();
     if (!credential) return fail(c, 'Missing credential', 400);
 
@@ -281,6 +309,7 @@ const handleGoogleLogin = async (c: any) => {
 // --- READER REGISTRATION & VERIFICATION ---
 const handleRegisterReader = async (c: any) => {
   try {
+    await ensureUsersTable(c);
     const { email, password, name } = await c.req.json();
     if (!email || !password) return fail(c, 'Email and password required', 400);
 
@@ -332,6 +361,7 @@ app.post('/api/auth/verify-email', handleVerifyEmail);
 // --- QUICK LOGIN (for subscribers/readers - passwordless) ---
 app.post('/api/auth/users/login', async (c) => {
   try {
+    await ensureUsersTable(c);
     if (!rateLimitAllow(`quicklogin:${clientKey(c)}`, 20, 60_000)) {
       return fail(c, 'Too many requests', 429);
     }
