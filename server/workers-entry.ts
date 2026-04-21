@@ -33,9 +33,23 @@ function splitOrigins(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
-async function ensureUsersTable(c: any) {
-  await c.env.DB.prepare(
-    `CREATE TABLE IF NOT EXISTS users (
+/** Ensures all tables the Worker touches exist (fresh D1 has none beyond what we create). */
+let d1SchemaReady: Promise<void> | undefined;
+
+async function ensureD1Schema(db: D1Database): Promise<void> {
+  if (!d1SchemaReady) {
+    d1SchemaReady = runD1Schema(db).catch((err) => {
+      d1SchemaReady = undefined;
+      throw err;
+    });
+  }
+  await d1SchemaReady;
+}
+
+async function runD1Schema(db: D1Database): Promise<void> {
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT,
@@ -56,7 +70,159 @@ async function ensureUsersTable(c: any) {
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     )`
-  ).run();
+    )
+    .run();
+
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS news (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      category TEXT DEFAULT 'General',
+      excerpt TEXT DEFAULT '',
+      content TEXT DEFAULT '',
+      image TEXT DEFAULT '',
+      author TEXT DEFAULT '',
+      author_id TEXT DEFAULT '',
+      featured INTEGER DEFAULT 0,
+      requires_subscription INTEGER DEFAULT 0,
+      status TEXT DEFAULT 'DRAFT',
+      rejection_reason TEXT DEFAULT '',
+      approved_by_admin TEXT DEFAULT '',
+      approved_by_super TEXT DEFAULT '',
+      admin_approved_at TEXT DEFAULT '',
+      super_approved_at TEXT DEFAULT '',
+      published_at TEXT DEFAULT '',
+      date TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    )`
+    )
+    .run();
+
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS magazines (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      issue_number TEXT DEFAULT '',
+      cover_image TEXT DEFAULT '',
+      pdf_url TEXT DEFAULT '',
+      pdf_r2_key TEXT DEFAULT '',
+      pages TEXT DEFAULT '[]',
+      page_images TEXT DEFAULT '[]',
+      price_digital REAL DEFAULT 0,
+      price_physical REAL DEFAULT 499,
+      gated_page INTEGER DEFAULT 2,
+      is_free INTEGER DEFAULT 0,
+      blur_paywall INTEGER DEFAULT 0,
+      status TEXT DEFAULT 'DRAFT',
+      date TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    )`
+    )
+    .run();
+
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS media_files (
+      id TEXT PRIMARY KEY,
+      original_name TEXT,
+      stored_name TEXT,
+      url TEXT,
+      kind TEXT,
+      mime_type TEXT,
+      size INTEGER,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`
+    )
+    .run();
+
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS subscriptions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      user_name TEXT DEFAULT '',
+      user_email TEXT DEFAULT '',
+      user_phone TEXT DEFAULT '',
+      plan TEXT NOT NULL,
+      sub_type TEXT DEFAULT 'DIGITAL',
+      amount REAL DEFAULT 0,
+      payment_method TEXT DEFAULT 'UPI',
+      payment_screenshot_url TEXT DEFAULT '',
+      payment_r2_key TEXT DEFAULT '',
+      payment_verified INTEGER DEFAULT 0,
+      verified_by TEXT DEFAULT '',
+      verified_at TEXT DEFAULT '',
+      rejection_reason TEXT DEFAULT '',
+      status TEXT DEFAULT 'PENDING',
+      start_date TEXT DEFAULT '',
+      end_date TEXT DEFAULT '',
+      shipping_address TEXT DEFAULT '',
+      notes TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now'))
+    )`
+    )
+    .run();
+
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS ads (
+      id TEXT PRIMARY KEY,
+      title TEXT DEFAULT '',
+      description TEXT DEFAULT '',
+      image TEXT DEFAULT '',
+      image_url TEXT DEFAULT '',
+      redirect_url TEXT DEFAULT '',
+      link TEXT DEFAULT '',
+      position TEXT DEFAULT 'SIDEBAR_TOP',
+      status TEXT DEFAULT 'ACTIVE',
+      active INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`
+    )
+    .run();
+
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS ticker_items (
+      id TEXT PRIMARY KEY,
+      text TEXT NOT NULL,
+      link TEXT DEFAULT '',
+      active INTEGER DEFAULT 1,
+      source TEXT DEFAULT 'manual',
+      created_at TEXT DEFAULT (datetime('now'))
+    )`
+    )
+    .run();
+
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS site_settings (
+      id TEXT PRIMARY KEY DEFAULT 'global',
+      site_name TEXT DEFAULT 'Vartmaan Sarokaar',
+      org_name TEXT DEFAULT 'Vinesh Acharya Foundation',
+      twitter_link TEXT DEFAULT '',
+      instagram_link TEXT DEFAULT '',
+      facebook_link TEXT DEFAULT '',
+      updated_at TEXT DEFAULT (datetime('now'))
+    )`
+    )
+    .run();
+
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS hero_section (
+      id TEXT PRIMARY KEY DEFAULT 'global',
+      headline TEXT DEFAULT 'Investigating The Truth.',
+      subtitle TEXT DEFAULT 'Premium independent journalism from the heart of India.',
+      bg_image TEXT DEFAULT '',
+      updated_at TEXT DEFAULT (datetime('now'))
+    )`
+    )
+    .run();
 }
 
 // CORS — strict allowlist from ALLOWED_ORIGINS only (configure dev origins in wrangler dev / .dev.vars)
@@ -75,6 +241,16 @@ app.use('*', async (c, next) => {
 
   if (c.req.method === 'OPTIONS') {
     return c.text('', 204);
+  }
+  await next();
+});
+
+app.use('*', async (c, next) => {
+  try {
+    await ensureD1Schema(c.env.DB);
+  } catch (e: any) {
+    console.error('ensureD1Schema:', e?.message || e);
+    return fail(c, 'Database initialization failed', 500);
   }
   await next();
 });
@@ -180,7 +356,6 @@ app.post('/api/translate/batch', async (c) => {
 // --- AUTH ---
 const handleLogin = async (c: any) => {
   try {
-    await ensureUsersTable(c);
     if (!rateLimitAllow(`login:${clientKey(c)}`, 30, 60_000)) {
       return fail(c, 'Too many login attempts', 429);
     }
@@ -260,7 +435,6 @@ const handleLogin = async (c: any) => {
 // --- GOOGLE AUTH ---
 const handleGoogleLogin = async (c: any) => {
   try {
-    await ensureUsersTable(c);
     const { credential } = await c.req.json();
     if (!credential) return fail(c, 'Missing credential', 400);
 
@@ -309,7 +483,6 @@ const handleGoogleLogin = async (c: any) => {
 // --- READER REGISTRATION & VERIFICATION ---
 const handleRegisterReader = async (c: any) => {
   try {
-    await ensureUsersTable(c);
     const { email, password, name } = await c.req.json();
     if (!email || !password) return fail(c, 'Email and password required', 400);
 
@@ -361,7 +534,6 @@ app.post('/api/auth/verify-email', handleVerifyEmail);
 // --- QUICK LOGIN (for subscribers/readers - passwordless) ---
 app.post('/api/auth/users/login', async (c) => {
   try {
-    await ensureUsersTable(c);
     if (!rateLimitAllow(`quicklogin:${clientKey(c)}`, 20, 60_000)) {
       return fail(c, 'Too many requests', 429);
     }
