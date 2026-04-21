@@ -609,11 +609,29 @@ app.post('/api/articles', auth, async (c) => {
   // Status logic: Admin/Editor creates published? No, let's keep it safe.
   // USER_REQUEST Task: EDITOR → PENDING, ADMIN → PUBLISH
   const status = (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') ? 'PUBLISHED' : 'PENDING_REVIEW';
+  const publishedAt = status === 'PUBLISHED' ? new Date().toISOString() : '';
+  const featured = data.featured ? 1 : 0;
+  const requiresSub = data.requires_subscription ? 1 : 0;
 
   await c.env.DB.prepare(`
-    INSERT INTO news (id, title, content, excerpt, category, author, status, image, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).bind(id, data.title, data.content, data.excerpt || '', data.category, data.author || user.name, status, data.image || '', createdAt, createdAt).run();
+    INSERT INTO news (id, title, content, excerpt, category, author, author_id, status, image, featured, requires_subscription, published_at, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    id,
+    data.title,
+    data.content,
+    data.excerpt || '',
+    data.category,
+    data.author || user.name,
+    user.id,
+    status,
+    data.image || '',
+    featured,
+    requiresSub,
+    publishedAt,
+    createdAt,
+    createdAt
+  ).run();
 
   return ok(c, { id });
 });

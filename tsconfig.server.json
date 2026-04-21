@@ -19,6 +19,7 @@
     "server/services/**/*.ts",
     "server/utils/**/*.ts",
     "scripts/**/*.ts",
+    "constants.ts",
     "types.ts",
     "worker-configuration.d.ts"
   ],

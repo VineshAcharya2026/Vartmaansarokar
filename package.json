@@ -15,6 +15,7 @@
     "server:dev": "nodemon --watch server --ext ts --exec tsx ./server/index.new.ts",
     "server:build": "tsc -p tsconfig.server.json",
     "seed": "tsx ./scripts/seed.ts",
+    "seed:content": "tsx ./scripts/seed-cloudflare-content.ts",
     "migrate:d1": "tsx ./migrations/migrate-to-d1.ts",
     "deploy": "deploy.bat",
     "deploy:workers": "wrangler deploy",

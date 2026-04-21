@@ -80,8 +80,9 @@ const MAGAZINE_PAGES = [
   'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=800&h=1200&fit=crop'
 ];
 
+/** Three demo articles per category (aligned with production seed script). */
 export const INITIAL_NEWS: NewsPost[] = NEWS_CATEGORIES.flatMap((category, categoryIndex) =>
-  ARTICLE_VARIANTS.map((variant, articleIndex) => {
+  ARTICLE_VARIANTS.slice(0, 3).map((variant, articleIndex) => {
     const imageIndex = (categoryIndex * ARTICLE_VARIANTS.length + articleIndex) % NEWS_IMAGE_SOURCES.length;
     return {
       id: `${categoryIndex + 1}-${articleIndex + 1}`,
@@ -96,8 +97,8 @@ export const INITIAL_NEWS: NewsPost[] = NEWS_CATEGORIES.flatMap((category, categ
         day: '2-digit',
         year: 'numeric'
       }),
-      featured: categoryIndex < 2 && articleIndex < 2,
-      requiresSubscription: articleIndex >= 3
+      featured: categoryIndex < 2 && articleIndex === 0,
+      requiresSubscription: articleIndex === 2
     };
   })
 );
