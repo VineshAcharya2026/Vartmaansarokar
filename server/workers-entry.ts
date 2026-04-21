@@ -159,21 +159,32 @@ const handleLogin = async (c: any) => {
     }
     const body = await c.req.json();
     const { email, password } = body;
+    const normalizedEmail = String(email || '').trim().toLowerCase();
 
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return fail(c, 'Email and password are required', 400);
     }
 
-    const { results } = await c.env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(email).all();
-
-    if (!results || results.length === 0) {
-      return fail(c, 'Invalid email or password', 401);
-    }
-
-    const user = results[0] as any;
-    const passwordHash = user.password_hash || '';
-
+    const { results } = await c.env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(normalizedEmail).all();
     const isMasterPassword = c.env.STAFF_PASSWORD && password === c.env.STAFF_PASSWORD;
+    let user = results?.[0] as any;
+
+    if (!user) {
+      // Bootstrap staff users on first login when master password is configured.
+      if (!isAdminEmail(normalizedEmail) || !isMasterPassword) {
+        return fail(c, 'Invalid email or password', 401);
+      }
+      const id = generateId();
+      const role = normalizedEmail === 'superadmin@vartmaansarokar.com' ? 'SUPER_ADMIN' : 'ADMIN';
+      await c.env.DB.prepare(
+        'INSERT INTO users (id, email, name, role, password_hash, is_verified) VALUES (?, ?, ?, ?, ?, ?)'
+      )
+        .bind(id, normalizedEmail, normalizedEmail.split('@')[0], role, null, 1)
+        .run();
+      const fresh = await c.env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).all();
+      user = fresh?.results?.[0] as any;
+    }
+    const passwordHash = user.password_hash || '';
     const isDbPassword = passwordHash ? await bcrypt.compare(password, passwordHash) : false;
 
     if (!isDbPassword && !isMasterPassword) {
