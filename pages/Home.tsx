@@ -19,7 +19,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 };
 
 const Home: React.FC = () => {
-  const { news, magazines, ads, batchTranslateNews } = useApp();
+  const { news, magazines, ads, heroData, batchTranslateNews } = useApp();
   const { t, i18n } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [adSlide, setAdSlide] = useState(0);
