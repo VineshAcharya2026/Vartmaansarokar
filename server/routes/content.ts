@@ -21,18 +21,18 @@ import {
   updateMagazine
 } from '../controllers/ContentController.js';
 import { validateArticle, validateMagazine } from '../middlewares/validation.js';
-import { authenticate, requireAnyRole } from '../middlewares/auth.js';
+import { authenticate, optionalAuthenticate, requireAnyRole } from '../middlewares/auth.js';
 import { UserRole } from '../../types.js';
 
 const router = Router();
 
-router.get('/articles', authenticate, getArticles);
-router.get('/articles/:id', authenticate, getArticle);
-router.get('/news', authenticate, getArticles);
-router.get('/news/:id', authenticate, getArticle);
-router.get('/magazines', authenticate, getMagazines);
-router.get('/magazines/:id', authenticate, getMagazine);
-router.get('/ads', authenticate, getAds);
+router.get('/articles', optionalAuthenticate, getArticles);
+router.get('/articles/:id', optionalAuthenticate, getArticle);
+router.get('/news', optionalAuthenticate, getArticles);
+router.get('/news/:id', optionalAuthenticate, getArticle);
+router.get('/magazines', optionalAuthenticate, getMagazines);
+router.get('/magazines/:id', optionalAuthenticate, getMagazine);
+router.get('/ads', optionalAuthenticate, getAds);
 
 router.post('/articles', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), validateArticle, createArticle);
 router.patch('/articles/:id', authenticate, requireAnyRole(UserRole.EDITOR, UserRole.SUPER_ADMIN), updateArticle);

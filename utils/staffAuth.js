@@ -3,7 +3,7 @@
  * Handles email/password login for admin/editor/superadmin roles
  */
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://vartmaan-sarokaar-api.vineshjm.workers.dev';
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'https://api.vartmaansarokaar.com').replace(/\/$/, '');
 
 // Token storage key
 const STAFF_TOKEN_KEY = 'vartmaan-auth-token';
@@ -30,9 +30,10 @@ export async function staffLogin(email, password) {
       return { success: false, error: data.error || 'Login failed' };
     }
 
-    if (data.token) {
-      localStorage.setItem(STAFF_TOKEN_KEY, data.token);
-      return { success: true, token: data.token, user: data.user };
+    const payload = data?.data || data;
+    if (payload?.token) {
+      localStorage.setItem(STAFF_TOKEN_KEY, payload.token);
+      return { success: true, token: payload.token, user: payload.user };
     }
 
     return { success: false, error: 'Invalid response from server' };
@@ -86,10 +87,7 @@ export function getStaffUser() {
   if (!payload) return null;
 
   return {
-    email: payload.email,
-    name: payload.name,
-    role: payload.role,
-    id: payload.sub,
+    id: payload.userId,
   };
 }
 
@@ -160,21 +158,22 @@ export async function verifyStaffTokenWithBackend() {
   if (!token) return { valid: false, error: 'No token' };
 
   try {
-    const response = await fetch(`${API_BASE}/api/auth/staff/verify`, {
+    const response = await fetch(`${API_BASE}/api/auth/me`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
       },
     });
 
-    const data = await response.json();
+    const body = await response.json();
+    const user = body?.data?.user;
 
-    if (!data.valid) {
+    if (!response.ok || !user) {
       staffLogout();
-      return { valid: false, error: data.error };
+      return { valid: false, error: body?.error || 'Invalid token' };
     }
 
-    return { valid: true, user: data.user };
+    return { valid: true, user };
   } catch (error) {
     console.error('Token verification failed:', error);
     return { valid: false, error: 'Network error' };
@@ -202,21 +201,8 @@ export function getStaffAuthHeaders() {
  * @param {string} email - Staff email
  */
 export async function requestPasswordReset(email) {
-  try {
-    const response = await fetch(`${API_BASE}/api/auth/staff/reset-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email }),
-    });
-
-    const data = await response.json();
-    return { success: response.ok, message: data.message, error: data.error };
-  } catch (error) {
-    console.error('Password reset request error:', error);
-    return { success: false, error: 'Network error' };
-  }
+  void email;
+  return { success: false, error: 'Password reset endpoint is not enabled.' };
 }
 
 // Export all functions as default object

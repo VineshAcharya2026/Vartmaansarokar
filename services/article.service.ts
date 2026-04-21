@@ -3,43 +3,45 @@ import { NewsItem } from '../types';
 
 export const articleService = {
   getArticles: async () => {
-    const { data } = await api.get('/articles');
-    return data.news || [];
+    const { data } = await api.get('/api/articles');
+    const r = data as { news?: NewsItem[]; articles?: NewsItem[] };
+    return r.news ?? r.articles ?? [];
   },
 
   getStaffArticles: async () => {
-    const { data } = await api.get('/articles/all');
-    return data.news || [];
+    const { data } = await api.get('/api/articles/all');
+    const r = data as { news?: NewsItem[]; articles?: NewsItem[] };
+    return r.news ?? r.articles ?? [];
   },
 
   getArticle: async (id: string) => {
-    const { data } = await api.get(`/articles/${id}`);
-    return data.article;
+    const { data } = await api.get(`/api/articles/${id}`);
+    return (data as { article: NewsItem }).article;
   },
 
   createArticle: async (article: Partial<NewsItem>) => {
-    const { data } = await api.post('/articles', article);
+    const { data } = await api.post('/api/articles', article);
     return data;
   },
 
   updateArticle: async (id: string, article: Partial<NewsItem>) => {
-    const { data } = await api.put(`/articles/${id}`, article);
+    const { data } = await api.put(`/api/articles/${id}`, article);
     return data;
   },
 
   deleteArticle: async (id: string) => {
-    await api.delete(`/articles/${id}`);
+    await api.delete(`/api/articles/${id}`);
   },
 
   approveArticle: async (id: string) => {
-    await api.post(`/articles/${id}/approve`);
+    await api.post(`/api/articles/${id}/approve`);
   },
 
   rejectArticle: async (id: string, reason: string) => {
-    await api.post(`/articles/${id}/reject`, { reason });
+    await api.post(`/api/articles/${id}/reject`, { reason });
   },
 
   reworkArticle: async (id: string, reason: string) => {
-    await api.post(`/articles/${id}/rework`, { reason });
+    await api.post(`/api/articles/${id}/rework`, { reason });
   }
 };

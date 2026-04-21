@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   approveSubscriptionRequest,
+  createPublicSubscription,
   createSubscriptionRequest,
   createUnlockRequest,
   deleteSubscriptionRequest,
@@ -10,9 +11,11 @@ import {
 import { validateSubscription } from '../middlewares/validation.js';
 import { authenticate, requireAnyRole } from '../middlewares/auth.js';
 import { UserRole } from '../../types.js';
+import { upload } from '../controllers/MediaController.js';
 
 const router = Router();
 
+router.post('/subscriptions', upload.single('file'), createPublicSubscription);
 router.post('/subscription-requests', validateSubscription, createSubscriptionRequest);
 router.post('/unlock-requests', createUnlockRequest);
 

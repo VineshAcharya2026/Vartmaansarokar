@@ -23,9 +23,10 @@ wrangler whoami || { echo -e "${RED}Error: Not authenticated. Run: wrangler logi
 # Step 1: Check D1 database
 echo ""
 echo -e "${YELLOW}Step 1: Checking D1 Database...${NC}"
-if ! wrangler d1 list | grep -q "vartmaan-sarokar-db"; then
+if ! wrangler d1 list | grep -q "vartmaansarokar-db"; then
     echo -e "${YELLOW}Creating D1 database...${NC}"
-    wrangler d1 create vartmaan-sarokar-db
+    wrangler d1 create vartmaansarokar-db
+    echo -e "${YELLOW}If this DB is new: copy the printed database_id into wrangler.toml, then re-run deploy.${NC}"
     echo -e "${GREEN}✅ D1 database created${NC}"
 else
     echo -e "${GREEN}✅ D1 database already exists${NC}"
@@ -45,7 +46,7 @@ fi
 # Step 3: Apply database schema
 echo ""
 echo -e "${YELLOW}Step 3: Applying Database Schema...${NC}"
-wrangler d1 execute vartmaan-sarokar-db --file=schema.sql
+wrangler d1 execute vartmaansarokar-db --file=schema.sql
 echo -e "${GREEN}✅ Database schema applied${NC}"
 
 # Step 4: Check secrets
@@ -59,10 +60,6 @@ fi
 
 if ! echo "$SECRETS" | grep -q "STAFF_PASSWORD"; then
     echo -e "${YELLOW}⚠️ STAFF_PASSWORD not set. Run: wrangler secret put STAFF_PASSWORD${NC}"
-fi
-
-if ! echo "$SECRETS" | grep -q "OPENAI_API_KEY"; then
-    echo -e "${YELLOW}⚠️ OPENAI_API_KEY not set (optional, for chat). Run: wrangler secret put OPENAI_API_KEY${NC}"
 fi
 
 if ! echo "$SECRETS" | grep -q "GOOGLE_CLIENT_ID"; then

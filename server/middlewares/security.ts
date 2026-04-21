@@ -10,7 +10,7 @@ export const securityHeaders = helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:", "http:"],
       scriptSrc: ["'self'", "https://accounts.google.com", "https://apis.google.com"],
-      connectSrc: ["'self'", "https://api.openai.com", "https://accounts.google.com", "https://oauth2.googleapis.com"],
+      connectSrc: ["'self'", "https://accounts.google.com", "https://oauth2.googleapis.com"],
       frameSrc: ["'self'", "https://accounts.google.com"],
     },
   },

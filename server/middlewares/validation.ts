@@ -35,11 +35,12 @@ export const validateMagazine = [
   body('title').trim().notEmpty().withMessage('Title is required'),
   body('issueNumber').trim().notEmpty().withMessage('Issue number is required'),
   body('coverImage').trim().notEmpty().withMessage('Cover image is required'),
+  body('pdfUrl').trim().notEmpty().withMessage('PDF URL is required'),
   body('date').isISO8601().withMessage('Invalid date format'),
-  body('priceDigital').optional().isNumeric(),
-  body('pricePhysical').optional().isNumeric(),
+  body('priceDigital').optional().isNumeric().toInt(),
+  body('pricePhysical').optional().isNumeric().toInt(),
   body('isFree').optional().isBoolean(),
-  body('gatedPage').optional().isNumeric(),
+  body('gatedPage').optional().isNumeric().toInt(),
   body('blurPaywall').optional().isBoolean(),
   handleValidationErrors
 ];

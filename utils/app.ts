@@ -5,13 +5,12 @@ function normalizeBaseUrl(value: string | undefined) {
 
 const ENV = import.meta.env as Record<string, string | undefined>;
 
-// Determine API base URL
+/** Worker / API origin only (no `/api` suffix). Set `VITE_API_BASE_URL` for every environment. */
 function getApiBaseUrl(): string {
-  if (ENV.VITE_API_BASE_URL || ENV.VITE_API_BASE) {
-    return normalizeBaseUrl(ENV.VITE_API_BASE_URL ?? ENV.VITE_API_BASE);
-  }
-
-  return 'https://vartmaan-sarokaar-api.vineshjm.workers.dev';
+  const v = ENV.VITE_API_BASE_URL ?? ENV.VITE_API_BASE;
+  if (v) return normalizeBaseUrl(v);
+  if (import.meta.env.DEV) return normalizeBaseUrl('http://localhost:5174');
+  return '';
 }
 
 export const API_BASE = getApiBaseUrl();
@@ -59,8 +58,9 @@ export function getAuthHeaders(): Record<string, string> {
 export function resolveAssetUrl(url: string) {
   if (!url) return '';
   if (/^https?:\/\//i.test(url)) return url;
-  if (url.startsWith('/')) return `${API_BASE}${url}`;
-  return `${API_BASE}/${url}`;
+  const base = API_BASE || '';
+  if (url.startsWith('/')) return `${base}${url}`;
+  return `${base}/${url}`;
 }
 
 export function formatFileSize(bytes: number) {

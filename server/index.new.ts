@@ -23,7 +23,6 @@ import { authenticate, requireRole, AuthenticatedRequest } from './middlewares/a
 import { UserRole } from '../types.js';
 
 // Import utilities
-import { load } from 'cheerio';
 import { OAuth2Client } from 'google-auth-library';
 
 dotenv.config();
@@ -34,27 +33,6 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const UPLOADS_DIR = path.join(ROOT_DIR, 'uploads');
 
 const PORT = Number(process.env.PORT ?? 5174);
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-
-function extractText(html: string) {
-  const $ = load(html);
-  $('script,style,noscript').remove();
-  return $('body').text().replace(/\s+/g, ' ').trim();
-}
-
-async function fetchPageText(url: string, limit: number) {
-  const response = await fetch(url, {
-    headers: { 'User-Agent': 'vartmaan-sarokaar-bot/1.0' },
-    redirect: 'follow'
-  });
-
-  const html = await response.text();
-  return {
-    html,
-    text: extractText(html).slice(0, limit)
-  };
-}
 
 async function start() {
   await fs.mkdir(UPLOADS_DIR, { recursive: true });
@@ -104,8 +82,7 @@ async function start() {
       data: {
         ok: true,
         storage: 'file',
-        databaseFile: store.getDatabaseFilePath(),
-        openAiConfigured: Boolean(OPENAI_API_KEY)
+        databaseFile: store.getDatabaseFilePath()
       }
     });
   });
@@ -139,105 +116,6 @@ async function start() {
       data: { logs: store.listAuditLogs() }
     });
   });
-
-  // Web scraping utility
-  app.get('/api/scrape', asyncHandler(async (req: Request, res: Response) => {
-    const url = req.query.url as string;
-    if (!url) {
-      return res.status(400).json({
-        success: false,
-        message: 'A url query parameter is required.',
-        error: 'Missing URL'
-      });
-    }
-
-    const { html, text } = await fetchPageText(url, 200000);
-    const $ = load(html);
-    const title = $('title').first().text().trim();
-
-    res.json({
-      success: true,
-      message: 'Website content scraped.',
-      data: { title, text }
-    });
-  }));
-
-  // Chat functionality
-  app.post('/api/chat', asyncHandler(async (req: Request, res: Response) => {
-    const { url, message } = req.body;
-
-    if (!message) {
-      return res.status(400).json({
-        success: false,
-        message: 'A message is required.',
-        error: 'Missing message'
-      });
-    }
-
-    if (!OPENAI_API_KEY) {
-      return res.status(500).json({
-        success: false,
-        message: 'OPENAI_API_KEY is not configured.',
-        error: 'OpenAI not configured'
-      });
-    }
-
-    let pageText = '';
-    if (url) {
-      try {
-        const scraped = await fetchPageText(url, 15000);
-        pageText = scraped.text;
-      } catch (error) {
-        console.warn('Failed to scrape context for chat request:', error);
-      }
-    }
-
-    const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: OPENAI_MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: 'You answer questions about the provided website content when it is available. If the answer is not in the provided content, say so clearly.'
-          },
-          {
-            role: 'system',
-            content: `WEBSITE_CONTENT:\n${pageText}`
-          },
-          {
-            role: 'user',
-            content: message
-          }
-        ],
-        max_tokens: 800,
-        temperature: 0.2
-      })
-    });
-
-    const payload = await openAiResponse.json() as any;
-
-    if (!openAiResponse.ok) {
-      const errorMessage = payload?.error?.message ?? 'OpenAI request failed.';
-      return res.status(502).json({
-        success: false,
-        message: 'OpenAI request failed.',
-        error: errorMessage
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Chat response generated.',
-      data: {
-        answer: payload?.choices?.[0]?.message?.content ?? ''
-      }
-    });
-  }));
 
   // 404 handler
   app.use((req, res) => {

@@ -165,9 +165,9 @@ function main() {
   console.log(`Found ${data.users.length} users, ${data.articles.length} articles, ${data.magazines.length} magazines, ${data.ads.length} ads, ${data.media.length} media files, ${data.subscriptionRequests.length} subscription requests`);
 
   console.log('\nTo apply this migration to D1:');
-  console.log('1. Create your D1 database: wrangler d1 create vartmaan-sarokar-db');
-  console.log('2. Apply schema: wrangler d1 execute vartmaan-sarokar-db --file=schema.sql');
-  console.log('3. Apply data: wrangler d1 execute vartmaan-sarokar-db --file=migrate-data.sql');
+  console.log('1. Create your D1 database: wrangler d1 create vartmaansarokar-db');
+  console.log('2. Apply schema: wrangler d1 execute vartmaansarokar-db --file=schema.sql');
+  console.log('3. Apply data: wrangler d1 execute vartmaansarokar-db --file=migrate-data.sql');
 }
 
 main();

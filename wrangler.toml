@@ -1,18 +1,25 @@
-name = "vartmaan-sarokaar-api"
+name = "vartmaansarokar"
 main = "server/workers-entry.ts"
-compatibility_date = "2024-01-01"
+compatibility_date = "2026-04-19"
 compatibility_flags = ["nodejs_compat"]
+routes = [
+  { pattern = "api.vartmaansarokaar.com/*", zone_name = "vartmaansarokaar.com" }
+]
+
+[observability]
+enabled = true
 
 [vars]
 NODE_ENV = "production"
-MAX_UPLOAD_SIZE_BYTES = "15728640"
-OPENAI_MODEL = "gpt-4o-mini"
-ALLOWED_ORIGINS = "https://main.vartmaan-sarokar-pages.pages.dev,https://vartmaan-sarokaar-pages.pages.dev,https://vartmaan-sarokaar.pages.dev,https://vartmaan-sarokaar-api.vineshjm.workers.dev"
+# Worker upload limit is enforced in code (5MB); keep in sync for ops/docs.
+MAX_UPLOAD_SIZE_BYTES = "5242880"
+ALLOWED_ORIGINS = "https://vartmaansarokaar.com,https://www.vartmaansarokaar.com,https://main.vartmaan-sarokar-pages.pages.dev"
 
+# D1: run `wrangler d1 create vartmaansarokar-db` (logged into the correct account), then set database_id to the printed UUID.
 [[d1_databases]]
 binding = "DB"
-database_name = "vartmaan-sarokar-db"
-database_id = "22be003e-a1b0-40d1-a356-c0d88155c36b"
+database_name = "vartmaansarokar-db"
+database_id = "9cc9608f-c17b-43f4-aa8c-4fc3306f02a4"
 
 [[r2_buckets]]
 binding = "MEDIA_BUCKET"

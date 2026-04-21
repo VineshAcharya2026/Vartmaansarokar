@@ -12,7 +12,7 @@ interface TranslationContextType {
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
 const CACHE_KEY_PREFIX = 'vs_trans_cache_';
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://vartmaan-sarokaar-api.vineshjm.workers.dev';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.vartmaansarokaar.com';
 
 export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState(localStorage.getItem('lang') || 'en');
@@ -58,8 +58,9 @@ export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ c
       });
       const data = await response.json();
       
-      if (data.translations) {
-        const newCache = { ...cache, ...data.translations };
+      const translations = data?.data?.translations ?? data?.translations;
+      if (translations) {
+        const newCache = { ...cache, ...translations };
         setCache(newCache);
         localStorage.setItem(`${CACHE_KEY_PREFIX}${language}`, JSON.stringify(newCache));
       }

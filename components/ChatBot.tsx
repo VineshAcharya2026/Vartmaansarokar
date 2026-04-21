@@ -19,21 +19,7 @@ const ChatBot: React.FC = () => {
     const userText = input.trim();
     append({ from: 'user', text: userText });
     setInput('');
-    setLoading(true);
-
-    try {
-      const data = await fetchApi<{ answer: string }>(API_BASE + '/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url || undefined, message: userText })
-      });
-
-      append({ from: 'bot', text: data.answer || t('chat.noResponse') });
-    } catch (err) {
-      append({ from: 'bot', text: `${t('chat.errorContactingServer')} ${String(err)}` });
-    } finally {
-      setLoading(false);
-    }
+    append({ from: 'bot', text: t('chat.noResponse') });
   };
 
   const handleQuickScrape = async () => {
@@ -41,9 +27,14 @@ const ChatBot: React.FC = () => {
     append({ from: 'system', text: t('chat.fetchingContent') });
     try {
       const query = new URLSearchParams({ url: url.trim() });
-      const data = await fetchApi<{ title?: string; text?: string }>(API_BASE + '/api/scrape?' + query.toString());
-      if (data.title) append({ from: 'system', text: `${t('chat.titlePrefix')} ${data.title}` });
-      if (data.text) append({ from: 'system', text: `${t('chat.textPrefix')} ${data.text.slice(0, 1000)}...` });
+      const data = await fetchApi<{ items?: { title?: string }[] }>(API_BASE + '/api/proxy/rss?' + query.toString());
+      const titles = (data.items || []).map((item) => item.title).filter(Boolean) as string[];
+      if (titles.length === 0) {
+        append({ from: 'system', text: t('chat.noResponse') });
+        return;
+      }
+      append({ from: 'system', text: `${t('chat.titlePrefix')} ${titles[0]}` });
+      append({ from: 'system', text: `${t('chat.textPrefix')} ${titles.slice(1, 6).join(' | ')}` });
     } catch (err) {
       append({ from: 'system', text: `${t('chat.failedToScrape')} ${String(err)}` });
     }

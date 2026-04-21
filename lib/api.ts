@@ -1,14 +1,13 @@
 import axios from 'axios';
-import { AUTH_TOKEN_KEY, SESSION_STORAGE_KEY } from '../utils/app';
+import { API_BASE, AUTH_TOKEN_KEY, SESSION_STORAGE_KEY } from '../utils/app';
 
-const BASE = import.meta.env.VITE_API_BASE_URL || 'https://vartmaan-sarokaar-api.vineshjm.workers.dev';
+const baseURL = API_BASE.replace(/\/$/, '');
 
 const api = axios.create({
-  baseURL: BASE,
-  withCredentials: true,
+  baseURL,
+  withCredentials: true
 });
 
-// Request interceptor to attach token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem(AUTH_TOKEN_KEY);
   if (token) {
@@ -17,12 +16,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor for global error handling
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const body = response.data as { success?: boolean; data?: unknown; error?: string | null } | null;
+    if (body && typeof body === 'object' && 'success' in body) {
+      if (body.success === false) {
+        const b = body as { error?: string; message?: string };
+        const err = new Error(b.error || b.message || 'Request failed');
+        return Promise.reject(err);
+      }
+      response.data = body.data;
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
-      // Clear auth and redirect on unauthorized
       localStorage.removeItem(AUTH_TOKEN_KEY);
       localStorage.removeItem(SESSION_STORAGE_KEY);
       window.location.href = '/#/staff-login';

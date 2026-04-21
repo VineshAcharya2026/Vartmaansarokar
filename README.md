@@ -40,7 +40,7 @@ Quick overview:
 1. `npm run db:create` - Create D1 database
 2. `npm run r2:create` - Create R2 bucket  
 3. `npm run db:schema` - Apply database schema
-4. Set secrets: `JWT_SECRET`, `STAFF_PASSWORD`, `OPENAI_API_KEY`
+3. Set secrets: `JWT_SECRET`, `STAFF_PASSWORD`, `GOOGLE_CLIENT_ID`
 5. `npm run deploy:workers` - Deploy Workers API
 6. Update `PRODUCTION_API_URL` in `utils/app.ts`
 7. `npm run deploy:pages` - Deploy frontend
@@ -61,7 +61,6 @@ Quick overview:
 - R2 Bucket for media storage
 - JWT authentication
 - Rate limiting & security headers
-- OpenAI integration for chat
 
 ### Database Schema (D1)
 - `users` - Authentication & roles
@@ -99,7 +98,6 @@ VITE_GOOGLE_CLIENT_ID=your-google-client-id
 ```bash
 wrangler secret put JWT_SECRET
 wrangler secret put STAFF_PASSWORD
-wrangler secret put OPENAI_API_KEY
 wrangler secret put GOOGLE_CLIENT_ID
 ```
 

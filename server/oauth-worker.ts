@@ -32,7 +32,7 @@ function isAdmin(email: string): boolean {
  */
 function getCorsHeaders(origin: string): Record<string, string> {
   return {
-    'Access-Control-Allow-Origin': origin || 'https://vartmaansarokar.pages.dev',
+    'Access-Control-Allow-Origin': origin || 'https://vartmaansarokaar.com',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Authorization, Content-Type',
     'Access-Control-Allow-Credentials': 'true',
@@ -76,12 +76,12 @@ function successResponse(data: Record<string, unknown>, origin: string = ''): Re
  * Redirects user to Google OAuth consent screen
  */
 async function handleGoogleLogin(env: Env, request: Request): Promise<Response> {
-  const origin = request.headers.get('Origin') || 'https://vartmaansarokar.pages.dev';
+  const origin = request.headers.get('Origin') || 'https://vartmaansarokaar.com';
   
   // Build Google OAuth URL
   const params = new URLSearchParams({
     client_id: env.GOOGLE_CLIENT_ID,
-    redirect_uri: 'https://vartmaan-sarokaar-api.vineshjm.workers.dev/api/auth/google/callback',
+    redirect_uri: 'https://api.vartmaansarokaar.com/api/auth/google/callback',
     response_type: 'code',
     scope: 'openid email profile',
     access_type: 'offline',
@@ -116,7 +116,7 @@ async function handleGoogleCallback(env: Env, request: Request): Promise<Respons
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': `https://vartmaansarokar.pages.dev/?error=${encodeURIComponent(error)}`,
+        'Location': `https://vartmaansarokaar.com/?error=${encodeURIComponent(error)}`,
       }
     });
   }
@@ -125,7 +125,7 @@ async function handleGoogleCallback(env: Env, request: Request): Promise<Respons
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': 'https://vartmaansarokar.pages.dev/?error=no_code',
+        'Location': 'https://vartmaansarokaar.com/?error=no_code',
       }
     });
   }
@@ -141,7 +141,7 @@ async function handleGoogleCallback(env: Env, request: Request): Promise<Respons
         code,
         client_id: env.GOOGLE_CLIENT_ID,
         client_secret: env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: 'https://vartmaan-sarokaar-api.vineshjm.workers.dev/api/auth/google/callback',
+        redirect_uri: 'https://api.vartmaansarokaar.com/api/auth/google/callback',
         grant_type: 'authorization_code',
       }),
     });
@@ -152,7 +152,7 @@ async function handleGoogleCallback(env: Env, request: Request): Promise<Respons
       return new Response(null, {
         status: 302,
         headers: {
-          'Location': 'https://vartmaansarokar.pages.dev/?error=token_exchange_failed',
+          'Location': 'https://vartmaansarokaar.com/?error=token_exchange_failed',
         }
       });
     }
@@ -170,7 +170,7 @@ async function handleGoogleCallback(env: Env, request: Request): Promise<Respons
       return new Response(null, {
         status: 302,
         headers: {
-          'Location': 'https://vartmaansarokar.pages.dev/?error=userinfo_failed',
+          'Location': 'https://vartmaansarokaar.com/?error=userinfo_failed',
         }
       });
     }
@@ -197,7 +197,7 @@ async function handleGoogleCallback(env: Env, request: Request): Promise<Respons
     
     // Step 5: Redirect to frontend with token
     const redirectPath = role === 'admin' ? '/admin' : '/';
-    const redirectUrl = `https://vartmaansarokar.pages.dev${redirectPath}?token=${encodeURIComponent(token)}`;
+    const redirectUrl = `https://vartmaansarokaar.com${redirectPath}?token=${encodeURIComponent(token)}`;
     
     return new Response(null, {
       status: 302,
@@ -212,7 +212,7 @@ async function handleGoogleCallback(env: Env, request: Request): Promise<Respons
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': 'https://vartmaansarokar.pages.dev/?error=oauth_failed',
+        'Location': 'https://vartmaansarokaar.com/?error=oauth_failed',
       }
     });
   }
@@ -223,7 +223,7 @@ async function handleGoogleCallback(env: Env, request: Request): Promise<Respons
  * Verifies JWT token from Authorization header
  */
 async function handleVerifyToken(env: Env, request: Request): Promise<Response> {
-  const origin = request.headers.get('Origin') || 'https://vartmaansarokar.pages.dev';
+  const origin = request.headers.get('Origin') || 'https://vartmaansarokaar.com';
   
   const authHeader = request.headers.get('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -268,7 +268,7 @@ async function handleVerifyToken(env: Env, request: Request): Promise<Response> 
  * Handles logout (frontend removes token from localStorage)
  */
 async function handleLogout(env: Env, request: Request): Promise<Response> {
-  const origin = request.headers.get('Origin') || 'https://vartmaansarokar.pages.dev';
+  const origin = request.headers.get('Origin') || 'https://vartmaansarokaar.com';
   
   return successResponse({ message: 'Logged out successfully' }, origin);
 }
@@ -294,7 +294,7 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     const method = request.method;
-    const origin = request.headers.get('Origin') || 'https://vartmaansarokar.pages.dev';
+    const origin = request.headers.get('Origin') || 'https://vartmaansarokaar.com';
     
     // Handle CORS preflight
     if (method === 'OPTIONS') {

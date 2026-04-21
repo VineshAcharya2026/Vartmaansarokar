@@ -422,22 +422,6 @@
     "fullscreen": "Fullscreen",
     "digitalLabel": "Free access to all magazine issues for everyone. Subscribe to print for ₹499/month."
   },
-  "chat": {
-    "title": "Ask Us Anything",
-    "subtitle": "Tell us a website URL and ask anything about it. We'll get you the answer.",
-    "websitePlaceholder": "https://example.com",
-    "fetch": "Fetch",
-    "emptyState": "No messages yet. Ask a question to start.",
-    "inputPlaceholder": "Ask me about the website...",
-    "thinking": "Thinking...",
-    "send": "Send",
-    "fetchingContent": "Fetching page content...",
-    "titlePrefix": "Title:",
-    "textPrefix": "Page text (trimmed):",
-    "noResponse": "We did not get a response. Please try again.",
-    "failedToScrape": "Could not read the website. Please check the URL:",
-    "errorContactingServer": "Something went wrong. Please try again:"
-  },
   "admin": {
     "welcomeBack": "Welcome back, {{name}}",
     "dashboardBody": "Publish stories, upload magazines, manage readers, and run ads from here.",

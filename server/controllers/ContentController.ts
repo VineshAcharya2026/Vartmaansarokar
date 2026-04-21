@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ContentService } from '../services/ContentService.js';
-import { asyncHandler } from '../utils/errorHandler.js';
+import { asyncHandler, AppError } from '../utils/errorHandler.js';
 import { AuthenticatedRequest } from '../middlewares/auth.js';
 import { UserRole } from '../../types.js';
 
@@ -14,12 +14,20 @@ function articleOptions(req: AuthenticatedRequest) {
 }
 
 export const getArticles = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const articles = contentService.getArticles(articleOptions(req));
-  res.json({ success: true, message: 'Articles loaded.', data: { articles, news: articles, queue: contentService.getArticleQueue() } });
+  const opts = req.user ? articleOptions(req) : { includeUnapproved: false };
+  const articles = contentService.getArticles(opts);
+  const queue = req.user ? contentService.getArticleQueue() : [];
+  res.json({ success: true, message: 'Articles loaded.', data: { articles, news: articles, queue } });
 });
 
-export const getArticle = asyncHandler(async (req: Request, res: Response) => {
+export const getArticle = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const article = contentService.getArticleById(req.params.id as string);
+  if (!req.user) {
+    const st = String(article.status || '');
+    if (!['APPROVED', 'PUBLISHED'].includes(st)) {
+      throw new AppError('Article not found.', 404);
+    }
+  }
   res.json({ success: true, message: 'Article loaded.', data: { article } });
 });
 
@@ -76,13 +84,24 @@ export const deleteArticle = asyncHandler(async (req: AuthenticatedRequest, res:
 });
 
 export const getMagazines = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const options = req.user?.role === UserRole.EDITOR ? { includeUnapproved: true, authorId: req.user.id } : { includeUnapproved: true };
+  const options = req.user
+    ? req.user.role === UserRole.EDITOR
+      ? { includeUnapproved: true, authorId: req.user.id }
+      : { includeUnapproved: true }
+    : { includeUnapproved: false };
   const magazines = contentService.getMagazines(options);
-  res.json({ success: true, message: 'Magazines loaded.', data: { magazines, queue: contentService.getMagazineQueue() } });
+  const queue = req.user ? contentService.getMagazineQueue() : [];
+  res.json({ success: true, message: 'Magazines loaded.', data: { magazines, queue } });
 });
 
-export const getMagazine = asyncHandler(async (req: Request, res: Response) => {
+export const getMagazine = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const magazine = contentService.getMagazineById(req.params.id as string);
+  if (!req.user) {
+    const st = String(magazine.status || '');
+    if (!['APPROVED', 'PUBLISHED'].includes(st)) {
+      throw new AppError('Magazine not found.', 404);
+    }
+  }
   res.json({ success: true, message: 'Magazine loaded.', data: { magazine } });
 });
 
@@ -123,8 +142,11 @@ export const deleteMagazine = asyncHandler(async (req: AuthenticatedRequest, res
   res.json({ success: true, message: 'Magazine deleted.', data: { deletedId: deleted.id, magazines: contentService.getMagazines(options) } });
 });
 
-export const getAds = asyncHandler(async (_req: Request, res: Response) => {
-  const ads = contentService.getAds();
+export const getAds = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  let ads = contentService.getAds();
+  if (!req.user) {
+    ads = ads.filter((a) => (a.status || 'ACTIVE') === 'ACTIVE');
+  }
   res.json({ success: true, message: 'Ads loaded.', data: { ads } });
 });
 

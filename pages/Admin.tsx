@@ -121,8 +121,8 @@ const Admin: React.FC = () => {
 
   const loadTicker = async () => {
     try {
-      const { data } = await api.get('/ticker');
-      setTickerItems(data.items || []);
+      const { data } = await api.get('/api/ticker');
+      setTickerItems((data as { items?: typeof tickerItems }).items ?? []);
     } catch (e) {
       console.error(e);
     }
@@ -130,8 +130,8 @@ const Admin: React.FC = () => {
 
   const loadMedia = async () => {
     try {
-      const { data } = await api.get('/media');
-      setMediaItems(data.media || []);
+      const { data } = await api.get('/api/media');
+      setMediaItems((data as { media?: typeof mediaItems }).media ?? []);
     } catch (e) {
       console.error(e);
     }
@@ -287,15 +287,59 @@ const Admin: React.FC = () => {
     coverImage: '',
     pdfUrl: '',
     gatedPage: 2,
-    price: 499,
+    pricePhysical: 499,
+    priceDigital: 0,
     blurPaywall: true
   });
+  const [magError, setMagError] = useState('');
+  const [magLoading, setMagLoading] = useState(false);
 
   const handleMagSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await addMagazine(magForm);
-    setIsAddingMag(false);
-    setMagForm({ title: '', issueNumber: '', date: new Date().toISOString().split('T')[0], coverImage: '', pdfUrl: '', gatedPage: 2, price: 499, blurPaywall: true });
+    setMagError('');
+    
+    // Validation
+    if (!magForm.title.trim()) {
+      setMagError('Please enter an issue title');
+      return;
+    }
+    if (!magForm.issueNumber.trim()) {
+      setMagError('Please enter an issue number');
+      return;
+    }
+    if (!magForm.coverImage.trim()) {
+      setMagError('Please provide a cover image URL');
+      return;
+    }
+    if (!magForm.pdfUrl.trim()) {
+      setMagError('Please provide a PDF URL');
+      return;
+    }
+    if (magForm.pricePhysical < 0) {
+      setMagError('Price cannot be negative');
+      return;
+    }
+
+    try {
+      setMagLoading(true);
+      await addMagazine(magForm);
+      setIsAddingMag(false);
+      setMagForm({ 
+        title: '', 
+        issueNumber: '', 
+        date: new Date().toISOString().split('T')[0], 
+        coverImage: '', 
+        pdfUrl: '', 
+        gatedPage: 2, 
+        pricePhysical: 499,
+        priceDigital: 0,
+        blurPaywall: true 
+      });
+    } catch (err: any) {
+      setMagError(err.message || 'Failed to create magazine. Please try again.');
+    } finally {
+      setMagLoading(false);
+    }
   };
 
   const renderMagazines = () => (
@@ -313,28 +357,34 @@ const Admin: React.FC = () => {
 
       {isAddingMag ? (
         <form onSubmit={handleMagSubmit} className="max-w-4xl bg-white p-8 rounded-[32px] shadow-xl border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {magError && (
+            <div className="md:col-span-2 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium flex items-start gap-3">
+              <AlertCircle size={20} className="flex-shrink-0 mt-0.5"/>
+              {magError}
+            </div>
+          )}
            <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Issue Title</label>
-                <input value={magForm.title} onChange={e => setMagForm({...magForm, title: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:border-[#800000] focus:ring-0 font-bold" placeholder="e.g. October 2024 Special" required />
+                <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Issue Title *</label>
+                <input value={magForm.title} onChange={e => setMagForm({...magForm, title: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:border-[#800000] focus:ring-0 font-bold" placeholder="e.g. October 2024 Special" disabled={magLoading} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Issue #</label>
-                  <input value={magForm.issueNumber} onChange={e => setMagForm({...magForm, issueNumber: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0 font-bold" placeholder="e.g. VOL 42" required />
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Issue # *</label>
+                  <input value={magForm.issueNumber} onChange={e => setMagForm({...magForm, issueNumber: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0 font-bold" placeholder="e.g. VOL 42" disabled={magLoading} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Publish Date</label>
-                  <input type="date" value={magForm.date} onChange={e => setMagForm({...magForm, date: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0 font-bold text-sm" required />
+                  <input type="date" value={magForm.date} onChange={e => setMagForm({...magForm, date: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0 font-bold text-sm" disabled={magLoading} />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Cover Image (URL or Media ID)</label>
-                <input value={magForm.coverImage} onChange={e => setMagForm({...magForm, coverImage: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0" placeholder="/media/id-name.jpg" />
+                <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Cover Image (URL) *</label>
+                <input value={magForm.coverImage} onChange={e => setMagForm({...magForm, coverImage: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0" placeholder="https://example.com/cover.jpg" disabled={magLoading} />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">PDF URL</label>
-                <input value={magForm.pdfUrl} onChange={e => setMagForm({...magForm, pdfUrl: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0" placeholder="/media/october.pdf" required />
+                <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">PDF URL *</label>
+                <input value={magForm.pdfUrl} onChange={e => setMagForm({...magForm, pdfUrl: e.target.value})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0" placeholder="https://example.com/magazine.pdf" disabled={magLoading} />
               </div>
            </div>
            
@@ -342,12 +392,17 @@ const Admin: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1 text-red-600">Gated Page #</label>
-                  <input type="number" value={magForm.gatedPage} onChange={e => setMagForm({...magForm, gatedPage: parseInt(e.target.value)})} className="w-full bg-red-50/50 p-4 rounded-xl border-transparent focus:ring-0 font-bold" />
+                  <input type="number" min="0" value={magForm.gatedPage} onChange={e => setMagForm({...magForm, gatedPage: parseInt(e.target.value)})} className="w-full bg-red-50/50 p-4 rounded-xl border-transparent focus:ring-0 font-bold" disabled={magLoading} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Print Price (₹)</label>
-                  <input type="number" value={magForm.price} onChange={e => setMagForm({...magForm, price: parseInt(e.target.value)})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0 font-bold" />
+                  <input type="number" min="0" value={magForm.pricePhysical} onChange={e => setMagForm({...magForm, pricePhysical: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0 font-bold" disabled={magLoading} />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest px-1">Digital Price (₹)</label>
+                <input type="number" min="0" value={magForm.priceDigital} onChange={e => setMagForm({...magForm, priceDigital: parseInt(e.target.value) || 0})} className="w-full bg-gray-50 p-4 rounded-xl border-transparent focus:ring-0 font-bold" disabled={magLoading} />
               </div>
               
               <div className="p-4 bg-gray-50 rounded-2xl flex items-center justify-between">
@@ -355,12 +410,19 @@ const Admin: React.FC = () => {
                    <h4 className="text-sm font-bold text-[#001f3f]">Blur Paywall</h4>
                    <p className="text-[10px] text-gray-400 font-medium">Blurs gated pages instead of blocking</p>
                 </div>
-                <input type="checkbox" checked={magForm.blurPaywall} onChange={e => setMagForm({...magForm, blurPaywall: e.target.checked})} className="w-6 h-6 rounded text-[#800000] focus:ring-0" />
+                <input type="checkbox" checked={magForm.blurPaywall} onChange={e => setMagForm({...magForm, blurPaywall: e.target.checked})} className="w-6 h-6 rounded text-[#800000] focus:ring-0" disabled={magLoading} />
               </div>
 
               <div className="pt-6">
-                <button type="submit" className="w-full bg-[#800000] text-white py-4 rounded-2xl font-black shadow-xl hover:bg-red-900 transition-all">
-                  Create Magazine Issue
+                <button type="submit" disabled={magLoading} className="w-full bg-[#800000] text-white py-4 rounded-2xl font-black shadow-xl hover:bg-red-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                  {magLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Magazine Issue'
+                  )}
                 </button>
               </div>
            </div>
@@ -409,7 +471,7 @@ const Admin: React.FC = () => {
           onClick={async () => {
             const text = prompt('Ticker Message?');
             if (text) {
-              await api.post('/ticker', { text });
+              await api.post('/api/ticker', { text });
               loadTicker();
             }
           }}
@@ -430,7 +492,7 @@ const Admin: React.FC = () => {
               <div className="flex gap-2">
                 <button 
                   onClick={async () => {
-                    await api.put(`/ticker/${item.id}`, { active: !item.active });
+                    await api.put(`/api/ticker/${item.id}`, { active: !item.active });
                     loadTicker();
                   }}
                   className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg"
@@ -439,7 +501,7 @@ const Admin: React.FC = () => {
                 </button>
                 <button 
                   onClick={async () => {
-                    await api.delete(`/ticker/${item.id}`);
+                    await api.delete(`/api/ticker/${item.id}`);
                     loadTicker();
                   }}
                   className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
@@ -473,7 +535,7 @@ const Admin: React.FC = () => {
                 formData.append('file', file);
                 setIsUploading(true);
                 try {
-                  await api.post('/media', formData);
+                  await api.post('/api/uploads', formData);
                   toast.success('Uploaded successfully');
                   loadMedia();
                 } catch (err) {

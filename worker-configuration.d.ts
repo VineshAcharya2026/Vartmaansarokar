@@ -8,13 +8,11 @@ interface Env {
   DB: D1Database;
   MEDIA_BUCKET: R2Bucket;
   JWT_SECRET: string;
-  OPENAI_API_KEY: string;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
   STAFF_PASSWORD: string;
   NODE_ENV: string;
   MAX_UPLOAD_SIZE_BYTES: string;
-  OPENAI_MODEL: string;
   ALLOWED_ORIGINS: string;
 }
 

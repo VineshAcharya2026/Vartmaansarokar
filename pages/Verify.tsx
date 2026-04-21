@@ -18,24 +18,31 @@ const Verify: React.FC = () => {
       }
 
       try {
-        const BASE = import.meta.env.VITE_API_BASE_URL || 'https://vartmaan-sarokaar-api.vineshjm.workers.dev';
-        const res = await fetch(`${BASE}/auth/verify-email`, {
+        const BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.vartmaansarokaar.com';
+        const res = await fetch(`${BASE.replace(/\/$/, '')}/api/auth/verify-email`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token })
         });
 
-        const data = await res.json() as any;
+        const data = await res.json() as {
+          success?: boolean;
+          data?: { message?: string };
+          message?: string;
+          error?: string | null;
+        };
 
         if (res.ok && data.success) {
           setStatus('success');
-          setMessage(data.message || 'Verification successful!');
+          const msg = data.data?.message ?? data.message ?? 'Verification successful!';
+          setMessage(msg);
           toast.success('Email verified! You can now log in.');
           setTimeout(() => navigate('/'), 3000);
         } else {
           setStatus('error');
-          setMessage(data.error || 'Verification failed.');
-          toast.error(data.error || 'Verification failed.');
+          const errMsg = data.error || 'Verification failed.';
+          setMessage(errMsg);
+          toast.error(errMsg);
         }
       } catch (err) {
         setStatus('error');

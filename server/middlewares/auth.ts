@@ -39,6 +39,29 @@ function extractToken(req: Request): string {
  * requireAuth: verify JWT, attach user to req.user.
  * Reads from Authorization header OR auth_token cookie.
  */
+export const optionalAuthenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  const token = extractToken(req);
+  if (!token) {
+    next();
+    return;
+  }
+  try {
+    const payload = jwt.verify(token, JWT_SECRET) as { userId?: string; id?: string };
+    const uid = payload.userId ?? payload.id;
+    if (!uid) {
+      next();
+      return;
+    }
+    const user = store.getUserById(uid);
+    if (user && user.isActive !== false) {
+      req.user = user;
+    }
+    next();
+  } catch {
+    next();
+  }
+};
+
 export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
   const token = extractToken(req);
 
@@ -48,13 +71,14 @@ export const authenticate = (req: AuthenticatedRequest, res: Response, next: Nex
   }
 
   try {
-    const payload = jwt.verify(token, JWT_SECRET) as { userId?: string };
-    if (!payload.userId) {
+    const payload = jwt.verify(token, JWT_SECRET) as { userId?: string; id?: string };
+    const uid = payload.userId ?? payload.id;
+    if (!uid) {
       res.status(401).json({ success: false, message: 'Invalid token.', error: 'Missing user identifier' });
       return;
     }
 
-    const user = store.getUserById(payload.userId);
+    const user = store.getUserById(uid);
     if (!user || user.isActive === false) {
       res.status(401).json({ success: false, message: 'Invalid token.', error: 'User not found or deactivated' });
       return;

@@ -5,7 +5,6 @@ import express, { NextFunction, Request, Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
-import { load } from 'cheerio';
 import crypto from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -31,8 +30,6 @@ const UPLOADS_DIR = path.join(ROOT_DIR, 'uploads');
 const PORT = Number(process.env.PORT ?? 5174);
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID || '';
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 const MAX_UPLOAD_SIZE_BYTES = Number(process.env.MAX_UPLOAD_SIZE_BYTES ?? 15 * 1024 * 1024);
 const USER_ROLES = Object.values(UserRole);
 const SUBSCRIPTION_STATUSES: SubscriptionStatus[] = ['ACTIVE', 'EXPIRED', 'PENDING'];
@@ -124,7 +121,7 @@ function detectMediaKind(mimeType: string): MediaFile['kind'] {
 }
 
 function createToken(user: UserRecord) {
-  return jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 }
 
 async function authRequired(request: AuthenticatedRequest, response: Response, next: NextFunction) {
@@ -306,25 +303,6 @@ function validateSubscriptionRequestInput(body: unknown): Omit<SubscriptionReque
   };
 }
 
-function extractText(html: string) {
-  const $ = load(html);
-  $('script,style,noscript').remove();
-  return $('body').text().replace(/\s+/g, ' ').trim();
-}
-
-async function fetchPageText(url: string, limit: number) {
-  const response = await fetch(url, {
-    headers: { 'User-Agent': 'vartmaan-sarokaar-bot/1.0' },
-    redirect: 'follow'
-  });
-
-  const html = await response.text();
-  return {
-    html,
-    text: extractText(html).slice(0, limit)
-  };
-}
-
 const uploadStorage = multer.diskStorage({
   destination: (_request, _file, callback) => {
     callback(null, UPLOADS_DIR);
@@ -368,8 +346,7 @@ async function start() {
       {
         ok: true,
         storage: 'file',
-        databaseFile: store.getDatabaseFilePath(),
-        openAiConfigured: Boolean(OPENAI_API_KEY)
+        databaseFile: store.getDatabaseFilePath()
       },
       'Health check passed.'
     );
@@ -889,102 +866,6 @@ async function start() {
     }
 
     sendSuccess(response, { request: updatedRequest }, 'Subscription request updated.');
-  });
-
-  app.get('/api/scrape', async (request, response) => {
-    const url = readString(request.query.url);
-    if (!url) {
-      sendError(response, 400, 'A url query parameter is required.');
-      return;
-    }
-
-    try {
-      const { html, text } = await fetchPageText(url, 200000);
-      const $ = load(html);
-      const title = $('title').first().text().trim();
-      sendSuccess(response, { title, text }, 'Website content scraped.');
-    } catch (error) {
-      sendError(response, 500, 'Failed to scrape the requested page.', error instanceof Error ? error.message : 'Unknown error');
-    }
-  });
-
-  app.post('/api/chat', async (request, response) => {
-    const body = isRecord(request.body) ? request.body : {};
-    const url = readString(body.url);
-    const message = readString(body.message);
-
-    if (!message) {
-      sendError(response, 400, 'A message is required.');
-      return;
-    }
-
-    if (!OPENAI_API_KEY) {
-      sendError(response, 500, 'OPENAI_API_KEY is not configured.');
-      return;
-    }
-
-    let pageText = '';
-    if (url) {
-      try {
-        const scraped = await fetchPageText(url, 15000);
-        pageText = scraped.text;
-      } catch (error) {
-        console.warn('Failed to scrape context for chat request:', error);
-      }
-    }
-
-    try {
-      const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: OPENAI_MODEL,
-          messages: [
-            {
-              role: 'system',
-              content: 'You answer questions about the provided website content when it is available. If the answer is not in the provided content, say so clearly.'
-            },
-            {
-              role: 'system',
-              content: `WEBSITE_CONTENT:\n${pageText}`
-            },
-            {
-              role: 'user',
-              content: message
-            }
-          ],
-          max_tokens: 800,
-          temperature: 0.2
-        })
-      });
-
-      const payload = (await openAiResponse.json().catch(() => null)) as {
-        choices?: Array<{ message?: { content?: string } }>;
-        error?: { message?: string } | string;
-      } | null;
-
-      if (!openAiResponse.ok) {
-        const errorMessage =
-          typeof payload?.error === 'string'
-            ? payload.error
-            : payload?.error?.message ?? 'OpenAI request failed.';
-        sendError(response, 502, 'OpenAI request failed.', errorMessage);
-        return;
-      }
-
-      sendSuccess(
-        response,
-        {
-          answer: payload?.choices?.[0]?.message?.content ?? ''
-        },
-        'Chat response generated.'
-      );
-    } catch (error) {
-      sendError(response, 500, 'Chat request failed.', error instanceof Error ? error.message : 'Unknown error');
-    }
   });
 
   app.use((_request, response) => {

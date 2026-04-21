@@ -3,7 +3,7 @@
  * Handles OAuth flow, token management, and user session
  */
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://vartmaan-sarokaar-api.vineshjm.workers.dev';
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'https://api.vartmaansarokaar.com').replace(/\/$/, '');
 
 // Token storage key
 const TOKEN_KEY = 'vartmaan-auth-token';
@@ -12,7 +12,7 @@ const TOKEN_KEY = 'vartmaan-auth-token';
  * Redirect user to Google OAuth login
  */
 export function handleGoogleLogin() {
-  window.location.href = `${API_BASE}/api/auth/google/login`;
+  throw new Error('Redirect-based Google OAuth is not enabled in this deployment.');
 }
 
 /**
@@ -90,10 +90,7 @@ export function getUser() {
   if (!payload) return null;
   
   return {
-    email: payload.email,
-    name: payload.name,
-    picture: payload.picture,
-    role: String(payload.role || '').toUpperCase(),
+    id: payload.userId,
   };
 }
 
@@ -148,22 +145,23 @@ export async function verifyTokenWithBackend() {
   if (!token) return { valid: false, error: 'No token' };
   
   try {
-    const response = await fetch(`${API_BASE}/api/auth/verify`, {
+    const response = await fetch(`${API_BASE}/api/auth/me`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
       },
     });
     
-    const data = await response.json();
+    const body = await response.json();
+    const user = body?.data?.user;
     
-    if (!data.valid) {
+    if (!response.ok || !user) {
       // Token invalid, remove it
       logout();
-      return { valid: false, error: data.error };
+      return { valid: false, error: body?.error || 'Invalid token' };
     }
     
-    return { valid: true, user: data.user };
+    return { valid: true, user };
   } catch (error) {
     console.error('Token verification failed:', error);
     return { valid: false, error: 'Network error' };

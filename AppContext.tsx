@@ -112,10 +112,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const login = async (email: string, password?: string) => {
-    const { data: resp } = await api.post('/auth/login', { email, password });
-    // Server wraps payload in { success, data: { token, user } }
-    const token: string = resp.data?.token ?? resp.token;
-    const user = resp.data?.user ?? resp.user;
+    const { data: resp } = await api.post('/api/auth/login', { email, password });
+    const token: string = (resp as { token: string }).token;
+    const user = (resp as { user: User }).user;
     localStorage.setItem(AUTH_TOKEN_KEY, token);
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
     setCurrentUser(user);
@@ -124,9 +123,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const loginWithGoogle = async (credential: string) => {
-    const { data: resp } = await api.post('/auth/google', { credential });
-    const token: string = resp.data?.token ?? resp.token;
-    const user = resp.data?.user ?? resp.user;
+    const { data: resp } = await api.post('/api/auth/google', { credential });
+    const token: string = (resp as { token: string }).token;
+    const user = (resp as { user: User }).user;
     localStorage.setItem(AUTH_TOKEN_KEY, token);
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
     setCurrentUser(user);
@@ -136,7 +135,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = () => {
     // Attempt server-side cookie/session cleanup (fire and forget)
-    api.post('/auth/logout').catch(() => {});
+    api.post('/api/auth/logout').catch(() => {});
     localStorage.removeItem(AUTH_TOKEN_KEY);
     localStorage.removeItem(SESSION_STORAGE_KEY);
     setCurrentUser(null);
@@ -144,175 +143,188 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const registerReader = async (formData: any) => {
-    await api.post('/auth/register', formData);
+    await api.post('/api/auth/register', formData);
   };
 
   const fetchNews = async () => {
     try {
-      const { data: resp } = await api.get('/articles');
-      setNews(resp.data?.articles ?? resp.news ?? []);
+      const { data: resp } = await api.get('/api/articles');
+      const r = resp as { news?: NewsItem[]; articles?: NewsItem[] };
+      setNews(r.news ?? r.articles ?? []);
     } catch (e) { console.error('Articles fetch failed'); }
   };
 
   const fetchStaffArticles = async () => {
     try {
-      // /articles returns all articles for authenticated staff via the modular server
-      const { data: resp } = await api.get('/articles');
-      setStaffArticles(resp.data?.articles ?? resp.news ?? []);
+      const { data: resp } = await api.get('/api/articles/all');
+      const r = resp as { news?: NewsItem[]; articles?: NewsItem[] };
+      setStaffArticles(r.news ?? r.articles ?? []);
     } catch (e) { console.error('Staff articles fetch failed'); }
   };
 
   const addNews = async (item: Partial<NewsItem>) => {
-    await api.post('/articles', item);
+    await api.post('/api/articles', item);
     toast.success('Article saved');
     fetchNews();
     if (['ADMIN', 'SUPER_ADMIN', 'EDITOR'].includes(currentUser?.role || '')) fetchStaffArticles();
   };
 
   const updateNews = async (id: string, item: Partial<NewsItem>) => {
-    await api.put(`/articles/${id}`, item);
+    await api.put(`/api/articles/${id}`, item);
     toast.success('Article updated');
     fetchNews();
     fetchStaffArticles();
   };
 
   const deleteNews = async (id: string) => {
-    await api.delete(`/articles/${id}`);
+    await api.delete(`/api/articles/${id}`);
     toast.success('Deleted');
     fetchStaffArticles();
   };
 
   const approveNews = async (id: string) => {
-    await api.post(`/articles/${id}/approve`);
+    await api.post(`/api/articles/${id}/approve`);
     toast.success('Approved');
     fetchStaffArticles();
   };
 
   const rejectNews = async (id: string, reason: string) => {
-    await api.post(`/articles/${id}/reject`, { reason });
+    await api.post(`/api/articles/${id}/reject`, { reason });
     toast.info('Rejected');
     fetchStaffArticles();
   };
 
   const reworkNews = async (id: string, reason: string) => {
-    await api.post(`/articles/${id}/rework`, { reason });
+    await api.post(`/api/articles/${id}/rework`, { reason });
     toast.info('Sent for rework');
     fetchStaffArticles();
   };
 
   const fetchMagazines = async () => {
     try {
-      const { data: resp } = await api.get('/magazines');
-      setMagazines(resp.data?.magazines ?? resp.magazines ?? []);
+      const { data: resp } = await api.get('/api/magazines');
+      const r = resp as { magazines?: MagazineItem[] };
+      setMagazines(r.magazines ?? []);
     } catch (e) { console.error('Magazines fetch failed'); }
   };
 
   const addMagazine = async (mag: Partial<MagazineItem>) => {
-    await api.post('/magazines', mag);
-    toast.success('Magazine added');
-    fetchMagazines();
+    try {
+      await api.post('/api/magazines', mag);
+      toast.success('Magazine created successfully');
+      await fetchMagazines();
+    } catch (error: any) {
+      const errorMsg = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Failed to create magazine. Please try again.';
+      toast.error(errorMsg);
+      throw new Error(errorMsg);
+    }
   };
 
   const deleteMagazine = async (id: string) => {
-    await api.delete(`/magazines/${id}`);
+    await api.delete(`/api/magazines/${id}`);
     toast.success('Deleted');
     fetchMagazines();
   };
 
   const fetchAds = async () => {
     try {
-      const { data: resp } = await api.get('/ads');
-      setAds(resp.data?.ads ?? resp.ads ?? []);
+      const { data: resp } = await api.get('/api/ads');
+      const r = resp as { ads?: AdItem[] };
+      setAds(r.ads ?? []);
     } catch (e) { console.error('Ads fetch failed'); }
   };
 
   const fetchAdminAds = async () => {
-    const { data: resp } = await api.get('/ads');
-    return resp.data?.ads ?? resp.ads ?? [];
+    const { data: resp } = await api.get('/api/ads');
+    const r = resp as { ads?: AdItem[] };
+    return r.ads ?? [];
   };
 
   const createAd = async (ad: Partial<AdItem>) => {
-    await api.post('/ads', ad);
+    await api.post('/api/ads', ad);
     toast.success('Ad created');
     fetchAds();
   };
 
   const updateAd = async (id: string, ad: Partial<AdItem>) => {
-    await api.put(`/ads/${id}`, ad);
+    await api.put(`/api/ads/${id}`, ad);
     toast.success('Ad updated');
     fetchAds();
   };
 
   const deleteAd = async (id: string) => {
-    await api.delete(`/ads/${id}`);
+    await api.delete(`/api/ads/${id}`);
     toast.success('Ad deleted');
     fetchAds();
   };
 
   const fetchMedia = async () => {
     try {
-      const { data: resp } = await api.get('/media');
-      setMedia(resp.data?.media ?? resp.media ?? []);
+      const { data: resp } = await api.get('/api/media');
+      const r = resp as { media?: MediaItem[] };
+      setMedia(r.media ?? []);
     } catch (e) { console.error('Media fetch failed'); }
   };
 
   const uploadFile = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    const { data: resp } = await api.post('/uploads', formData);
-    const media = resp.data?.media ?? resp.media;
-    return { url: media?.url ?? '' };
+    const { data: resp } = await api.post('/api/uploads', formData);
+    const r = resp as { url?: string; media?: { url?: string } };
+    const media = r.media;
+    return { url: media?.url ?? r.url ?? '' };
   };
 
   const fetchUsers = async () => {
     try {
-      const { data: resp } = await api.get('/users');
-      setUsers(resp.data?.users ?? resp.users ?? []);
+      const { data: resp } = await api.get('/api/users');
+      const r = resp as { users?: User[] };
+      setUsers(r.users ?? []);
     } catch (e) { console.error('Users fetch failed'); }
   };
 
   const approveUser = async (id: string) => {
-    await api.post(`/users/${id}/approve`);
+    await api.post(`/api/users/${id}/approve`);
     toast.success('Approved');
     fetchUsers();
   };
 
   const rejectUser = async (id: string, reason: string) => {
-    await api.post(`/users/${id}/reject`, { reason });
+    await api.post(`/api/users/${id}/reject`, { reason });
     toast.info('Rejected');
     fetchUsers();
   };
 
   const deleteUser = async (id: string) => {
-    await api.delete(`/users/${id}`);
+    await api.delete(`/api/users/${id}`);
     toast.success('Deleted');
     fetchUsers();
   };
 
   const fetchSettings = async () => {
      try {
-       const { data: resp } = await api.get('/settings');
-       const s = resp.data?.settings ?? resp.settings;
+       const { data: resp } = await api.get('/api/settings');
+       const s = (resp as { settings?: SiteSettings }).settings;
        if (s) setSiteSettings(s);
      } catch(e) {}
   };
 
   const fetchHero = async () => {
      try {
-       const { data: resp } = await api.get('/hero');
-       const h = resp.data?.hero ?? resp.hero;
+       const { data: resp } = await api.get('/api/hero');
+       const h = (resp as { hero?: HeroData }).hero;
        if (h) setHeroData(h);
      } catch(e) {}
   };
 
   const updateSettings = async (data: Partial<SiteSettings>) => {
-    await api.put('/settings', data);
+    await api.put('/api/settings', data);
     toast.success('Settings Saved');
     fetchSettings();
   };
 
   const updateHero = async (data: Partial<HeroData>) => {
-    await api.put('/hero', data);
+    await api.put('/api/hero', data);
     toast.success('Hero Updated');
     fetchHero();
   };

@@ -25,10 +25,11 @@ echo ✅ Authenticated
 REM Step 1: Check D1 database
 echo.
 echo Step 1: Checking D1 Database...
-wrangler d1 list | findstr "vartmaan-sarokar-db" >nul
+wrangler d1 list | findstr "vartmaansarokar-db" >nul
 if %errorlevel% neq 0 (
     echo Creating D1 database...
-    wrangler d1 create vartmaan-sarokar-db
+    wrangler d1 create vartmaansarokar-db
+    echo If this DB is new: copy the printed database_id into wrangler.toml, then re-run deploy.
     echo ✅ D1 database created
 ) else (
     echo ✅ D1 database already exists
@@ -49,7 +50,7 @@ if %errorlevel% neq 0 (
 REM Step 3: Apply database schema
 echo.
 echo Step 3: Applying Database Schema...
-wrangler d1 execute vartmaan-sarokar-db --file=schema.sql
+wrangler d1 execute vartmaansarokar-db --file=schema.sql
 echo ✅ Database schema applied
 
 REM Step 4: Deploy Workers
@@ -78,5 +79,4 @@ echo.
 echo ⚠️  Important: Set your secrets!
 echo    wrangler secret put JWT_SECRET
 echo    wrangler secret put STAFF_PASSWORD
-echo    wrangler secret put OPENAI_API_KEY (optional)
 echo    wrangler secret put GOOGLE_CLIENT_ID (optional)

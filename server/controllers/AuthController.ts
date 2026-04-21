@@ -12,8 +12,8 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const COOKIE_NAME = 'auth_token';
 const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-function createToken(user: Pick<UserRecord, 'id' | 'role'>) {
-  return jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+function createToken(user: Pick<UserRecord, 'id'>) {
+  return jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 }
 
 function toPublicUser(user: UserRecord) {

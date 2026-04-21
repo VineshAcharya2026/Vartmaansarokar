@@ -20,7 +20,6 @@ const Category = React.lazy(() => import('./pages/Category'));
 const Verify = React.lazy(() => import('./pages/Verify'));
 const About = React.lazy(() => import('./pages/About'));
 const Contact = React.lazy(() => import('./pages/Contact'));
-const ChatBot = React.lazy(() => import('./components/ChatBot'));
 const Profile = React.lazy(() => import('./pages/Profile'));
 const Articles = React.lazy(() => import('./pages/Articles'));
 const Subscribe = React.lazy(() => import('./pages/Subscribe'));
@@ -188,7 +187,6 @@ const AppContent: React.FC = () => {
             <Suspense fallback={<div className="flex items-center justify-center py-20"><p className="text-sm font-bold tracking-widest text-[#800000] uppercase">{t('loading.experience')}</p></div>}>
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/chat" element={<ChatBot />} />
                 <Route path="/news/:id" element={<NewsDetail />} />
                 <Route path="/articles" element={<Articles />} />
                 <Route path="/category/:slug" element={<Category />} />

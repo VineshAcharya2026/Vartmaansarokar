@@ -99,8 +99,8 @@ export class AuthService {
     return this.toPublicUser(user);
   }
 
-  private generateToken(user: { id: string; role: string; email: string; name: string }) {
-    return jwt.sign({ userId: user.id, role: user.role, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
+  private generateToken(user: { id: string }) {
+    return jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
   }
 
   private toPublicUser(user: UserRecord) {
