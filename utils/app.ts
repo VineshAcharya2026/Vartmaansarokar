@@ -5,12 +5,17 @@ function normalizeBaseUrl(value: string | undefined) {
 
 const ENV = import.meta.env as Record<string, string | undefined>;
 
-/** Worker / API origin only (no `/api` suffix). Set `VITE_API_BASE_URL` for every environment. */
+/**
+ * Public API origin (no `/api` suffix). Override with `VITE_API_BASE_URL` in `.env` / CI build.
+ * Fallback matches production Worker — avoids login calls hitting the static host when env is missing.
+ */
+const PRODUCTION_API_BASE_DEFAULT = 'https://api.vartmaansarokaar.com';
+
 function getApiBaseUrl(): string {
   const v = ENV.VITE_API_BASE_URL ?? ENV.VITE_API_BASE;
   if (v) return normalizeBaseUrl(v);
   if (import.meta.env.DEV) return normalizeBaseUrl('http://localhost:5174');
-  return '';
+  return PRODUCTION_API_BASE_DEFAULT;
 }
 
 export const API_BASE = getApiBaseUrl();

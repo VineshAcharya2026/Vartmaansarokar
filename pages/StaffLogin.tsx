@@ -51,8 +51,16 @@ const StaffLogin = () => {
     setLoading(true);
 
     try {
-      await login(email.trim(), password);
-      // Redirect handled in useEffect once `currentUser` is set
+      const user = await login(email.trim(), password);
+      const r = user.role as string;
+      if (staffRoles.includes(r as (typeof staffRoles)[number])) {
+        const from = location.state?.from?.pathname;
+        const target =
+          typeof from === 'string' && from.startsWith('/admin') ? from : '/admin';
+        navigate(target, { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     } catch (err: any) {
       setError(err.message || t('staffLogin.unexpectedError'));
     } finally {
