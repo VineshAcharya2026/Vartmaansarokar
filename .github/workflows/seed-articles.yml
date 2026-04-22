@@ -1,0 +1,37 @@
+# One-time or occasional: insert 15 demo articles into production D1 via the Worker API.
+# Requires repository secret: SEED_STAFF_PASSWORD (same value as Worker STAFF_PASSWORD).
+#
+# GitHub → Actions → "Seed D1 articles (API)" → Run workflow
+
+name: Seed D1 articles (API)
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: .
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Seed articles via API
+        run: node ./scripts/seed-articles-via-api.mjs
+        env:
+          API_URL: https://api.vartmaansarokaar.com
+          SEED_EMAIL: superadmin@vartmaansarokaar.com
+          SEED_PASSWORD: ${{ secrets.SEED_STAFF_PASSWORD }}
