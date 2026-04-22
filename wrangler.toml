@@ -1,32 +1,5 @@
-name = "vartmaansarokar"
-main = "server/workers-entry.ts"
+# Cloudflare Pages (Vite → dist/) — must stay Worker-free so Pages Git builds parse this file.
+# API + D1 + R2: see wrangler.worker.toml
+name = "vartmaan-sarokar-pages"
 compatibility_date = "2026-04-19"
-compatibility_flags = ["nodejs_compat"]
-routes = [
-  { pattern = "api.vartmaansarokaar.com/*", zone_name = "vartmaansarokaar.com" }
-]
-
-[observability]
-enabled = true
-
-[vars]
-NODE_ENV = "production"
-# Worker upload limit is enforced in code (5MB); keep in sync for ops/docs.
-MAX_UPLOAD_SIZE_BYTES = "5242880"
-ALLOWED_ORIGINS = "https://vartmaansarokaar.com,https://www.vartmaansarokaar.com,https://main.vartmaan-sarokar-pages.pages.dev"
-
-# D1: run `wrangler d1 create vartmaansarokar-db` (logged into the correct account), then set database_id to the printed UUID.
-[[d1_databases]]
-binding = "DB"
-database_name = "vartmaansarokar-db"
-database_id = "9cc9608f-c17b-43f4-aa8c-4fc3306f02a4"
-
-[[r2_buckets]]
-binding = "MEDIA_BUCKET"
-bucket_name = "vartmaan-media"
-
-[ai]
-binding = "AI"
-
-# Pages configuration
 pages_build_output_dir = "dist"

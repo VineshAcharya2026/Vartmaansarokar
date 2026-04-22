@@ -1,0 +1,28 @@
+# API Worker (api.vartmaansarokaar.com) — deploy: wrangler deploy -c wrangler.worker.toml
+name = "vartmaansarokar"
+main = "server/workers-entry.ts"
+compatibility_date = "2026-04-19"
+compatibility_flags = ["nodejs_compat"]
+routes = [
+  { pattern = "api.vartmaansarokaar.com/*", zone_name = "vartmaansarokaar.com" }
+]
+
+[observability]
+enabled = true
+
+[vars]
+NODE_ENV = "production"
+MAX_UPLOAD_SIZE_BYTES = "5242880"
+ALLOWED_ORIGINS = "https://vartmaansarokaar.com,https://www.vartmaansarokaar.com,https://main.vartmaan-sarokar-pages.pages.dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "vartmaansarokar-db"
+database_id = "9cc9608f-c17b-43f4-aa8c-4fc3306f02a4"
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "vartmaan-media"
+
+[ai]
+binding = "AI"

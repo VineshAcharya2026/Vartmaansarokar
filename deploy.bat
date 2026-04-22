@@ -50,13 +50,13 @@ if %errorlevel% neq 0 (
 REM Step 3: Apply database schema
 echo.
 echo Step 3: Applying Database Schema...
-wrangler d1 execute vartmaansarokar-db --file=schema.sql
+wrangler d1 execute vartmaansarokar-db --file=schema.sql -c wrangler.worker.toml
 echo ✅ Database schema applied
 
 REM Step 4: Deploy Workers
 echo.
 echo Step 4: Deploying Workers API...
-wrangler deploy
+wrangler deploy -c wrangler.worker.toml
 echo ✅ Workers API deployed
 
 REM Step 5: Build frontend

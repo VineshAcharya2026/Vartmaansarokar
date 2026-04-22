@@ -1,5 +1,4 @@
-# Builds the Vite app and uploads `dist` to Cloudflare Pages (see wrangler.toml pages_build_output_dir).
-# Project name must match the Pages project in Cloudflare (e.g. …vartmaan-sarokar-pages.pages.dev). Edit the deploy step to change.
+# Builds the Vite app and uploads `dist` to Cloudflare Pages (root `wrangler.toml`: pages_build_output_dir, name).
 name: Deploy Cloudflare Pages
 
 on:
@@ -28,6 +27,7 @@ on:
       - 'tsconfig.app.json'
       - 'tsconfig.node.json'
       - '.env.production'
+      - 'wrangler.toml'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 

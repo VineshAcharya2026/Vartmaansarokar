@@ -1,1 +1,4 @@
-/* /index.html 200
+# App uses HashRouter (routes in #/…). No /* → /index.html rule needed, which avoids
+# Cloudflare’s “infinite loop” warning on `/* /index.html 200`.
+# If you ever switch to BrowserRouter, add a single SPA rewrite per Cloudflare Pages docs
+# and exclude /assets/* so hashed files are not rewritten.

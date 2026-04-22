@@ -46,7 +46,7 @@ fi
 # Step 3: Apply database schema
 echo ""
 echo -e "${YELLOW}Step 3: Applying Database Schema...${NC}"
-wrangler d1 execute vartmaansarokar-db --file=schema.sql
+wrangler d1 execute vartmaansarokar-db --file=schema.sql -c wrangler.worker.toml
 echo -e "${GREEN}✅ Database schema applied${NC}"
 
 # Step 4: Check secrets
@@ -69,7 +69,7 @@ fi
 # Step 5: Deploy Workers
 echo ""
 echo -e "${YELLOW}Step 5: Deploying Workers API...${NC}"
-wrangler deploy
+wrangler deploy -c wrangler.worker.toml
 echo -e "${GREEN}✅ Workers API deployed${NC}"
 
 # Step 6: Build and deploy frontend

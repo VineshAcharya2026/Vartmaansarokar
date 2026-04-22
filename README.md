@@ -82,7 +82,8 @@ Quick overview:
 ├── migrations/         # Database migrations
 ├── locales/            # i18n translations
 ├── schema.sql          # D1 database schema
-├── wrangler.toml       # Cloudflare config
+├── wrangler.toml       # Cloudflare Pages (Vite dist) only
+├── wrangler.worker.toml # API Worker (D1, R2, routes to api.*)
 └── DEPLOYMENT.md       # Deployment guide
 ```
 
@@ -94,11 +95,11 @@ VITE_API_BASE_URL=https://your-workers-url.workers.dev
 VITE_GOOGLE_CLIENT_ID=your-google-client-id
 ```
 
-### Backend Secrets (Cloudflare)
+### Backend Secrets (Cloudflare Worker)
 ```bash
-wrangler secret put JWT_SECRET
-wrangler secret put STAFF_PASSWORD
-wrangler secret put GOOGLE_CLIENT_ID
+wrangler secret put JWT_SECRET -c wrangler.worker.toml
+wrangler secret put STAFF_PASSWORD -c wrangler.worker.toml
+wrangler secret put GOOGLE_CLIENT_ID -c wrangler.worker.toml
 ```
 
 ## 📝 Available Scripts

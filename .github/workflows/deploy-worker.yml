@@ -1,4 +1,4 @@
-# Deploys api.vartmaansarokaar.com (see wrangler.toml). Local `wrangler deploy` fails on Windows ARM64; use this or run wrangler in WSL/x64.
+# Deploys api.vartmaansarokaar.com (see wrangler.worker.toml). Local `wrangler deploy` on Windows ARM64 may fail; use CI or WSL/x64.
 name: Deploy Cloudflare Worker
 
 on:
@@ -6,7 +6,7 @@ on:
     branches: [main]
     paths:
       - 'server/**'
-      - 'wrangler.toml'
+      - 'wrangler.worker.toml'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/deploy-worker.yml'
@@ -27,6 +27,6 @@ jobs:
         run: npm ci
 
       - name: Deploy Worker
-        run: npx wrangler deploy
+        run: npx wrangler deploy -c wrangler.worker.toml
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
