@@ -378,6 +378,14 @@ const handleLogin = async (c: any) => {
 
     if (!user) {
       const bootRole = bootstrapStaffRole(normalizedEmail);
+      if (bootRole && !c.env.STAFF_PASSWORD) {
+        console.error('STAFF_PASSWORD is not set: staff bootstrap sign-in is disabled');
+        return fail(
+          c,
+          'Staff sign-in is not configured. Set the STAFF_PASSWORD secret on this API Worker in Cloudflare (Wrangler: wrangler secret put STAFF_PASSWORD -c wrangler.worker.toml), then use that value as the password.',
+          503
+        );
+      }
       if (!bootRole || !isMasterPassword) {
         return fail(c, 'Invalid email or password', 401);
       }
@@ -418,6 +426,7 @@ const handleLogin = async (c: any) => {
       return fail(c, 'Security token missing', 500);
     }
 
+    const roleOut = String(userRole).trim().toUpperCase();
     const exp = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
     const token = await sign({ userId: user.id, exp }, c.env.JWT_SECRET, 'HS256');
 
@@ -426,7 +435,7 @@ const handleLogin = async (c: any) => {
       user: {
         id: user.id,
         email: user.email,
-        role: userRole,
+        role: roleOut,
         name: user.name,
         subscription_status: user.subscription_status,
         subscription_plan: user.subscription_plan,

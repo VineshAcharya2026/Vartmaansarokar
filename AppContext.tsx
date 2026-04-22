@@ -85,11 +85,21 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | null>(null);
 
+const normalizeUser = (u: User): User => ({
+  ...u,
+  role: (String(u.role).trim().toUpperCase() as User['role']) || u.role
+});
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isReady, setIsReady] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = localStorage.getItem(SESSION_STORAGE_KEY);
-    return saved ? JSON.parse(saved) : null;
+    if (!saved) return null;
+    try {
+      return normalizeUser(JSON.parse(saved) as User);
+    } catch {
+      return null;
+    }
   });
   
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -114,7 +124,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const login = async (email: string, password?: string) => {
     const { data: resp } = await api.post('/api/auth/login', { email, password });
     const token: string = (resp as { token: string }).token;
-    const user = (resp as { user: User }).user;
+    const user = normalizeUser((resp as { user: User }).user);
     localStorage.setItem(AUTH_TOKEN_KEY, token);
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
     setCurrentUser(user);
@@ -125,7 +135,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const loginWithGoogle = async (credential: string) => {
     const { data: resp } = await api.post('/api/auth/google', { credential });
     const token: string = (resp as { token: string }).token;
-    const user = (resp as { user: User }).user;
+    const user = normalizeUser((resp as { user: User }).user);
     localStorage.setItem(AUTH_TOKEN_KEY, token);
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
     setCurrentUser(user);

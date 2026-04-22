@@ -196,9 +196,30 @@ const AppContent: React.FC = () => {
                 <Route path="/magazine" element={<Magazine />} />
                 <Route path="/subscribe" element={<Subscribe />} />
                 <Route path="/staff-login" element={<StaffLogin />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/admin/news/new" element={<ArticleEditor />} />
-                <Route path="/admin/news/edit/:id" element={<ArticleEditor />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute requiredRoles={[...STAFF_ROLES]}>
+                      <Admin />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/news/new"
+                  element={
+                    <ProtectedRoute requiredRoles={[...STAFF_ROLES]}>
+                      <ArticleEditor />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/news/edit/:id"
+                  element={
+                    <ProtectedRoute requiredRoles={[...STAFF_ROLES]}>
+                      <ArticleEditor />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/verify" element={<Verify />} />
