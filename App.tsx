@@ -119,7 +119,9 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const { t } = useTranslation();
   const { isReady } = useApp();
-  const isAdminPage = location.pathname === '/admin';
+  const isAdminPage = location.pathname === '/admin' || location.pathname.startsWith('/admin/');
+  const allowContentBeforeDataReady =
+    location.pathname === '/staff-login' || location.pathname === '/admin' || location.pathname.startsWith('/admin/');
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterMessage, setNewsletterMessage] = useState('');
   const [newsletterError, setNewsletterError] = useState('');
@@ -170,7 +172,7 @@ const AppContent: React.FC = () => {
     setAuthModalState((prev) => ({ ...prev, isOpen: false }));
   }, []);
 
-  if (!isReady) {
+  if (!isReady && !allowContentBeforeDataReady) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white px-8 py-6 rounded-2xl shadow-xl border border-gray-100">

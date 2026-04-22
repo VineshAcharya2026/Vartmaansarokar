@@ -344,17 +344,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     const init = async () => {
-      await Promise.all([fetchNews(), fetchMagazines(), fetchAds(), fetchSettings(), fetchHero()]);
-      if (['ADMIN', 'SUPER_ADMIN', 'EDITOR'].includes(currentUser?.role || '')) {
-        const staffLoads: Promise<unknown>[] = [fetchStaffArticles(), fetchMedia()];
-        if (['ADMIN', 'SUPER_ADMIN'].includes(String(currentUser?.role))) {
-          staffLoads.push(fetchUsers());
+      try {
+        await Promise.all([fetchNews(), fetchMagazines(), fetchAds(), fetchSettings(), fetchHero()]);
+        if (['ADMIN', 'SUPER_ADMIN', 'EDITOR'].includes(currentUser?.role || '')) {
+          const staffLoads: Promise<unknown>[] = [fetchStaffArticles(), fetchMedia()];
+          if (['ADMIN', 'SUPER_ADMIN'].includes(String(currentUser?.role))) {
+            staffLoads.push(fetchUsers());
+          }
+          await Promise.all(staffLoads);
         }
-        await Promise.all(staffLoads);
+      } catch (e) {
+        console.error('App data init failed', e);
+      } finally {
+        setIsReady(true);
       }
-      setIsReady(true);
     };
-    init();
+    void init();
   }, [currentUser]);
 
   const value = {
