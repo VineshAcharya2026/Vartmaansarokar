@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Lock, Mail, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { useApp } from '../AppContext';
+import { STAFF_DEV_DEMO_PASSWORD, STAFF_LOGIN_EMAILS } from '../utils/app';
 
 const StaffLogin = () => {
   const { t } = useTranslation();
@@ -58,19 +59,16 @@ const StaffLogin = () => {
     }
   };
 
-  // Demo credentials helper
+  /** Prefill email only in production. In dev, optional `VITE_DEV_STAFF_DEMO` in `.env.local` can prefill a test password (never commit). */
   const fillDemoCredentials = (role: 'superadmin' | 'admin' | 'editor') => {
-    const credentials: Record<string, { email: string; password: string }> = {
-      superadmin: { email: 'superadmin@vartmaansarokar.com', password: 'PassworD@2026' },
-      admin: { email: 'admin@vartmaansarokar.com', password: 'PassworD@2026' },
-      editor: { email: 'editor@vartmaansarokar.com', password: 'PassworD@2026' },
+    const emails = {
+      superadmin: STAFF_LOGIN_EMAILS.superAdmin,
+      admin: STAFF_LOGIN_EMAILS.admin,
+      editor: STAFF_LOGIN_EMAILS.editor
     };
-    
-    if (credentials[role]) {
-      setEmail(credentials[role].email);
-      setPassword(credentials[role].password);
-      setError('');
-    }
+    setEmail(emails[role]);
+    setPassword(import.meta.env.DEV && STAFF_DEV_DEMO_PASSWORD ? STAFF_DEV_DEMO_PASSWORD : '');
+    setError('');
   };
 
   return (
@@ -176,10 +174,12 @@ const StaffLogin = () => {
             </button>
           </form>
 
-          {/* Demo Credentials - For Development Only */}
+          {/* Email shortcuts: production prefills email only; password is your Worker STAFF_PASSWORD (secret). */}
           <div className="mt-6 pt-6 border-t border-white/10">
             <p className="text-gray-400 text-xs text-center mb-3">
-              {t('staffLogin.quickLogin')}
+              {import.meta.env.DEV && STAFF_DEV_DEMO_PASSWORD
+                ? t('staffLogin.quickLogin')
+                : t('staffLogin.emailShortcuts', 'Fill staff email (password: server secret / your account)')}
             </p>
             <div className="grid grid-cols-3 gap-2">
               <button

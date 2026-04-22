@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { APP_BASE, STAFF_LOGIN_EMAILS, STAFF_LOGIN_PASSWORD } from '../utils/app';
+import { APP_BASE, STAFF_LOGIN_EMAILS } from '../utils/app';
 import { NEWS_CATEGORIES } from '../constants';
 import { buildCategorySlug } from '../utils/app';
 import { translateCategory } from '../utils/i18n';
@@ -22,7 +22,6 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onOpenAuthModal }) => {
       initialView: 'login',
       initialAccessType: 'DIGITAL',
       prefillEmail: email,
-      prefillPassword: STAFF_LOGIN_PASSWORD,
       staffLabel: label
     });
   };

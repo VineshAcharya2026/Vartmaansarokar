@@ -81,7 +81,7 @@ const StyledAdminNav = styled.aside`
 const Admin: React.FC = () => {
   const navigate = useNavigate();
   const { 
-    currentUser, magazines, news, ads, users,
+    currentUser, magazines, news, staffArticles, ads, users,
     heroData, siteSettings,
     fetchNews, addNews, updateNews, deleteNews, approveNews, rejectNews, reworkNews,
     fetchMagazines, addMagazine, deleteMagazine,
@@ -100,6 +100,27 @@ const Admin: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
 
   const isMaster = currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPER_ADMIN;
+  const isEditor = currentUser?.role === UserRole.EDITOR;
+
+  const allNavItems = [
+    { key: 'dashboard', label: 'Overview', icon: LayoutDashboard, masterOnly: false },
+    { key: 'users', label: 'User Management', icon: Users, masterOnly: true },
+    { key: 'news', label: 'News Editor', icon: FileText, masterOnly: false },
+    { key: 'magazines', label: 'Magazines', icon: Book, masterOnly: true },
+    { key: 'hero', label: 'Hero Section', icon: Layout, masterOnly: true },
+    { key: 'ticker', label: 'News Ticker', icon: Megaphone, masterOnly: true },
+    { key: 'media', label: 'Media Library', icon: ImageIcon, masterOnly: false },
+    { key: 'ads', label: 'Ads Management', icon: Edit2, masterOnly: true },
+    { key: 'settings', label: 'Site Settings', icon: Settings, masterOnly: true }
+  ];
+
+  const navItems = isEditor ? allNavItems.filter((i) => !i.masterOnly) : allNavItems;
+
+  useEffect(() => {
+    if (!isEditor) return;
+    const masterOnlyTabs = new Set(['users', 'magazines', 'hero', 'ticker', 'ads', 'settings']);
+    if (masterOnlyTabs.has(activeTab)) setActiveTab('dashboard');
+  }, [isEditor, activeTab]);
 
   useEffect(() => {
     if (activeTab === 'ads') loadAdminAds();
@@ -186,10 +207,14 @@ const Admin: React.FC = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Articles', count: news.length, color: 'blue', icon: FileText },
-          { label: 'Issues', count: magazines.length, color: 'red', icon: Book },
-          { label: 'Members', count: users.length, color: 'green', icon: Users },
-          { label: 'Live Ads', count: ads.length, color: 'amber', icon: ImageIcon },
+          { label: isEditor ? 'Your articles' : 'Articles', count: staffArticles.length, color: 'blue', icon: FileText },
+          ...(isMaster
+            ? [
+                { label: 'Issues', count: magazines.length, color: 'red', icon: Book },
+                { label: 'Members', count: users.length, color: 'green', icon: Users },
+                { label: 'Live Ads', count: ads.length, color: 'amber', icon: ImageIcon }
+              ]
+            : []),
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100">
             <div className="flex items-center gap-4">
@@ -240,7 +265,7 @@ const Admin: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {news.map(item => (
+            {staffArticles.map((item) => (
               <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                 <td className="px-6 py-4">
                   <div className="font-bold text-[#0f172a] text-sm truncate max-w-xs">{item.title}</div>
@@ -268,7 +293,9 @@ const Admin: React.FC = () => {
                     >
                       <Edit2 size={18}/>
                     </button>
-                    <button onClick={() => deleteNews(item.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                    {isMaster && (
+                      <button onClick={() => deleteNews(item.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete article"><Trash2 size={18}/></button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -898,18 +925,6 @@ const Admin: React.FC = () => {
     }
   };
 
-  const navItems = [
-    { key: 'dashboard', label: 'Overview', icon: LayoutDashboard },
-    { key: 'users', label: 'User Management', icon: Users },
-    { key: 'news', label: 'News Editor', icon: FileText },
-    { key: 'magazines', label: 'Magazines', icon: Book },
-    { key: 'hero', label: 'Hero Section', icon: Layout },
-    { key: 'ticker', label: 'News Ticker', icon: Megaphone },
-    { key: 'media', label: 'Media Library', icon: ImageIcon },
-    { key: 'ads', label: 'Ads Management', icon: Edit2 },
-    { key: 'settings', label: 'Site Settings', icon: Settings }
-  ];
-
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-[#f8fafc] overflow-hidden">
       <StyledAdminNav className="hidden lg:flex w-[240px] bg-[#0f172a] text-white p-6 flex-col shrink-0">
@@ -919,7 +934,7 @@ const Admin: React.FC = () => {
         </div>
         
         <div className="radio-inputs-vertical flex-1 overflow-y-auto">
-          {navItems.map(item => (
+          {navItems.map((item) => (
              <label key={item.key} className="radio-vertical">
                <input 
                  type="radio" 

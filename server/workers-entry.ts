@@ -18,13 +18,18 @@ export interface Env {
 
 const app = new Hono<{ Bindings: Env; Variables: { user: any } }>();
 
-const ADMIN_EMAILS = [
-  'vineshjm@gmail.com',
-  'admin@vartmaansarokar.com',
-  'superadmin@vartmaansarokar.com'
-];
-
-const isAdminEmail = (email: string) => ADMIN_EMAILS.includes(email.toLowerCase());
+/**
+ * D1 first-login bootstrap with Worker secret STAFF_PASSWORD only. Never use client-bundled "passwords".
+ * Also used to assign/elevate roles for allowlisted emails (Google sign-in or READER rows).
+ */
+function bootstrapStaffRole(email: string): 'SUPER_ADMIN' | 'ADMIN' | 'EDITOR' | null {
+  const e = email.trim().toLowerCase();
+  if (e === 'superadmin@vartmaansarokar.com') return 'SUPER_ADMIN';
+  if (e === 'admin@vartmaansarokar.com') return 'ADMIN';
+  if (e === 'editor@vartmaansarokar.com') return 'EDITOR';
+  if (e === 'vineshjm@gmail.com') return 'SUPER_ADMIN';
+  return null;
+}
 
 function splitOrigins(value: string | undefined): string[] {
   return (value || '')
@@ -372,16 +377,15 @@ const handleLogin = async (c: any) => {
     let user = results?.[0] as any;
 
     if (!user) {
-      // Bootstrap staff users on first login when master password is configured.
-      if (!isAdminEmail(normalizedEmail) || !isMasterPassword) {
+      const bootRole = bootstrapStaffRole(normalizedEmail);
+      if (!bootRole || !isMasterPassword) {
         return fail(c, 'Invalid email or password', 401);
       }
       const id = generateId();
-      const role = normalizedEmail === 'superadmin@vartmaansarokar.com' ? 'SUPER_ADMIN' : 'ADMIN';
       await c.env.DB.prepare(
         'INSERT INTO users (id, email, name, role, password_hash, is_verified) VALUES (?, ?, ?, ?, ?, ?)'
       )
-        .bind(id, normalizedEmail, normalizedEmail.split('@')[0], role, null, 1)
+        .bind(id, normalizedEmail, normalizedEmail.split('@')[0], bootRole, null, 1)
         .run();
       const fresh = await c.env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).all();
       user = fresh?.results?.[0] as any;
@@ -397,9 +401,12 @@ const handleLogin = async (c: any) => {
     }
 
     let userRole = user.role;
-    if (isAdminEmail(user.email) && userRole === 'READER') {
-      userRole = 'SUPER_ADMIN';
-      await c.env.DB.prepare('UPDATE users SET role = ? WHERE id = ?').bind(userRole, user.id).run();
+    if (userRole === 'READER') {
+      const r = bootstrapStaffRole(user.email);
+      if (r) {
+        userRole = r;
+        await c.env.DB.prepare('UPDATE users SET role = ? WHERE id = ?').bind(userRole, user.id).run();
+      }
     }
 
     if (userRole === 'READER' && user.is_verified === 0) {
@@ -450,15 +457,18 @@ const handleGoogleLogin = async (c: any) => {
 
     if (!user) {
       const id = generateId();
-      const role = isAdminEmail(payload.email) ? 'SUPER_ADMIN' : 'READER';
+      const role = bootstrapStaffRole(payload.email) ?? 'READER';
       await c.env.DB.prepare('INSERT INTO users (id, email, name, role, google_id, is_verified) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(id, payload.email, payload.name || '', role, payload.sub, 1)
         .run();
       const fresh = await c.env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).all();
       user = fresh.results?.[0];
-    } else if (isAdminEmail(user.email) && user.role === 'READER') {
-      await c.env.DB.prepare('UPDATE users SET role = ? WHERE id = ?').bind('SUPER_ADMIN', user.id).run();
-      user.role = 'SUPER_ADMIN';
+    } else if (user.role === 'READER') {
+      const r = bootstrapStaffRole(user.email);
+      if (r) {
+        await c.env.DB.prepare('UPDATE users SET role = ? WHERE id = ?').bind(r, user.id).run();
+        user.role = r;
+      }
     }
 
     const exp = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
@@ -756,7 +766,21 @@ app.get('/api/articles', async (c) => {
 });
 
 app.get('/api/articles/all', auth, role('ADMIN', 'SUPER_ADMIN', 'EDITOR'), async (c) => {
-  const { results } = await c.env.DB.prepare("SELECT * FROM news ORDER BY created_at DESC").all();
+  const user = c.get('user') as { id: string; role: string };
+  let q = '';
+  if (user.role === 'EDITOR') {
+    q = 'SELECT * FROM news WHERE author_id = ? ORDER BY created_at DESC';
+  } else if (user.role === 'ADMIN') {
+    q = "SELECT * FROM news WHERE status IN ('PENDING_REVIEW','PUBLISHED','REJECTED','DRAFT') ORDER BY created_at DESC";
+  } else if (user.role === 'SUPER_ADMIN') {
+    q = 'SELECT * FROM news ORDER BY created_at DESC';
+  } else {
+    return fail(c, 'Forbidden', 403);
+  }
+  const { results } =
+    user.role === 'EDITOR'
+      ? await c.env.DB.prepare(q).bind(user.id).all()
+      : await c.env.DB.prepare(q).all();
   return ok(c, { news: results || [] });
 });
 
@@ -772,7 +796,7 @@ app.get('/api/articles/:id', async (c) => {
   return ok(c, { article: results[0] });
 });
 
-app.post('/api/articles', auth, async (c) => {
+app.post('/api/articles', auth, role('EDITOR', 'ADMIN', 'SUPER_ADMIN'), async (c) => {
   const user = c.get('user');
   const data = await c.req.json();
   const id = generateId();
@@ -808,18 +832,79 @@ app.post('/api/articles', auth, async (c) => {
   return ok(c, { id });
 });
 
-app.put('/api/articles/:id', auth, async (c) => {
-  const id = c.req.param('id');
-  const data = await c.req.json();
-  const updatedAt = new Date().toISOString();
-  
-  await c.env.DB.prepare(`
-    UPDATE news 
-    SET title = ?, content = ?, excerpt = ?, category = ?, author = ?, image = ?, updated_at = ?
-    WHERE id = ?
-  `).bind(data.title, data.content, data.excerpt, data.category, data.author, data.image, updatedAt, id).run();
+app.put('/api/articles/:id', auth, role('EDITOR', 'ADMIN', 'SUPER_ADMIN'), async (c) => {
+  try {
+    const id = c.req.param('id');
+    const user = c.get('user') as { id: string; role: string };
+    const body = (await c.req.json()) as Record<string, unknown>;
+    // Ignore client status — workflow is enforced here only.
+    if ('status' in body) delete (body as { status?: unknown }).status;
 
-  return ok(c, {});
+    const { results } = await c.env.DB.prepare('SELECT * FROM news WHERE id = ?').bind(id).all();
+    if (!results || !results[0]) return fail(c, 'Article not found', 404);
+    const article = results[0] as Record<string, unknown>;
+
+    if (user.role === 'EDITOR' && String(article.author_id) !== user.id) {
+      return fail(c, 'You can only edit your own articles', 403);
+    }
+
+    let newStatus = String(article.status || '');
+    if (user.role === 'EDITOR') {
+      newStatus = 'PENDING_REVIEW';
+    } else if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+      newStatus = 'PUBLISHED';
+    }
+
+    const title = (body.title as string) || String(article.title || '');
+    const category = (body.category as string) || String(article.category || 'General');
+    const excerpt = (body.excerpt as string) ?? String(article.excerpt || '');
+    const content = (body.content as string) ?? String(article.content || '');
+    const image = (body.image as string) ?? String(article.image || '');
+    const author = (body.author as string) || String(article.author || '');
+
+    const feat =
+      body.featured !== undefined ? ((body.featured as boolean) ? 1 : 0) : Number(article.featured || 0);
+    const requires =
+      body.requires_subscription !== undefined
+        ? (body.requires_subscription as boolean)
+          ? 1
+          : 0
+        : Number(article.requires_subscription || 0);
+
+    let publishedAt = String(article.published_at || '');
+    if (newStatus === 'PUBLISHED') {
+      publishedAt = new Date().toISOString();
+    } else if (newStatus === 'PENDING_REVIEW' && user.role === 'EDITOR') {
+      publishedAt = '';
+    }
+
+    await c.env.DB.prepare(`
+      UPDATE news SET 
+        title=?, category=?, excerpt=?, content=?, image=?, author=?,
+        featured=?, requires_subscription=?, status=?, published_at=?,
+        updated_at=?
+      WHERE id=?
+    `)
+      .bind(
+        title,
+        category,
+        excerpt,
+        content,
+        image,
+        author,
+        feat,
+        requires,
+        newStatus,
+        publishedAt,
+        new Date().toISOString(),
+        id
+      )
+      .run();
+
+    return ok(c, { message: 'Updated successfully', status: newStatus });
+  } catch (err: any) {
+    return fail(c, err.message || 'Server error', 500);
+  }
 });
 
 app.delete('/api/articles/:id', auth, role('ADMIN', 'SUPER_ADMIN'), async (c) => {
@@ -831,7 +916,11 @@ app.delete('/api/articles/:id', auth, role('ADMIN', 'SUPER_ADMIN'), async (c) =>
 const handleApprove = async (c: any) => {
   try {
     const id = c.req.param('id');
-    const result = await c.env.DB.prepare("UPDATE news SET status='PUBLISHED' WHERE id=?").bind(id).run();
+    const when = new Date().toISOString();
+    const result = await c.env.DB
+      .prepare("UPDATE news SET status='PUBLISHED', published_at=?, updated_at=? WHERE id=?")
+      .bind(when, when, id)
+      .run();
     const changes = result.meta?.changes ?? (result as any).changes ?? 0;
     if (changes === 0 && !result.success) return fail(c, 'Approve failed', 400);
     return ok(c, { message: 'Approved' });

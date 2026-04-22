@@ -4,6 +4,10 @@ interface ImportMetaEnv {
   readonly VITE_API_BASE_URL?: string;
   readonly VITE_API_BASE?: string;
   readonly VITE_GOOGLE_CLIENT_ID?: string;
+  readonly VITE_DEV_STAFF_DEMO?: string;
+  readonly VITE_SUPER_ADMIN_EMAIL?: string;
+  readonly VITE_ADMIN_EMAIL?: string;
+  readonly VITE_EDITOR_EMAIL?: string;
 }
 
 interface ImportMeta {

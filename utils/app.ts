@@ -18,11 +18,20 @@ export const APP_BASE = import.meta.env.BASE_URL || '/';
 export const SESSION_STORAGE_KEY = 'vartmaan-current-user';
 export const AUTH_TOKEN_KEY = 'token';
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
-export const STAFF_LOGIN_PASSWORD = import.meta.env.VITE_STAFF_PASSWORD ?? '';
+
+/**
+ * Public staff *email* hints only (for UX). Never ship real passwords: auth is `STAFF_PASSWORD` on the Worker.
+ * Local dev may set `VITE_DEV_STAFF_DEMO` in `.env.local` (not committed) to prefill a shared test password.
+ */
+export const STAFF_DEV_DEMO_PASSWORD =
+  import.meta.env.DEV && (import.meta.env.VITE_DEV_STAFF_DEMO as string | undefined)
+    ? String(import.meta.env.VITE_DEV_STAFF_DEMO)
+    : '';
+
 export const STAFF_LOGIN_EMAILS = {
-  superAdmin: import.meta.env.VITE_SUPER_ADMIN_EMAIL ?? 'superadmin@cms.com',
-  admin: import.meta.env.VITE_ADMIN_EMAIL ?? 'admin@cms.com',
-  editor: import.meta.env.VITE_EDITOR_EMAIL ?? 'editor@cms.com'
+  superAdmin: import.meta.env.VITE_SUPER_ADMIN_EMAIL ?? 'superadmin@vartmaansarokar.com',
+  admin: import.meta.env.VITE_ADMIN_EMAIL ?? 'admin@vartmaansarokar.com',
+  editor: import.meta.env.VITE_EDITOR_EMAIL ?? 'editor@vartmaansarokar.com'
 } as const;
 
 export function buildCategorySlug(category: string) {

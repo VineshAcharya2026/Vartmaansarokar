@@ -185,19 +185,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const approveNews = async (id: string) => {
     await api.post(`/api/articles/${id}/approve`);
     toast.success('Approved');
-    fetchStaffArticles();
+    await fetchStaffArticles();
+    await fetchNews();
   };
 
   const rejectNews = async (id: string, reason: string) => {
     await api.post(`/api/articles/${id}/reject`, { reason });
     toast.info('Rejected');
-    fetchStaffArticles();
+    await fetchStaffArticles();
+    await fetchNews();
   };
 
   const reworkNews = async (id: string, reason: string) => {
     await api.post(`/api/articles/${id}/rework`, { reason });
     toast.info('Sent for rework');
-    fetchStaffArticles();
+    await fetchStaffArticles();
+    await fetchNews();
   };
 
   const fetchMagazines = async () => {
@@ -333,7 +336,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const init = async () => {
       await Promise.all([fetchNews(), fetchMagazines(), fetchAds(), fetchSettings(), fetchHero()]);
       if (['ADMIN', 'SUPER_ADMIN', 'EDITOR'].includes(currentUser?.role || '')) {
-         await Promise.all([fetchStaffArticles(), fetchMedia(), fetchUsers()]);
+        const staffLoads: Promise<unknown>[] = [fetchStaffArticles(), fetchMedia()];
+        if (['ADMIN', 'SUPER_ADMIN'].includes(String(currentUser?.role))) {
+          staffLoads.push(fetchUsers());
+        }
+        await Promise.all(staffLoads);
       }
       setIsReady(true);
     };
