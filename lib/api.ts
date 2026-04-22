@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { API_BASE, AUTH_TOKEN_KEY, SESSION_STORAGE_KEY } from '../utils/app';
 
 const baseURL = API_BASE.replace(/\/$/, '');
@@ -7,6 +7,27 @@ const api = axios.create({
   baseURL,
   withCredentials: true
 });
+
+/** These POSTs return 401 for wrong credentials; must not clear session or force redirect. */
+function isUnauthenticatedAuthPost(config: { method?: string; url?: string } | undefined): boolean {
+  if (!config || (config.method || 'get').toLowerCase() !== 'post') return false;
+  const raw = (config.url || '').split('?')[0];
+  const path = (() => {
+    try {
+      if (raw.startsWith('http')) return new URL(raw).pathname;
+      return raw;
+    } catch {
+      return raw;
+    }
+  })();
+  return (
+    path === '/api/auth/login' ||
+    path === '/api/auth/staff/login' ||
+    path === '/api/auth/google' ||
+    path === '/api/auth/register' ||
+    path === '/api/auth/users/login'
+  );
+}
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem(AUTH_TOKEN_KEY);
@@ -30,10 +51,27 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem(AUTH_TOKEN_KEY);
-      localStorage.removeItem(SESSION_STORAGE_KEY);
-      window.location.href = '/#/staff-login';
+    const res = isAxiosError(error) ? error.response : undefined;
+    const payload = res?.data as { success?: boolean; error?: string; message?: string } | undefined;
+    const fromApi = payload?.error || (typeof payload?.message === 'string' ? payload.message : undefined);
+
+    if (res?.status === 401 && !isUnauthenticatedAuthPost(error.config)) {
+      try {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+        if (typeof window !== 'undefined') {
+          const h = window.location.hash || '';
+          if (!h.includes('staff-login')) {
+            window.location.href = '/#/staff-login';
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    if (fromApi) {
+      return Promise.reject(new Error(fromApi));
     }
     return Promise.reject(error);
   }
