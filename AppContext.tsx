@@ -142,7 +142,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     toast.info('Logged out');
   };
 
-  const registerReader = async (formData: any) => {
+  const registerReader = async (formData: { email: string; password: string; name: string }) => {
     await api.post('/api/auth/register', formData);
   };
 

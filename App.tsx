@@ -6,7 +6,12 @@ import { AppProvider, useApp } from './AppContext';
 import { TranslationProvider } from './context/TranslationContext';
 import Home from './pages/Home';
 import Sidebar from './components/Sidebar';
-import AuthAccessModal, { AuthAccessModalLaunchOptions, AuthModalView, AccessType } from './components/AuthAccessModal';
+import AuthAccessModal, {
+  AuthAccessModalLaunchOptions,
+  AuthModalView,
+  AccessType,
+  MainAuthTab
+} from './components/AuthAccessModal';
 import SiteNavbar from './components/SiteNavbar';
 import SiteFooter from './components/SiteFooter';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -143,9 +148,8 @@ const AppContent: React.FC = () => {
     isOpen: boolean;
     initialView: AuthModalView;
     initialAccessType: AccessType;
+    initialMainTab?: MainAuthTab;
     prefillEmail?: string;
-    prefillPassword?: string;
-    staffLabel?: string;
   }>({
     isOpen: false,
     initialView: 'subscribe',
@@ -157,9 +161,8 @@ const AppContent: React.FC = () => {
       isOpen: true,
       initialView: options.initialView ?? 'subscribe',
       initialAccessType: options.initialAccessType ?? 'DIGITAL',
-      prefillEmail: options.prefillEmail,
-      prefillPassword: options.prefillPassword,
-      staffLabel: options.staffLabel
+      initialMainTab: options.initialMainTab,
+      prefillEmail: options.prefillEmail
     });
   }, []);
 
@@ -211,7 +214,7 @@ const AppContent: React.FC = () => {
           {!isAdminPage && <Sidebar />}
         </div>
       </main>
-      <SiteFooter onOpenAuthModal={openAuthModal} />
+      <SiteFooter />
       <AuthAccessModal {...authModalState} onClose={closeAuthModal} />
     </div>
   );

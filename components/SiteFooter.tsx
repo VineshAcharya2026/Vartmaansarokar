@@ -1,30 +1,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { APP_BASE, STAFF_LOGIN_EMAILS } from '../utils/app';
+import { APP_BASE } from '../utils/app';
 import { NEWS_CATEGORIES } from '../constants';
 import { buildCategorySlug } from '../utils/app';
 import { translateCategory } from '../utils/i18n';
-import { AuthAccessModalLaunchOptions } from './AuthAccessModal';
 
-interface SiteFooterProps {
-  onOpenAuthModal: (options?: AuthAccessModalLaunchOptions) => void;
-}
-
-const SiteFooter: React.FC<SiteFooterProps> = ({ onOpenAuthModal }) => {
+const SiteFooter: React.FC = () => {
   const { t } = useTranslation();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterError, setNewsletterError] = useState('');
   const [newsletterSuccess, setNewsletterSuccess] = useState('');
-
-  const openStaffLogin = (label: string, email: string) => {
-    onOpenAuthModal({
-      initialView: 'login',
-      initialAccessType: 'DIGITAL',
-      prefillEmail: email,
-      staffLabel: label
-    });
-  };
 
   return (
     <footer className="bg-gradient-to-br from-[#001f3f] via-[#0a274d] to-[#101f32] text-white pt-20 pb-10 border-t border-white/10">
@@ -39,37 +25,19 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onOpenAuthModal }) => {
               </div>
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed max-w-md">{t('footer.description')}</p>
-            <div className="flex gap-3">
-              <Link to="/magazine" className="px-5 py-3 rounded-lg bg-[#800000] hover:bg-red-800 font-bold text-sm transition-colors">{t('common.readMagazine')}</Link>
-              <Link to="/about" className="px-5 py-3 rounded-lg border border-white/15 hover:bg-white/5 font-bold text-sm transition-colors">{t('footer.aboutLink')}</Link>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.28em] text-gray-400 font-black mb-3">
-                {t('auth.staffShortcuts')}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => openStaffLogin(t('auth.superAdminLogin'), STAFF_LOGIN_EMAILS.superAdmin)}
-                  className="rounded-full border border-white/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white/85 transition-colors hover:bg-white/10"
-                >
-                  {t('auth.superAdmin')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openStaffLogin(t('auth.adminLogin'), STAFF_LOGIN_EMAILS.admin)}
-                  className="rounded-full border border-white/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white/85 transition-colors hover:bg-white/10"
-                >
-                  {t('auth.admin')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openStaffLogin(t('auth.editorLogin'), STAFF_LOGIN_EMAILS.editor)}
-                  className="rounded-full border border-white/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white/85 transition-colors hover:bg-white/10"
-                >
-                  {t('common.editorLogin')}
-                </button>
-              </div>
+            <div className="flex flex-wrap gap-3">
+              <Link to="/magazine" className="px-5 py-3 rounded-lg bg-[#800000] hover:bg-red-800 font-bold text-sm transition-colors">
+                {t('common.readMagazine')}
+              </Link>
+              <Link to="/about" className="px-5 py-3 rounded-lg border border-white/15 hover:bg-white/5 font-bold text-sm transition-colors">
+                {t('footer.aboutLink')}
+              </Link>
+              <Link
+                to="/staff-login"
+                className="px-5 py-3 rounded-lg border border-white/25 text-white/90 hover:bg-white/10 font-bold text-sm transition-colors"
+              >
+                {t('footer.staffLogin', 'Staff login')}
+              </Link>
             </div>
           </div>
 
@@ -136,8 +104,7 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onOpenAuthModal }) => {
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row gap-3 md:items-center md:justify-between text-xs uppercase tracking-[0.25em] text-gray-400">
           <p>{t('footer.copyright')}</p>
-          <div className="flex gap-4">
-            <Link to="/staff-login" className="hover:text-white transition-colors">{t('footer.staffLogin', 'Staff Login')}</Link>
+          <div className="flex flex-wrap gap-4">
             <span>{t('footer.tagline')}</span>
           </div>
         </div>

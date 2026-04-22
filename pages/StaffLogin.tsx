@@ -18,40 +18,41 @@ const StaffLogin = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  // Redirect if already logged in with admin access
+  const staffRoles = ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] as const;
+
+  /** If already signed in, send staff to dashboard (or return URL only if it is an admin route). */
   React.useEffect(() => {
-    if (currentUser) {
-      const from = location.state?.from?.pathname || '/admin';
-      navigate(from, { replace: true });
+    if (!currentUser) return;
+    if (staffRoles.includes(currentUser.role as (typeof staffRoles)[number])) {
+      const from = location.state?.from?.pathname;
+      const target =
+        typeof from === 'string' && from.startsWith('/admin') ? from : '/admin';
+      navigate(target, { replace: true });
+    } else {
+      navigate('/', { replace: true });
     }
-  }, [currentUser, navigate, location]);
+  }, [currentUser, navigate, location.state]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
-    
-    // Validation
+
     if (!email.trim()) {
       setError(t('staffLogin.emailError'));
       return;
     }
-    
+
     if (!password.trim()) {
       setError(t('staffLogin.passwordError'));
       return;
     }
-    
-    setLoading(true);
-    
-    try {
-      const user = await login(email.trim(), password);
 
-      if (user) {
-        // Redirection is now handled by the role check
-        const target = ['SUPER_ADMIN', 'ADMIN', 'EDITOR'].includes(user.role) ? '/admin' : '/';
-        navigate(target, { replace: true });
-      }
+    setLoading(true);
+
+    try {
+      await login(email.trim(), password);
+      // Redirect handled in useEffect once `currentUser` is set
     } catch (err: any) {
       setError(err.message || t('staffLogin.unexpectedError'));
     } finally {
