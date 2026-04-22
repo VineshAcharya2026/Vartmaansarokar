@@ -1,7 +1,7 @@
 {
   "name": "vartmaan-sarokaar",
   "private": true,
-  "version": "0.0.8",
+  "version": "0.0.9",
   "type": "module",
   "homepage": "https://vineshacharya2026.github.io/VartmaanSarokar",
   "scripts": {
@@ -17,6 +17,7 @@
     "seed": "tsx ./scripts/seed.ts",
     "env:validate": "node -e \"import('./config/env.js').then(m=>{m.getCloudflareEnv();console.log('Cloudflare env OK')})\"",
     "seed:content": "tsx ./scripts/seed-cloudflare-content.ts",
+    "seed:articles": "node ./scripts/seedArticles.js",
     "migrate:d1": "tsx ./migrations/migrate-to-d1.ts",
     "deploy": "deploy.bat",
     "deploy:workers": "wrangler deploy -c wrangler.worker.toml",

@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { verify, sign } from 'hono/jwt';
 import * as bcrypt from 'bcryptjs';
 import { ok, fail } from './api-contract';
+import { getArticlesList } from './routes/articleRoutes';
 import { clientKey, rateLimitAllow } from './worker-rate-limit';
 
 export interface Env {
@@ -769,10 +770,7 @@ app.put('/api/news/:id', auth, role('EDITOR', 'ADMIN', 'SUPER_ADMIN'), async (c)
 });
 
 // --- NEWS / ARTICLES ---
-app.get('/api/articles', async (c) => {
-  const { results } = await c.env.DB.prepare("SELECT * FROM news WHERE status='PUBLISHED' ORDER BY created_at DESC").all();
-  return ok(c, { news: results || [] });
-});
+app.get('/api/articles', getArticlesList);
 
 app.get('/api/articles/all', auth, role('ADMIN', 'SUPER_ADMIN', 'EDITOR'), async (c) => {
   const user = c.get('user') as { id: string; role: string };
