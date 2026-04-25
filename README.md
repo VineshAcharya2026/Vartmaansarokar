@@ -1,6 +1,6 @@
 # Vartmaan Sarokaar
 
-A modern Nepali digital news and magazine platform built with React, TypeScript, and Cloudflare.
+A modern Premium digital news and magazine platform built with React, TypeScript, and Cloudflare.
 
 ## 🚀 Production Ready
 
@@ -38,7 +38,7 @@ See **[DEPLOYMENT.md](DEPLOYMENT.md)** for detailed deployment instructions.
 
 Quick overview:
 1. `npm run db:create` - Create D1 database
-2. `npm run r2:create` - Create R2 bucket  
+2. `npm run r2:create` - Create R2 bucket
 3. `npm run db:schema` - Apply database schema
 3. Set secrets: `JWT_SECRET`, `STAFF_PASSWORD`, `GOOGLE_CLIENT_ID`
 5. `npm run deploy:workers` - Deploy Workers API
