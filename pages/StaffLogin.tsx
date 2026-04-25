@@ -9,7 +9,7 @@ const StaffLogin = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser, login } = useApp();
+  const { currentUser, loginStaff } = useApp();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,13 +20,23 @@ const StaffLogin = () => {
 
   const staffRoles = ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] as const;
 
+  const staffHomePath = (role: string) => {
+    if (role === 'EDITOR') return '/admin?tab=news';
+    if (role === 'ADMIN' || role === 'SUPER_ADMIN') return '/admin?tab=approvals';
+    return '/admin';
+  };
+
   /** If already signed in, send staff to dashboard (or return URL only if it is an admin route). */
   React.useEffect(() => {
     if (!currentUser) return;
     if (staffRoles.includes(currentUser.role as (typeof staffRoles)[number])) {
-      const from = location.state?.from?.pathname;
+      const loc = location.state?.from as { pathname?: string; search?: string } | undefined;
+      const fromPath = loc?.pathname;
+      const fromSearch = typeof loc?.search === 'string' ? loc.search : '';
       const target =
-        typeof from === 'string' && from.startsWith('/admin') ? from : '/admin';
+        typeof fromPath === 'string' && fromPath.startsWith('/admin')
+          ? `${fromPath}${fromSearch}`
+          : staffHomePath(String(currentUser.role));
       navigate(target, { replace: true });
     } else {
       navigate('/', { replace: true });
@@ -51,15 +61,20 @@ const StaffLogin = () => {
     setLoading(true);
 
     try {
-      const user = await login(email.trim(), password);
+      const user = await loginStaff(email.trim(), password);
       const r = user.role as string;
       if (staffRoles.includes(r as (typeof staffRoles)[number])) {
-        const from = location.state?.from?.pathname;
+        setSuccess(true);
+        const loc = location.state?.from as { pathname?: string; search?: string } | undefined;
+        const fromPath = loc?.pathname;
+        const fromSearch = typeof loc?.search === 'string' ? loc.search : '';
         const target =
-          typeof from === 'string' && from.startsWith('/admin') ? from : '/admin';
+          typeof fromPath === 'string' && fromPath.startsWith('/admin')
+            ? `${fromPath}${fromSearch}`
+            : staffHomePath(r);
         navigate(target, { replace: true });
       } else {
-        navigate('/', { replace: true });
+        setError(t('staffLogin.unexpectedError', 'This account does not have staff access.'));
       }
     } catch (err: any) {
       setError(err.message || t('staffLogin.unexpectedError'));

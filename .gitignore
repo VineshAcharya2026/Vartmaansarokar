@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 dist
+dist-server
 dist-ssr
 *.local
 
@@ -16,6 +17,7 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+.dev.vars
 
 server/data/
 uploads/

@@ -1,16 +1,23 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from './lib/api';
-import { 
-  NewsItem, 
-  MagazineItem, 
-  User, 
-  AdItem, 
-  MediaItem, 
-  UserRole, 
-  NewsStatus 
+import {
+  NewsItem,
+  MagazineItem,
+  User,
+  AdItem,
+  MediaItem,
+  SubscriptionTableRow
 } from './types';
 import toast from 'react-hot-toast';
 import { SESSION_STORAGE_KEY, AUTH_TOKEN_KEY } from './utils/app';
+import {
+  mapNewsRow,
+  mapMagazineRow,
+  mapUserRow,
+  mapAdRow,
+  mapSubscriptionRow,
+  extractNewsListPayload
+} from './utils/apiMappers';
 
 interface SiteSettings {
   site_name: string;
@@ -32,6 +39,10 @@ interface AppContextType {
   news: NewsItem[];
   staffArticles: NewsItem[];
   magazines: MagazineItem[];
+  /** All magazine issues for admin (includes non-published). */
+  adminMagazines: MagazineItem[];
+  pendingArticles: NewsItem[];
+  subscriptionRequests: SubscriptionTableRow[];
   ads: AdItem[];
   media: MediaItem[];
   users: User[];
@@ -40,6 +51,7 @@ interface AppContextType {
   
   // Auth
   login: (email: string, pass: string) => Promise<User>;
+  loginStaff: (email: string, pass: string) => Promise<User>;
   loginWithGoogle: (credential: string) => Promise<User>;
   registerReader: (data: any) => Promise<void>;
   logout: () => void;
@@ -56,8 +68,15 @@ interface AppContextType {
 
   // Magazines
   fetchMagazines: () => Promise<void>;
+  fetchAdminMagazines: () => Promise<void>;
   addMagazine: (mag: Partial<MagazineItem>) => Promise<void>;
   deleteMagazine: (id: string) => Promise<void>;
+
+  // Approvals (admin)
+  fetchPendingArticles: () => Promise<void>;
+  fetchSubscriptionRequests: () => Promise<void>;
+  approveSubscription: (id: string) => Promise<void>;
+  rejectSubscription: (id: string, reason: string) => Promise<void>;
 
   // Ads
   fetchAds: () => Promise<void>;
@@ -81,6 +100,10 @@ interface AppContextType {
   updateHero: (data: Partial<HeroData>) => Promise<void>;
   fetchSettings: () => Promise<void>;
   fetchHero: () => Promise<void>;
+
+  /** Client-side: translate in-memory article fields via public `/api/translate/batch`. */
+  batchTranslateNews: (ids: string[], targetLang: string) => Promise<void>;
+  translateNewsContent: (id: string, targetLang: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -105,6 +128,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [news, setNews] = useState<NewsItem[]>([]);
   const [staffArticles, setStaffArticles] = useState<NewsItem[]>([]);
   const [magazines, setMagazines] = useState<MagazineItem[]>([]);
+  const [adminMagazines, setAdminMagazines] = useState<MagazineItem[]>([]);
+  const [pendingArticles, setPendingArticles] = useState<NewsItem[]>([]);
+  const [subscriptionRequests, setSubscriptionRequests] = useState<SubscriptionTableRow[]>([]);
   const [ads, setAds] = useState<AdItem[]>([]);
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -132,6 +158,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return user;
   };
 
+  const loginStaff = async (email: string, password?: string) => {
+    const { data: resp } = await api.post('/api/auth/staff/login', { email, password });
+    const token: string = (resp as { token: string }).token;
+    const user = normalizeUser((resp as { user: User }).user);
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
+    setCurrentUser(user);
+    toast.success(`Welcome, ${user.name}`);
+    return user;
+  };
+
   const loginWithGoogle = async (credential: string) => {
     const { data: resp } = await api.post('/api/auth/google', { credential });
     const token: string = (resp as { token: string }).token;
@@ -149,7 +186,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem(AUTH_TOKEN_KEY);
     localStorage.removeItem(SESSION_STORAGE_KEY);
     setCurrentUser(null);
-    toast.info('Logged out');
+    toast('Logged out');
   };
 
   const registerReader = async (formData: { email: string; password: string; name: string }) => {
@@ -159,17 +196,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const fetchNews = async () => {
     try {
       const { data: resp } = await api.get('/api/articles');
-      const r = resp as { news?: NewsItem[]; articles?: NewsItem[] };
-      setNews(r.news ?? r.articles ?? []);
-    } catch (e) { console.error('Articles fetch failed'); }
+      const raw = extractNewsListPayload(resp);
+      setNews(raw.map((row) => mapNewsRow(row)));
+    } catch (e) {
+      console.error('Articles fetch failed');
+    }
   };
 
   const fetchStaffArticles = async () => {
     try {
       const { data: resp } = await api.get('/api/articles/all');
-      const r = resp as { news?: NewsItem[]; articles?: NewsItem[] };
-      setStaffArticles(r.news ?? r.articles ?? []);
-    } catch (e) { console.error('Staff articles fetch failed'); }
+      const raw = extractNewsListPayload(resp);
+      setStaffArticles(raw.map((row) => mapNewsRow(row)));
+    } catch (e) {
+      console.error('Staff articles fetch failed');
+    }
+  };
+
+  const fetchPendingArticles = async () => {
+    try {
+      const { data: resp } = await api.get('/api/articles/pending');
+      const raw = extractNewsListPayload(resp);
+      setPendingArticles(raw.map((row) => mapNewsRow(row)));
+    } catch (e) {
+      console.error('Pending articles fetch failed');
+    }
+  };
+
+  const fetchSubscriptionRequests = async () => {
+    try {
+      const { data: resp } = await api.get('/api/subscriptions/admin');
+      const r = resp as { subscriptions?: Record<string, unknown>[] };
+      const raw = r.subscriptions ?? [];
+      setSubscriptionRequests(raw.map((row) => mapSubscriptionRow(row)));
+    } catch (e) {
+      console.error('Subscription requests fetch failed');
+    }
   };
 
   const addNews = async (item: Partial<NewsItem>) => {
@@ -197,28 +259,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     toast.success('Approved');
     await fetchStaffArticles();
     await fetchNews();
+    await fetchPendingArticles();
   };
 
   const rejectNews = async (id: string, reason: string) => {
     await api.post(`/api/articles/${id}/reject`, { reason });
-    toast.info('Rejected');
+    toast('Rejected');
     await fetchStaffArticles();
     await fetchNews();
+    await fetchPendingArticles();
   };
 
   const reworkNews = async (id: string, reason: string) => {
     await api.post(`/api/articles/${id}/rework`, { reason });
-    toast.info('Sent for rework');
+    toast('Sent for rework');
     await fetchStaffArticles();
     await fetchNews();
+    await fetchPendingArticles();
   };
 
   const fetchMagazines = async () => {
     try {
       const { data: resp } = await api.get('/api/magazines');
-      const r = resp as { magazines?: MagazineItem[] };
-      setMagazines(r.magazines ?? []);
-    } catch (e) { console.error('Magazines fetch failed'); }
+      const r = resp as { magazines?: Record<string, unknown>[] };
+      const raw = r.magazines ?? [];
+      setMagazines(raw.map((row) => mapMagazineRow(row)));
+    } catch (e) {
+      console.error('Magazines fetch failed');
+    }
+  };
+
+  const fetchAdminMagazines = async () => {
+    try {
+      const { data: resp } = await api.get('/api/magazines/all');
+      const r = resp as { magazines?: Record<string, unknown>[] };
+      const raw = r.magazines ?? [];
+      setAdminMagazines(raw.map((row) => mapMagazineRow(row)));
+    } catch (e) {
+      console.error('Admin magazines fetch failed');
+    }
   };
 
   const addMagazine = async (mag: Partial<MagazineItem>) => {
@@ -226,8 +305,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await api.post('/api/magazines', mag);
       toast.success('Magazine created successfully');
       await fetchMagazines();
+      await fetchAdminMagazines();
     } catch (error: any) {
-      const errorMsg = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Failed to create magazine. Please try again.';
+      const errorMsg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        'Failed to create magazine. Please try again.';
       toast.error(errorMsg);
       throw new Error(errorMsg);
     }
@@ -236,7 +320,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteMagazine = async (id: string) => {
     await api.delete(`/api/magazines/${id}`);
     toast.success('Deleted');
-    fetchMagazines();
+    await fetchMagazines();
+    await fetchAdminMagazines();
   };
 
   const fetchAds = async () => {
@@ -248,9 +333,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const fetchAdminAds = async () => {
-    const { data: resp } = await api.get('/api/ads');
-    const r = resp as { ads?: AdItem[] };
-    return r.ads ?? [];
+    const { data: resp } = await api.get('/api/ads/admin');
+    const r = resp as { ads?: Record<string, unknown>[] };
+    const raw = r.ads ?? [];
+    return raw.map((row) => mapAdRow(row));
   };
 
   const createAd = async (ad: Partial<AdItem>) => {
@@ -291,9 +377,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const fetchUsers = async () => {
     try {
       const { data: resp } = await api.get('/api/users');
-      const r = resp as { users?: User[] };
-      setUsers(r.users ?? []);
-    } catch (e) { console.error('Users fetch failed'); }
+      const r = resp as { users?: Record<string, unknown>[] };
+      const raw = r.users ?? [];
+      setUsers(raw.map((row) => mapUserRow(row)));
+    } catch (e) {
+      console.error('Users fetch failed');
+    }
+  };
+
+  const approveSubscription = async (id: string) => {
+    await api.post(`/api/subscriptions/${id}/approve`);
+    toast.success('Subscription approved');
+    await fetchSubscriptionRequests();
+    await fetchUsers();
+  };
+
+  const rejectSubscription = async (id: string, reason: string) => {
+    await api.post(`/api/subscriptions/${id}/reject`, { reason });
+    toast('Subscription rejected');
+    await fetchSubscriptionRequests();
   };
 
   const approveUser = async (id: string) => {
@@ -304,7 +406,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const rejectUser = async (id: string, reason: string) => {
     await api.post(`/api/users/${id}/reject`, { reason });
-    toast.info('Rejected');
+    toast('Rejected');
     fetchUsers();
   };
 
@@ -342,6 +444,73 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     fetchHero();
   };
 
+  const batchTranslateNews = useCallback(
+    async (ids: string[], targetLang: string) => {
+      const items = news.filter((n) => ids.includes(n.id));
+      if (items.length === 0) return;
+
+      const textEntries: Array<{ id: string; field: 'title' | 'excerpt' | 'content'; text: string }> = [];
+      for (const n of items) {
+        if (n.title) textEntries.push({ id: n.id, field: 'title', text: n.title });
+        if (n.excerpt) textEntries.push({ id: n.id, field: 'excerpt', text: n.excerpt });
+        if (n.content) textEntries.push({ id: n.id, field: 'content', text: n.content });
+      }
+      if (textEntries.length === 0) return;
+
+      const texts = textEntries.map((e) => e.text);
+      try {
+        const { data: resp } = await api.post<{ translations: Record<string, string> }>('/api/translate/batch', {
+          texts,
+          targetLang
+        });
+        const translations = resp?.translations ?? {};
+        setNews((prev) =>
+          prev.map((article) => {
+            if (!ids.includes(article.id)) return article;
+            const next = { ...article };
+            for (const e of textEntries) {
+              if (e.id !== article.id) continue;
+              const translated = translations[e.text];
+              if (!translated) continue;
+              if (e.field === 'title') next.title = translated;
+              else if (e.field === 'excerpt') next.excerpt = translated;
+              else next.content = translated;
+            }
+            return next;
+          })
+        );
+      } catch (e) {
+        console.error('Batch translate failed', e);
+      }
+    },
+    [news]
+  );
+
+  const translateNewsContent = useCallback(
+    async (id: string, targetLang: string) => {
+      await batchTranslateNews([id], targetLang);
+    },
+    [batchTranslateNews]
+  );
+
+  useEffect(() => {
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    if (!token) return;
+    void (async () => {
+      try {
+        const { data: resp } = await api.get('/api/auth/me');
+        const r = resp as { user?: Record<string, unknown> };
+        if (r.user) {
+          const u = normalizeUser(mapUserRow(r.user) as User);
+          setCurrentUser(u);
+          localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(u));
+        }
+      } catch {
+        /* token invalid — interceptor may clear session */
+      }
+    })();
+  }, []);
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -349,7 +518,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (['ADMIN', 'SUPER_ADMIN', 'EDITOR'].includes(currentUser?.role || '')) {
           const staffLoads: Promise<unknown>[] = [fetchStaffArticles(), fetchMedia()];
           if (['ADMIN', 'SUPER_ADMIN'].includes(String(currentUser?.role))) {
-            staffLoads.push(fetchUsers());
+            staffLoads.push(
+              fetchUsers(),
+              fetchAdminMagazines(),
+              fetchPendingArticles(),
+              fetchSubscriptionRequests()
+            );
           }
           await Promise.all(staffLoads);
         }
@@ -363,14 +537,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [currentUser]);
 
   const value = {
-    isReady, currentUser, news, staffArticles, magazines, ads, media, users, siteSettings, heroData,
-    login, loginWithGoogle, registerReader, logout,
-    fetchNews, fetchStaffArticles, addNews, updateNews, deleteNews, approveNews, rejectNews, reworkNews,
-    fetchMagazines, addMagazine, deleteMagazine,
-    fetchAds, fetchAdminAds, createAd, updateAd, deleteAd,
-    fetchMedia, uploadFile,
-    fetchUsers, approveUser, rejectUser, deleteUser,
-    updateSettings, updateHero, fetchSettings, fetchHero
+    isReady,
+    currentUser,
+    news,
+    staffArticles,
+    magazines,
+    adminMagazines,
+    pendingArticles,
+    subscriptionRequests,
+    ads,
+    media,
+    users,
+    siteSettings,
+    heroData,
+    login,
+    loginStaff,
+    loginWithGoogle,
+    registerReader,
+    logout,
+    fetchNews,
+    fetchStaffArticles,
+    addNews,
+    updateNews,
+    deleteNews,
+    approveNews,
+    rejectNews,
+    reworkNews,
+    fetchMagazines,
+    fetchAdminMagazines,
+    addMagazine,
+    deleteMagazine,
+    fetchPendingArticles,
+    fetchSubscriptionRequests,
+    approveSubscription,
+    rejectSubscription,
+    fetchAds,
+    fetchAdminAds,
+    createAd,
+    updateAd,
+    deleteAd,
+    fetchMedia,
+    uploadFile,
+    fetchUsers,
+    approveUser,
+    rejectUser,
+    deleteUser,
+    updateSettings,
+    updateHero,
+    fetchSettings,
+    fetchHero,
+    batchTranslateNews,
+    translateNewsContent
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

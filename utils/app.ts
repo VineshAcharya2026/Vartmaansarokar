@@ -14,7 +14,8 @@ const PRODUCTION_API_BASE_DEFAULT = 'https://api.vartmaansarokaar.com';
 function getApiBaseUrl(): string {
   const v = ENV.VITE_API_BASE_URL ?? ENV.VITE_API_BASE;
   if (v) return normalizeBaseUrl(v);
-  if (import.meta.env.DEV) return normalizeBaseUrl('http://localhost:5174');
+  // Dev + no explicit base: same-origin `/api/*` so Vite proxy can reach Express or `wrangler dev` (D1).
+  if (import.meta.env.DEV) return '';
   return PRODUCTION_API_BASE_DEFAULT;
 }
 
@@ -33,6 +34,7 @@ export const STAFF_DEV_DEMO_PASSWORD =
     ? String(import.meta.env.VITE_DEV_STAFF_DEMO)
     : '';
 
+/** Default to canonical DB seed domain; @vartmaansarokaar.com still works via server email variants. */
 export const STAFF_LOGIN_EMAILS = {
   superAdmin: import.meta.env.VITE_SUPER_ADMIN_EMAIL ?? 'superadmin@vartmaansarokar.com',
   admin: import.meta.env.VITE_ADMIN_EMAIL ?? 'admin@vartmaansarokar.com',
