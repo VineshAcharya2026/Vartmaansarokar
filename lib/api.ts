@@ -4,7 +4,7 @@ import { API_BASE, AUTH_TOKEN_KEY, SESSION_STORAGE_KEY } from '../utils/app';
 const baseURL = API_BASE.replace(/\/$/, '');
 
 const api = axios.create({
-  baseURL,
+  baseURL: baseURL || undefined,
   withCredentials: true
 });
 
@@ -34,6 +34,17 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // Keep API reads fresh across browser/proxy/CDN layers.
+  const method = (config.method || 'get').toLowerCase();
+  const isGet = method === 'get';
+  const url = String(config.url || '');
+  if (isGet && url.includes('/api/')) {
+    config.headers['Cache-Control'] = 'no-cache';
+    config.headers.Pragma = 'no-cache';
+    config.headers.Expires = '0';
+    const params = (config.params || {}) as Record<string, unknown>;
+    config.params = { ...params, _t: Date.now() };
+  }
   return config;
 });
 
@@ -46,7 +57,10 @@ api.interceptors.response.use(
         const err = new Error(b.error || b.message || 'Request failed');
         return Promise.reject(err);
       }
-      response.data = body.data;
+      // Avoid clobbering response.data with undefined (would break clients expecting top-level keys).
+      if (body.data !== undefined) {
+        response.data = body.data;
+      }
     }
     return response;
   },

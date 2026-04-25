@@ -237,21 +237,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addNews = async (item: Partial<NewsItem>) => {
     await api.post('/api/articles', item);
     toast.success('Article saved');
-    fetchNews();
-    if (['ADMIN', 'SUPER_ADMIN', 'EDITOR'].includes(currentUser?.role || '')) fetchStaffArticles();
+    if (['ADMIN', 'SUPER_ADMIN', 'EDITOR'].includes(currentUser?.role || '')) {
+      await Promise.all([fetchNews(), fetchStaffArticles()]);
+      return;
+    }
+    await fetchNews();
   };
 
   const updateNews = async (id: string, item: Partial<NewsItem>) => {
     await api.put(`/api/articles/${id}`, item);
     toast.success('Article updated');
-    fetchNews();
-    fetchStaffArticles();
+    await Promise.all([fetchNews(), fetchStaffArticles()]);
   };
 
   const deleteNews = async (id: string) => {
     await api.delete(`/api/articles/${id}`);
     toast.success('Deleted');
-    fetchStaffArticles();
+    await Promise.all([fetchStaffArticles(), fetchNews(), fetchPendingArticles()]);
   };
 
   const approveNews = async (id: string) => {
@@ -342,19 +344,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const createAd = async (ad: Partial<AdItem>) => {
     await api.post('/api/ads', ad);
     toast.success('Ad created');
-    fetchAds();
+    await fetchAds();
   };
 
   const updateAd = async (id: string, ad: Partial<AdItem>) => {
     await api.put(`/api/ads/${id}`, ad);
     toast.success('Ad updated');
-    fetchAds();
+    await fetchAds();
   };
 
   const deleteAd = async (id: string) => {
     await api.delete(`/api/ads/${id}`);
     toast.success('Ad deleted');
-    fetchAds();
+    await fetchAds();
   };
 
   const fetchMedia = async () => {
@@ -401,19 +403,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const approveUser = async (id: string) => {
     await api.post(`/api/users/${id}/approve`);
     toast.success('Approved');
-    fetchUsers();
+    await fetchUsers();
   };
 
   const rejectUser = async (id: string, reason: string) => {
     await api.post(`/api/users/${id}/reject`, { reason });
     toast('Rejected');
-    fetchUsers();
+    await fetchUsers();
   };
 
   const deleteUser = async (id: string) => {
     await api.delete(`/api/users/${id}`);
     toast.success('Deleted');
-    fetchUsers();
+    await fetchUsers();
   };
 
   const fetchSettings = async () => {
@@ -435,13 +437,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateSettings = async (data: Partial<SiteSettings>) => {
     await api.put('/api/settings', data);
     toast.success('Settings Saved');
-    fetchSettings();
+    await fetchSettings();
   };
 
   const updateHero = async (data: Partial<HeroData>) => {
     await api.put('/api/hero', data);
     toast.success('Hero Updated');
-    fetchHero();
+    await fetchHero();
   };
 
   const batchTranslateNews = useCallback(

@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Lock, Mail, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { useApp } from '../AppContext';
 import { STAFF_DEV_DEMO_PASSWORD, STAFF_LOGIN_EMAILS } from '../utils/app';
+import { isStaffRole } from '../features/auth';
+import { resolveStaffRedirectTarget } from '../features/dashboard';
 
 const StaffLogin = () => {
   const { t } = useTranslation();
@@ -18,25 +20,12 @@ const StaffLogin = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const staffRoles = ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] as const;
-
-  const staffHomePath = (role: string) => {
-    if (role === 'EDITOR') return '/admin?tab=news';
-    if (role === 'ADMIN' || role === 'SUPER_ADMIN') return '/admin?tab=approvals';
-    return '/admin';
-  };
-
   /** If already signed in, send staff to dashboard (or return URL only if it is an admin route). */
   React.useEffect(() => {
     if (!currentUser) return;
-    if (staffRoles.includes(currentUser.role as (typeof staffRoles)[number])) {
+    if (isStaffRole(currentUser.role)) {
       const loc = location.state?.from as { pathname?: string; search?: string } | undefined;
-      const fromPath = loc?.pathname;
-      const fromSearch = typeof loc?.search === 'string' ? loc.search : '';
-      const target =
-        typeof fromPath === 'string' && fromPath.startsWith('/admin')
-          ? `${fromPath}${fromSearch}`
-          : staffHomePath(String(currentUser.role));
+      const target = resolveStaffRedirectTarget(currentUser.role, loc);
       navigate(target, { replace: true });
     } else {
       navigate('/', { replace: true });
@@ -47,8 +36,9 @@ const StaffLogin = () => {
     e.preventDefault();
     setError('');
     setSuccess(false);
+    const normalizedEmail = email.trim().toLowerCase();
 
-    if (!email.trim()) {
+    if (!normalizedEmail) {
       setError(t('staffLogin.emailError'));
       return;
     }
@@ -61,23 +51,34 @@ const StaffLogin = () => {
     setLoading(true);
 
     try {
-      const user = await loginStaff(email.trim(), password);
-      const r = user.role as string;
-      if (staffRoles.includes(r as (typeof staffRoles)[number])) {
+      const user = await loginStaff(normalizedEmail, password);
+      if (isStaffRole(user.role)) {
         setSuccess(true);
         const loc = location.state?.from as { pathname?: string; search?: string } | undefined;
-        const fromPath = loc?.pathname;
-        const fromSearch = typeof loc?.search === 'string' ? loc.search : '';
-        const target =
-          typeof fromPath === 'string' && fromPath.startsWith('/admin')
-            ? `${fromPath}${fromSearch}`
-            : staffHomePath(r);
+        const target = resolveStaffRedirectTarget(user.role, loc);
         navigate(target, { replace: true });
       } else {
         setError(t('staffLogin.unexpectedError', 'This account does not have staff access.'));
       }
     } catch (err: any) {
-      setError(err.message || t('staffLogin.unexpectedError'));
+      const msg = String(err?.message || '').trim();
+      if (/network\s*error|failed to fetch|load failed/i.test(msg)) {
+        setError(
+          t(
+            'staffLogin.unexpectedError',
+            'Cannot reach login server. Please check internet/API deployment and try again.'
+          )
+        );
+      } else if (/staff sign-in is not configured/i.test(msg)) {
+        setError(
+          t(
+            'staffLogin.unexpectedError',
+            'Staff sign-in is not configured on server yet. Set STAFF_PASSWORD on Worker secrets.'
+          )
+        );
+      } else {
+        setError(msg || t('staffLogin.unexpectedError'));
+      }
     } finally {
       setLoading(false);
     }

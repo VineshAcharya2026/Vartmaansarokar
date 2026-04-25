@@ -16,6 +16,7 @@ import SiteNavbar from './components/SiteNavbar';
 import SiteFooter from './components/SiteFooter';
 import ErrorBoundary from './components/ErrorBoundary';
 import ToastProvider from './components/ToastProvider';
+import { STAFF_ROLES, type StaffRole } from './features/auth';
 
 const Magazine = React.lazy(() => import('./pages/Magazine'));
 const Admin = React.lazy(() => import('./pages/Admin'));
@@ -37,9 +38,6 @@ const AdDetail = React.lazy(() => import('./pages/AdDetail'));
  * ProtectedRoute — redirects to /staff-login if the user is not authenticated
  * or lacks a required role. Preserves the attempted path for post-login redirect.
  */
-const STAFF_ROLES = ['ADMIN', 'SUPER_ADMIN', 'EDITOR'] as const;
-type StaffRole = typeof STAFF_ROLES[number];
-
 const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRoles?: StaffRole[] }> = ({ children, requiredRoles }) => {
   const { currentUser } = useApp();
   const location = useLocation();
