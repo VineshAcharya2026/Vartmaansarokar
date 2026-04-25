@@ -1,6 +1,6 @@
 # Vartmaan Sarokaar
 
-A modern Premium digital news and magazine platform built with React, TypeScript, and Cloudflare.
+A modern Nepali digital news and magazine platform built with React, TypeScript, and Cloudflare.
 
 ## 🚀 Production Ready
 
@@ -38,7 +38,7 @@ See **[DEPLOYMENT.md](DEPLOYMENT.md)** for detailed deployment instructions.
 
 Quick overview:
 1. `npm run db:create` - Create D1 database
-2. `npm run r2:create` - Create R2 bucket
+2. `npm run r2:create` - Create R2 bucket  
 3. `npm run db:schema` - Apply database schema
 3. Set secrets: `JWT_SECRET`, `STAFF_PASSWORD`, `GOOGLE_CLIENT_ID`
 5. `npm run deploy:workers` - Deploy Workers API
@@ -82,8 +82,7 @@ Quick overview:
 ├── migrations/         # Database migrations
 ├── locales/            # i18n translations
 ├── schema.sql          # D1 database schema
-├── wrangler.toml       # Cloudflare Pages (Vite dist) only
-├── wrangler.worker.toml # API Worker (D1, R2, routes to api.*)
+├── wrangler.toml       # Cloudflare config
 └── DEPLOYMENT.md       # Deployment guide
 ```
 
@@ -95,11 +94,11 @@ VITE_API_BASE_URL=https://your-workers-url.workers.dev
 VITE_GOOGLE_CLIENT_ID=your-google-client-id
 ```
 
-### Backend Secrets (Cloudflare Worker)
+### Backend Secrets (Cloudflare)
 ```bash
-wrangler secret put JWT_SECRET -c wrangler.worker.toml
-wrangler secret put STAFF_PASSWORD -c wrangler.worker.toml
-wrangler secret put GOOGLE_CLIENT_ID -c wrangler.worker.toml
+wrangler secret put JWT_SECRET
+wrangler secret put STAFF_PASSWORD
+wrangler secret put GOOGLE_CLIENT_ID
 ```
 
 ## 📝 Available Scripts

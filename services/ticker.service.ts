@@ -6,6 +6,11 @@ export const tickerService = {
     return (data as { items?: unknown[] }).items ?? [];
   },
 
+  getCricketTicker: async () => {
+    const { data } = await api.get('/api/ticker/cricket');
+    return (data as { items?: unknown[] }).items ?? [];
+  },
+
   createTicker: async (text: string) => {
     const { data } = await api.post('/api/ticker', { text });
     return data;

@@ -1,16 +1,8 @@
 import { Hono } from 'hono';
 import { verify, sign } from 'hono/jwt';
 import * as bcrypt from 'bcryptjs';
-import { ok, fail } from './api-contract.js';
-import { clientKey, rateLimitAllow } from './worker-rate-limit.js';
-import { getArticlesList } from './modules/articles/index.js';
-import {
-  bootstrapStaffRole,
-  canonicalStaffLoginEmail,
-  ensureStaffSeedAccounts,
-  staffLoginEmailVariants
-} from './modules/auth/staffAuth.js';
-import { applyNoStoreHeaders } from './modules/dashboard/cacheHeaders.js';
+import { ok, fail } from './api-contract';
+import { clientKey, rateLimitAllow } from './worker-rate-limit';
 
 export interface Env {
   DB: D1Database;
@@ -26,44 +18,19 @@ export interface Env {
 
 const app = new Hono<{ Bindings: Env; Variables: { user: any } }>();
 
+const ADMIN_EMAILS = [
+  'vineshjm@gmail.com',
+  'admin@vartmaansarokar.com',
+  'superadmin@vartmaansarokar.com'
+];
+
+const isAdminEmail = (email: string) => ADMIN_EMAILS.includes(email.toLowerCase());
+
 function splitOrigins(value: string | undefined): string[] {
   return (value || '')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
-}
-
-/** Cloudflare Pages project previews: https://<branch>.vartmaan-sarokar-pages.pages.dev */
-const PAGES_PREVIEW_HOST_SUFFIX = '.vartmaan-sarokar-pages.pages.dev';
-
-function isOriginAllowed(origin: string, allowedOriginsCsv: string | undefined): boolean {
-  if (!origin) {
-    return true;
-  }
-  const allowed = new Set(splitOrigins(allowedOriginsCsv));
-  if (allowed.has(origin)) {
-    return true;
-  }
-  try {
-    const u = new URL(origin);
-    if (u.protocol === 'https:' && u.hostname.endsWith(PAGES_PREVIEW_HOST_SUFFIX)) {
-      return true;
-    }
-    /** GitHub Pages (e.g. homepage in package.json); public GET APIs need this for browser fetches. */
-    if (u.protocol === 'https:' && u.hostname.endsWith('.github.io')) {
-      return true;
-    }
-    /** Vite / local dev: browser sends Origin http://localhost:<port> (not listed in ALLOWED_ORIGINS). */
-    if (
-      (u.protocol === 'http:' || u.protocol === 'https:') &&
-      (u.hostname === 'localhost' || u.hostname === '127.0.0.1')
-    ) {
-      return true;
-    }
-  } catch {
-    return false;
-  }
-  return false;
 }
 
 /** Ensures all tables the Worker touches exist (fresh D1 has none beyond what we create). */
@@ -258,14 +225,14 @@ async function runD1Schema(db: D1Database): Promise<void> {
     .run();
 }
 
-// CORS — ALLOWED_ORIGINS list + https://*.vartmaan-sarokar-pages.pages.dev (Cloudflare Pages previews)
+// CORS — strict allowlist from ALLOWED_ORIGINS only (configure dev origins in wrangler dev / .dev.vars)
 app.use('*', async (c, next) => {
   const origin = c.req.header('Origin') || '';
-  const pass = !origin || isOriginAllowed(origin, c.env.ALLOWED_ORIGINS);
-  if (origin && !pass) {
+  const allowed = new Set(splitOrigins(c.env.ALLOWED_ORIGINS));
+  if (origin && !allowed.has(origin)) {
     return c.text('Forbidden', 403);
   }
-  if (pass && origin) {
+  if (origin && allowed.has(origin)) {
     c.header('Access-Control-Allow-Origin', origin);
   }
   c.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
@@ -273,21 +240,14 @@ app.use('*', async (c, next) => {
   c.header('Access-Control-Allow-Credentials', 'true');
 
   if (c.req.method === 'OPTIONS') {
-    return c.body(null, 204);
+    return c.text('', 204);
   }
   await next();
-});
-
-// Dynamic API responses must stay fresh on Cloudflare/browser.
-app.use('/api/*', async (c, next) => {
-  await next();
-  applyNoStoreHeaders(c);
 });
 
 app.use('*', async (c, next) => {
   try {
     await ensureD1Schema(c.env.DB);
-    await ensureStaffSeedAccounts(c.env.DB, c.env.STAFF_PASSWORD);
   } catch (e: any) {
     console.error('ensureD1Schema:', e?.message || e);
     return fail(c, 'Database initialization failed', 500);
@@ -344,14 +304,7 @@ app.onError((err, c) => {
 app.get('/api/health', async (c) => {
   try {
     await c.env.DB.prepare('SELECT 1').first();
-    return ok(c, {
-      db: 'connected',
-      time: new Date().toISOString(),
-      auth: {
-        jwtSecretConfigured: Boolean(c.env.JWT_SECRET),
-        staffPasswordConfigured: Boolean(c.env.STAFF_PASSWORD)
-      }
-    });
+    return ok(c, { db: 'connected', time: new Date().toISOString() });
   } catch (e: any) {
     return fail(c, e?.message || 'Database unavailable', 503);
   }
@@ -414,32 +367,21 @@ const handleLogin = async (c: any) => {
       return fail(c, 'Email and password are required', 400);
     }
 
-    const variants = staffLoginEmailVariants(normalizedEmail);
-    const ph = variants.map(() => '?').join(', ');
-    const { results } = await c.env.DB.prepare(`SELECT * FROM users WHERE email IN (${ph})`).bind(...variants).all();
+    const { results } = await c.env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(normalizedEmail).all();
     const isMasterPassword = c.env.STAFF_PASSWORD && password === c.env.STAFF_PASSWORD;
     let user = results?.[0] as any;
 
     if (!user) {
-      const bootRole = bootstrapStaffRole(normalizedEmail);
-      if (bootRole && !c.env.STAFF_PASSWORD) {
-        console.error('STAFF_PASSWORD is not set: staff bootstrap sign-in is disabled');
-        return fail(
-          c,
-          'Staff sign-in is not configured. Set the STAFF_PASSWORD secret on this API Worker in Cloudflare (Wrangler: wrangler secret put STAFF_PASSWORD -c wrangler.worker.toml), then use that value as the password.',
-          503
-        );
-      }
-      if (!bootRole || !isMasterPassword) {
+      // Bootstrap staff users on first login when master password is configured.
+      if (!isAdminEmail(normalizedEmail) || !isMasterPassword) {
         return fail(c, 'Invalid email or password', 401);
       }
       const id = generateId();
-      const insertEmail = canonicalStaffLoginEmail(normalizedEmail);
-      const insertLocal = insertEmail.split('@')[0];
+      const role = normalizedEmail === 'superadmin@vartmaansarokar.com' ? 'SUPER_ADMIN' : 'ADMIN';
       await c.env.DB.prepare(
         'INSERT INTO users (id, email, name, role, password_hash, is_verified) VALUES (?, ?, ?, ?, ?, ?)'
       )
-        .bind(id, insertEmail, insertLocal, bootRole, null, 1)
+        .bind(id, normalizedEmail, normalizedEmail.split('@')[0], role, null, 1)
         .run();
       const fresh = await c.env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).all();
       user = fresh?.results?.[0] as any;
@@ -455,12 +397,9 @@ const handleLogin = async (c: any) => {
     }
 
     let userRole = user.role;
-    if (userRole === 'READER') {
-      const r = bootstrapStaffRole(user.email);
-      if (r) {
-        userRole = r;
-        await c.env.DB.prepare('UPDATE users SET role = ? WHERE id = ?').bind(userRole, user.id).run();
-      }
+    if (isAdminEmail(user.email) && userRole === 'READER') {
+      userRole = 'SUPER_ADMIN';
+      await c.env.DB.prepare('UPDATE users SET role = ? WHERE id = ?').bind(userRole, user.id).run();
     }
 
     if (userRole === 'READER' && user.is_verified === 0) {
@@ -472,7 +411,6 @@ const handleLogin = async (c: any) => {
       return fail(c, 'Security token missing', 500);
     }
 
-    const roleOut = String(userRole).trim().toUpperCase();
     const exp = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
     const token = await sign({ userId: user.id, exp }, c.env.JWT_SECRET, 'HS256');
 
@@ -481,7 +419,7 @@ const handleLogin = async (c: any) => {
       user: {
         id: user.id,
         email: user.email,
-        role: roleOut,
+        role: userRole,
         name: user.name,
         subscription_status: user.subscription_status,
         subscription_plan: user.subscription_plan,
@@ -512,30 +450,26 @@ const handleGoogleLogin = async (c: any) => {
 
     if (!user) {
       const id = generateId();
-      const role = bootstrapStaffRole(payload.email) ?? 'READER';
+      const role = isAdminEmail(payload.email) ? 'SUPER_ADMIN' : 'READER';
       await c.env.DB.prepare('INSERT INTO users (id, email, name, role, google_id, is_verified) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(id, payload.email, payload.name || '', role, payload.sub, 1)
         .run();
       const fresh = await c.env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).all();
       user = fresh.results?.[0];
-    } else if (user.role === 'READER') {
-      const r = bootstrapStaffRole(user.email);
-      if (r) {
-        await c.env.DB.prepare('UPDATE users SET role = ? WHERE id = ?').bind(r, user.id).run();
-        user.role = r;
-      }
+    } else if (isAdminEmail(user.email) && user.role === 'READER') {
+      await c.env.DB.prepare('UPDATE users SET role = ? WHERE id = ?').bind('SUPER_ADMIN', user.id).run();
+      user.role = 'SUPER_ADMIN';
     }
 
     const exp = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
     const token = await sign({ userId: user.id, exp }, c.env.JWT_SECRET, 'HS256');
-    const roleOut = String(user.role || 'READER').trim().toUpperCase();
 
     return ok(c, {
       token,
       user: {
         id: user.id,
         email: user.email,
-        role: roleOut,
+        role: user.role,
         name: user.name,
         subscription_status: user.subscription_status,
         subscription_plan: user.subscription_plan
@@ -648,9 +582,7 @@ app.post('/api/auth/users/login', async (c) => {
 
 app.get('/api/auth/me', auth, async (c) => {
   const u = c.get('user') as { id: string };
-  const { results } = await c.env.DB.prepare(
-    'SELECT id, email, name, role, phone, address, subscription_plan, subscription_status, payment_verified, payment_screenshot_url, created_at FROM users WHERE id = ?'
-  ).bind(u.id).all();
+  const { results } = await c.env.DB.prepare('SELECT id, email, name, role, phone, address, subscription_plan, subscription_status, payment_verified, created_at FROM users WHERE id = ?').bind(u.id).all();
   const user = results[0] as any;
   if (!user) return fail(c, 'User not found', 404);
   return ok(c, { user });
@@ -794,18 +726,11 @@ app.put('/api/news/:id', auth, role('EDITOR', 'ADMIN', 'SUPER_ADMIN'), async (c)
       newStatus = 'PUBLISHED';
     }
 
-    let publishedAt = article.published_at || '';
-    if (newStatus === 'PUBLISHED') {
-      publishedAt = new Date().toISOString();
-    } else if (newStatus === 'PENDING_REVIEW' && user.role === 'EDITOR') {
-      publishedAt = '';
-    }
-
     await c.env.DB.prepare(`
       UPDATE news SET 
-        title=?, category=?, excerpt=?, content=?, image=?, 
-        featured=?, requires_subscription=?, status=?, published_at=?, updated_at=datetime('now') 
-        WHERE id=?
+      title=?, category=?, excerpt=?, content=?, image=?, 
+      featured=?, requires_subscription=?, status=?, updated_at=datetime('now') 
+      WHERE id=?
     `).bind(
       body.title || article.title || '',
       body.category || article.category || 'General',
@@ -815,7 +740,6 @@ app.put('/api/news/:id', auth, role('EDITOR', 'ADMIN', 'SUPER_ADMIN'), async (c)
       body.featured !== undefined ? (body.featured ? 1 : 0) : (article.featured || 0),
       body.requires_subscription !== undefined ? (body.requires_subscription ? 1 : 0) : (article.requires_subscription || 0),
       newStatus,
-      publishedAt,
       id
     ).run();
 
@@ -826,24 +750,13 @@ app.put('/api/news/:id', auth, role('EDITOR', 'ADMIN', 'SUPER_ADMIN'), async (c)
 });
 
 // --- NEWS / ARTICLES ---
-app.get('/api/articles', getArticlesList);
+app.get('/api/articles', async (c) => {
+  const { results } = await c.env.DB.prepare("SELECT * FROM news WHERE status='PUBLISHED' ORDER BY created_at DESC").all();
+  return ok(c, { news: results || [] });
+});
 
 app.get('/api/articles/all', auth, role('ADMIN', 'SUPER_ADMIN', 'EDITOR'), async (c) => {
-  const user = c.get('user') as { id: string; role: string };
-  let q = '';
-  if (user.role === 'EDITOR') {
-    q = 'SELECT * FROM news WHERE author_id = ? ORDER BY created_at DESC';
-  } else if (user.role === 'ADMIN') {
-    q = "SELECT * FROM news WHERE status IN ('PENDING_REVIEW','PUBLISHED','REJECTED','DRAFT') ORDER BY created_at DESC";
-  } else if (user.role === 'SUPER_ADMIN') {
-    q = 'SELECT * FROM news ORDER BY created_at DESC';
-  } else {
-    return fail(c, 'Forbidden', 403);
-  }
-  const { results } =
-    user.role === 'EDITOR'
-      ? await c.env.DB.prepare(q).bind(user.id).all()
-      : await c.env.DB.prepare(q).all();
+  const { results } = await c.env.DB.prepare("SELECT * FROM news ORDER BY created_at DESC").all();
   return ok(c, { news: results || [] });
 });
 
@@ -859,13 +772,14 @@ app.get('/api/articles/:id', async (c) => {
   return ok(c, { article: results[0] });
 });
 
-app.post('/api/articles', auth, role('EDITOR', 'ADMIN', 'SUPER_ADMIN'), async (c) => {
+app.post('/api/articles', auth, async (c) => {
   const user = c.get('user');
   const data = await c.req.json();
   const id = generateId();
   const createdAt = new Date().toISOString();
   
-  // Editors submit for review; ADMIN and SUPER_ADMIN publish immediately on create.
+  // Status logic: Admin/Editor creates published? No, let's keep it safe.
+  // USER_REQUEST Task: EDITOR → PENDING, ADMIN → PUBLISH
   const status = (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') ? 'PUBLISHED' : 'PENDING_REVIEW';
   const publishedAt = status === 'PUBLISHED' ? new Date().toISOString() : '';
   const featured = data.featured ? 1 : 0;
@@ -894,80 +808,18 @@ app.post('/api/articles', auth, role('EDITOR', 'ADMIN', 'SUPER_ADMIN'), async (c
   return ok(c, { id });
 });
 
-app.put('/api/articles/:id', auth, role('EDITOR', 'ADMIN', 'SUPER_ADMIN'), async (c) => {
-  try {
-    const id = c.req.param('id');
-    const user = c.get('user') as { id: string; role: string };
-    const body = (await c.req.json()) as Record<string, unknown>;
-    // Ignore client status — workflow is enforced here only.
-    if ('status' in body) delete (body as { status?: unknown }).status;
+app.put('/api/articles/:id', auth, async (c) => {
+  const id = c.req.param('id');
+  const data = await c.req.json();
+  const updatedAt = new Date().toISOString();
+  
+  await c.env.DB.prepare(`
+    UPDATE news 
+    SET title = ?, content = ?, excerpt = ?, category = ?, author = ?, image = ?, updated_at = ?
+    WHERE id = ?
+  `).bind(data.title, data.content, data.excerpt, data.category, data.author, data.image, updatedAt, id).run();
 
-    const { results } = await c.env.DB.prepare('SELECT * FROM news WHERE id = ?').bind(id).all();
-    if (!results || !results[0]) return fail(c, 'Article not found', 404);
-    const article = results[0] as Record<string, unknown>;
-
-    if (user.role === 'EDITOR' && String(article.author_id) !== user.id) {
-      return fail(c, 'You can only edit your own articles', 403);
-    }
-
-    // Editors re-submit for review; ADMIN / SUPER_ADMIN publish on save (no separate approve step).
-    let newStatus = String(article.status || '');
-    if (user.role === 'EDITOR') {
-      newStatus = 'PENDING_REVIEW';
-    } else if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
-      newStatus = 'PUBLISHED';
-    }
-
-    const title = (body.title as string) || String(article.title || '');
-    const category = (body.category as string) || String(article.category || 'General');
-    const excerpt = (body.excerpt as string) ?? String(article.excerpt || '');
-    const content = (body.content as string) ?? String(article.content || '');
-    const image = (body.image as string) ?? String(article.image || '');
-    const author = (body.author as string) || String(article.author || '');
-
-    const feat =
-      body.featured !== undefined ? ((body.featured as boolean) ? 1 : 0) : Number(article.featured || 0);
-    const requires =
-      body.requires_subscription !== undefined
-        ? (body.requires_subscription as boolean)
-          ? 1
-          : 0
-        : Number(article.requires_subscription || 0);
-
-    let publishedAt = String(article.published_at || '');
-    if (newStatus === 'PUBLISHED') {
-      publishedAt = new Date().toISOString();
-    } else if (newStatus === 'PENDING_REVIEW' && user.role === 'EDITOR') {
-      publishedAt = '';
-    }
-
-    await c.env.DB.prepare(`
-      UPDATE news SET 
-        title=?, category=?, excerpt=?, content=?, image=?, author=?,
-        featured=?, requires_subscription=?, status=?, published_at=?,
-        updated_at=?
-      WHERE id=?
-    `)
-      .bind(
-        title,
-        category,
-        excerpt,
-        content,
-        image,
-        author,
-        feat,
-        requires,
-        newStatus,
-        publishedAt,
-        new Date().toISOString(),
-        id
-      )
-      .run();
-
-    return ok(c, { message: 'Updated successfully', status: newStatus });
-  } catch (err: any) {
-    return fail(c, err.message || 'Server error', 500);
-  }
+  return ok(c, {});
 });
 
 app.delete('/api/articles/:id', auth, role('ADMIN', 'SUPER_ADMIN'), async (c) => {
@@ -979,11 +831,7 @@ app.delete('/api/articles/:id', auth, role('ADMIN', 'SUPER_ADMIN'), async (c) =>
 const handleApprove = async (c: any) => {
   try {
     const id = c.req.param('id');
-    const when = new Date().toISOString();
-    const result = await c.env.DB
-      .prepare("UPDATE news SET status='PUBLISHED', published_at=?, updated_at=? WHERE id=?")
-      .bind(when, when, id)
-      .run();
+    const result = await c.env.DB.prepare("UPDATE news SET status='PUBLISHED' WHERE id=?").bind(id).run();
     const changes = result.meta?.changes ?? (result as any).changes ?? 0;
     if (changes === 0 && !result.success) return fail(c, 'Approve failed', 400);
     return ok(c, { message: 'Approved' });
@@ -1043,14 +891,13 @@ app.post('/api/magazines', auth, role('ADMIN', 'SUPER_ADMIN'), async (c) => {
   const coverImage = data.coverImage || data.cover_image || '';
   const pdfUrl = data.pdfUrl || data.pdf_url || '';
   const gatedPage = data.gatedPage ?? data.gated_page ?? 0;
-  const pricePhysical = Number(data.pricePhysical ?? data.price_physical ?? data.price ?? 499) || 0;
-  const priceDigital = Number(data.priceDigital ?? data.price_digital ?? 0) || 0;
+  const price = data.price ?? 0;
   const blurPaywall = data.blurPaywall ?? data.blur_paywall ?? false;
 
   await c.env.DB.prepare(`
-    INSERT INTO magazines (id, title, issue_number, date, cover_image, pdf_url, gated_page, price_physical, price_digital, blur_paywall, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PUBLISHED')
-  `).bind(id, title, issueNumber, date, coverImage, pdfUrl, gatedPage, pricePhysical, priceDigital, blurPaywall ? 1 : 0).run();
+    INSERT INTO magazines (id, title, issue_number, date, cover_image, pdf_url, gated_page, price_physical, blur_paywall, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'PUBLISHED')
+  `).bind(id, title, issueNumber, date, coverImage, pdfUrl, gatedPage, price, blurPaywall ? 1 : 0).run();
   return ok(c, { id });
 });
 
@@ -1213,104 +1060,6 @@ app.post('/api/subscriptions', async (c) => {
     return ok(c, { message: 'Subscription request submitted' }, 201);
   } catch (err: any) {
     return fail(c, err.message || 'Subscription failed', 500);
-  }
-});
-
-app.get('/api/subscriptions/admin', auth, role('ADMIN', 'SUPER_ADMIN'), async (c) => {
-  const statusQ = c.req.query('status')?.trim();
-  if (statusQ) {
-    const { results } = await c.env.DB
-      .prepare('SELECT * FROM subscriptions WHERE status = ? ORDER BY created_at DESC')
-      .bind(statusQ.toUpperCase())
-      .all();
-    return ok(c, { subscriptions: results || [] });
-  }
-  const { results } = await c.env.DB.prepare('SELECT * FROM subscriptions ORDER BY created_at DESC').all();
-  return ok(c, { subscriptions: results || [] });
-});
-
-app.post('/api/subscriptions/:id/approve', auth, role('ADMIN', 'SUPER_ADMIN'), async (c) => {
-  try {
-    const id = c.req.param('id');
-    const admin = c.get('user') as { id: string };
-    const { results } = await c.env.DB.prepare('SELECT * FROM subscriptions WHERE id = ?').bind(id).all();
-    const sub = results?.[0] as Record<string, unknown> | undefined;
-    if (!sub) return fail(c, 'Not found', 404);
-    if (String(sub.status) !== 'PENDING') return fail(c, 'Subscription is not pending', 400);
-
-    const email = String(sub.user_email || '')
-      .trim()
-      .toLowerCase();
-    if (!email) return fail(c, 'Invalid subscription record', 400);
-
-    const now = new Date().toISOString();
-    await c.env.DB
-      .prepare(
-        `UPDATE subscriptions SET status = 'APPROVED', verified_at = ?, verified_by = ?, payment_verified = 1 WHERE id = ?`
-      )
-      .bind(now, admin.id, id)
-      .run();
-
-    const subType = String(sub.sub_type || 'DIGITAL').toUpperCase();
-    const planRaw = String(sub.plan || '').toUpperCase();
-    const planLabel =
-      subType === 'PHYSICAL' || planRaw.includes('PRINT') || planRaw.includes('PHYSICAL') ? 'PRINT' : 'DIGITAL';
-    const proof = String(sub.payment_screenshot_url || '');
-
-    const existingRes = await c.env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(email).all();
-    const existing = existingRes.results?.[0] as Record<string, unknown> | undefined;
-
-    if (existing) {
-      await c.env.DB
-        .prepare(
-          `UPDATE users SET subscription_status = 'ACTIVE', subscription_plan = ?, payment_screenshot_url = ?, payment_verified = 1, updated_at = ? WHERE id = ?`
-        )
-        .bind(planLabel, proof, now, String(existing.id))
-        .run();
-      await c.env.DB.prepare(`UPDATE subscriptions SET user_id = ? WHERE id = ?`).bind(String(existing.id), id).run();
-    } else {
-      const userId = generateId();
-      await c.env.DB
-        .prepare(
-          `INSERT INTO users (id, email, name, role, phone, address, subscription_plan, subscription_status, payment_screenshot_url, payment_verified, is_verified, created_at, updated_at)
-           VALUES (?, ?, ?, 'READER', ?, ?, ?, 'ACTIVE', ?, 1, 1, datetime('now'), ?)`
-        )
-        .bind(
-          userId,
-          email,
-          String(sub.user_name || email.split('@')[0] || 'Reader'),
-          String(sub.user_phone || ''),
-          String(sub.shipping_address || ''),
-          planLabel,
-          proof,
-          now
-        )
-        .run();
-      await c.env.DB.prepare(`UPDATE subscriptions SET user_id = ? WHERE id = ?`).bind(userId, id).run();
-    }
-
-    return ok(c, { message: 'Approved' });
-  } catch (err: any) {
-    return fail(c, err.message || 'Approve failed', 500);
-  }
-});
-
-app.post('/api/subscriptions/:id/reject', auth, role('ADMIN', 'SUPER_ADMIN'), async (c) => {
-  try {
-    const id = c.req.param('id');
-    const body = (await c.req.json().catch(() => ({}))) as { reason?: string };
-    const reason = String(body.reason || 'Rejected');
-    const { results } = await c.env.DB.prepare('SELECT * FROM subscriptions WHERE id = ?').bind(id).all();
-    const sub = results?.[0] as { status?: string } | undefined;
-    if (!sub) return fail(c, 'Not found', 404);
-    if (String(sub.status) !== 'PENDING') return fail(c, 'Subscription is not pending', 400);
-    await c.env.DB
-      .prepare(`UPDATE subscriptions SET status = 'REJECTED', rejection_reason = ? WHERE id = ?`)
-      .bind(reason, id)
-      .run();
-    return ok(c, { message: 'Rejected' });
-  } catch (err: any) {
-    return fail(c, err.message || 'Reject failed', 500);
   }
 });
 

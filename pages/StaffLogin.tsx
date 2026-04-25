@@ -3,15 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Lock, Mail, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { useApp } from '../AppContext';
-import { STAFF_DEV_DEMO_PASSWORD, STAFF_LOGIN_EMAILS } from '../utils/app';
-import { isStaffRole } from '../features/auth';
-import { resolveStaffRedirectTarget } from '../features/dashboard';
 
 const StaffLogin = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser, loginStaff } = useApp();
+  const { currentUser, login } = useApp();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,80 +17,60 @@ const StaffLogin = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  /** If already signed in, send staff to dashboard (or return URL only if it is an admin route). */
+  // Redirect if already logged in with admin access
   React.useEffect(() => {
-    if (!currentUser) return;
-    if (isStaffRole(currentUser.role)) {
-      const loc = location.state?.from as { pathname?: string; search?: string } | undefined;
-      const target = resolveStaffRedirectTarget(currentUser.role, loc);
-      navigate(target, { replace: true });
-    } else {
-      navigate('/', { replace: true });
+    if (currentUser) {
+      const from = location.state?.from?.pathname || '/admin';
+      navigate(from, { replace: true });
     }
-  }, [currentUser, navigate, location.state]);
+  }, [currentUser, navigate, location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
-    const normalizedEmail = email.trim().toLowerCase();
-
-    if (!normalizedEmail) {
+    
+    // Validation
+    if (!email.trim()) {
       setError(t('staffLogin.emailError'));
       return;
     }
-
+    
     if (!password.trim()) {
       setError(t('staffLogin.passwordError'));
       return;
     }
-
+    
     setLoading(true);
-
+    
     try {
-      const user = await loginStaff(normalizedEmail, password);
-      if (isStaffRole(user.role)) {
-        setSuccess(true);
-        const loc = location.state?.from as { pathname?: string; search?: string } | undefined;
-        const target = resolveStaffRedirectTarget(user.role, loc);
+      const user = await login(email.trim(), password);
+
+      if (user) {
+        // Redirection is now handled by the role check
+        const target = ['SUPER_ADMIN', 'ADMIN', 'EDITOR'].includes(user.role) ? '/admin' : '/';
         navigate(target, { replace: true });
-      } else {
-        setError(t('staffLogin.unexpectedError', 'This account does not have staff access.'));
       }
     } catch (err: any) {
-      const msg = String(err?.message || '').trim();
-      if (/network\s*error|failed to fetch|load failed/i.test(msg)) {
-        setError(
-          t(
-            'staffLogin.unexpectedError',
-            'Cannot reach login server. Please check internet/API deployment and try again.'
-          )
-        );
-      } else if (/staff sign-in is not configured/i.test(msg)) {
-        setError(
-          t(
-            'staffLogin.unexpectedError',
-            'Staff sign-in is not configured on server yet. Set STAFF_PASSWORD on Worker secrets.'
-          )
-        );
-      } else {
-        setError(msg || t('staffLogin.unexpectedError'));
-      }
+      setError(err.message || t('staffLogin.unexpectedError'));
     } finally {
       setLoading(false);
     }
   };
 
-  /** Prefill email only in production. In dev, optional `VITE_DEV_STAFF_DEMO` in `.env.local` can prefill a test password (never commit). */
+  // Demo credentials helper
   const fillDemoCredentials = (role: 'superadmin' | 'admin' | 'editor') => {
-    const emails = {
-      superadmin: STAFF_LOGIN_EMAILS.superAdmin,
-      admin: STAFF_LOGIN_EMAILS.admin,
-      editor: STAFF_LOGIN_EMAILS.editor
+    const credentials: Record<string, { email: string; password: string }> = {
+      superadmin: { email: 'superadmin@vartmaansarokar.com', password: 'PassworD@2026' },
+      admin: { email: 'admin@vartmaansarokar.com', password: 'PassworD@2026' },
+      editor: { email: 'editor@vartmaansarokar.com', password: 'PassworD@2026' },
     };
-    setEmail(emails[role]);
-    setPassword(import.meta.env.DEV && STAFF_DEV_DEMO_PASSWORD ? STAFF_DEV_DEMO_PASSWORD : '');
-    setError('');
+    
+    if (credentials[role]) {
+      setEmail(credentials[role].email);
+      setPassword(credentials[role].password);
+      setError('');
+    }
   };
 
   return (
@@ -199,12 +176,10 @@ const StaffLogin = () => {
             </button>
           </form>
 
-          {/* Email shortcuts: production prefills email only; password is your Worker STAFF_PASSWORD (secret). */}
+          {/* Demo Credentials - For Development Only */}
           <div className="mt-6 pt-6 border-t border-white/10">
             <p className="text-gray-400 text-xs text-center mb-3">
-              {import.meta.env.DEV && STAFF_DEV_DEMO_PASSWORD
-                ? t('staffLogin.quickLogin')
-                : t('staffLogin.emailShortcuts', 'Fill staff email (password: server secret / your account)')}
+              {t('staffLogin.quickLogin')}
             </p>
             <div className="grid grid-cols-3 gap-2">
               <button

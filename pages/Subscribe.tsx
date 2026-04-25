@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Mail, Smartphone, MapPin, Loader2, ArrowRight, Upload, X } from 'lucide-react';
 import api from '../lib/api';
+import toast from 'react-hot-toast';
 
 type PlanType = 'DIGITAL' | 'PRINT';
 
@@ -22,7 +23,7 @@ export default function Subscribe() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (plan === 'PRINT' && !screenshot) {
-      alert("Please upload payment screenshot for Print plan");
+      toast.error('Please upload payment screenshot for Print plan');
       return;
     }
     
@@ -41,7 +42,7 @@ export default function Subscribe() {
       });
       setSubmitted(true);
     } catch (err: any) {
-      alert(err.response?.data?.error || "Subscription failed. Please check your details.");
+      toast.error(err.response?.data?.error || 'Subscription failed. Please check your details.');
     } finally {
       setLoading(false);
     }

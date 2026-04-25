@@ -60,6 +60,15 @@ const Home: React.FC = () => {
     return map;
   }, [news]);
 
+  const cricketNews = useMemo(() => {
+    const sports = news.filter((item) => item.category === 'Sports');
+    const explicitCricket = sports.filter((item) =>
+      /cricket|ipl|bcci|icc|t20|odi|test/i.test(`${item.title} ${item.excerpt} ${item.content}`)
+    );
+    if (explicitCricket.length > 0) return explicitCricket.slice(0, 6);
+    return sports.slice(0, 6);
+  }, [news]);
+
   /* ── Trending categories (top 6 by article count) ── */
   const trendingCategories = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -236,6 +245,51 @@ const Home: React.FC = () => {
             </Link>
           ))}
         </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════
+          SECTION 4B — Cricket News
+      ═══════════════════════════════════════════════════ */}
+      <section data-reveal>
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
+          <div className="flex items-center">
+            <div className="w-2 h-10 bg-[#800000] mr-4 rounded-full" />
+            <h2 className="text-2xl md:text-3xl font-bold text-[#001f3f] serif">Cricket News</h2>
+          </div>
+          <Link
+            to={`/category/${buildCategorySlug('Sports')}`}
+            className="text-[#800000] font-bold hover:underline flex items-center gap-2 text-sm group"
+          >
+            {t('home.viewAll', { defaultValue: 'View All' })} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        {cricketNews.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {cricketNews.map((item) => (
+              <article key={item.id} className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-xl transition-all border border-gray-100">
+                <Link to={`/news/${item.id}`} className="block">
+                  <div className="relative h-52 overflow-hidden">
+                    <img src={resolveAssetUrl(item.image)} alt={item.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                    <span className="absolute top-3 left-3 bg-[#800000] text-white text-[10px] px-3 py-1 rounded-md uppercase tracking-widest font-black">
+                      Cricket
+                    </span>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-lg font-bold text-[#001f3f] serif line-clamp-2">{item.title}</h3>
+                    <p className="text-sm text-gray-500 mt-2 line-clamp-2">{item.excerpt}</p>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-4">{item.date}</p>
+                  </div>
+                </Link>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center text-gray-500">
+            Cricket stories will appear here once sports coverage is published.
+          </div>
+        )}
       </section>
 
       {/* ═══════════════════════════════════════════════════

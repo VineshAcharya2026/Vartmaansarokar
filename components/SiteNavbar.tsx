@@ -272,14 +272,14 @@ const SiteNavbar: React.FC<SiteNavbarProps> = ({ onOpenAuthModal }) => {
   ];
 
   const handleSubscribe = () => {
-    onOpenAuthModal({ initialView: 'subscribe', initialAccessType: 'DIGITAL', initialMainTab: 'membership' });
+    onOpenAuthModal({ initialView: 'subscribe', initialAccessType: 'DIGITAL' });
   };
 
   const handleSignIn = () => {
     if (currentUser) {
       navigate('/profile');
     } else {
-      onOpenAuthModal({ initialView: 'login', initialAccessType: 'DIGITAL', initialMainTab: 'signin' });
+      onOpenAuthModal({ initialView: 'login', initialAccessType: 'DIGITAL' });
     }
   };
 

@@ -1,11 +1,8 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const __root = path.dirname(fileURLToPath(import.meta.url));
-
-export default defineConfig(() => ({
+export default defineConfig(({ mode }) => ({
   base: '/',
   envDir: './',
   server: {
@@ -25,7 +22,7 @@ export default defineConfig(() => ({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': __root
+      '@': path.resolve(__dirname, '.')
     }
   },
   build: {

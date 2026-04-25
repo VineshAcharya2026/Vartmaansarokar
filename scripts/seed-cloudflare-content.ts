@@ -1,6 +1,6 @@
 /**
- * Seeds D1 via the live Worker API: 3 published articles, 3 magazine issues,
- * and 10 image + 10 PDF files in the media library (R2 + media_files) via POST /api/uploads.
+ * Seeds D1 via the live Worker API: 3 published articles per NEWS_CATEGORIES category,
+ * plus 3 magazine issues. Uploads a tiny JPEG + minimal PDF to R2 through POST /api/uploads.
  *
  * Usage (PowerShell):
  *   $env:API_URL="https://api.vartmaansarokaar.com"
@@ -17,11 +17,6 @@ const API_URL = (process.env.API_URL || 'https://api.vartmaansarokaar.com').repl
 const SEED_EMAIL = process.env.SEED_EMAIL || 'superadmin@vartmaansarokar.com';
 const SEED_PASSWORD = process.env.SEED_PASSWORD || '';
 const SKIP_IF_EXISTS = process.env.SEED_SKIP_IF_EXISTS !== '0';
-
-const EXPECTED_ARTICLES = 3;
-const EXPECTED_MAGAZINES = 3;
-const EXPECTED_IMAGES = 10;
-const EXPECTED_PDFS = 10;
 
 /** 1×1 JPEG */
 const MIN_JPEG = Buffer.from(
@@ -71,20 +66,6 @@ const VARIANTS = [
 
 type Envelope<T> = { success: boolean; data: T | null; error: string | null };
 
-type MediaRow = {
-  id?: string;
-  original_name?: string;
-  originalName?: string;
-  stored_name?: string;
-  storedName?: string;
-  url?: string;
-  kind?: string;
-  mime_type?: string;
-  mimeType?: string;
-  created_at?: string;
-  createdAt?: string;
-};
-
 async function unwrap<T>(res: Response): Promise<T> {
   const body = (await res.json()) as Envelope<T>;
   if (!res.ok || !body.success || body.data === null) {
@@ -93,13 +74,9 @@ async function unwrap<T>(res: Response): Promise<T> {
   return body.data;
 }
 
-function originalName(m: MediaRow): string {
-  return (m.originalName ?? m.original_name ?? '').toString();
-}
-
 async function login(): Promise<string> {
   if (!SEED_PASSWORD) {
-    throw new Error('Set SEED_PASSWORD to your Worker STAFF_PASSWORD (same password used for staff login).');
+    throw new Error('Set SEED_PASSWORD to your Worker STAFF_PASSWORD (same password used for staff quick login).');
   }
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
@@ -121,14 +98,6 @@ async function uploadAsset(token: string, bytes: Buffer, filename: string, mime:
   });
   const data = await unwrap<{ url: string }>(res);
   return data.url;
-}
-
-async function fetchMedia(token: string): Promise<MediaRow[]> {
-  const res = await fetch(`${API_URL}/api/media`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  const data = await unwrap<{ media: MediaRow[] }>(res);
-  return data.media || [];
 }
 
 async function countArticles(token: string): Promise<number> {
@@ -193,126 +162,56 @@ async function sleep(ms: number) {
   await new Promise((r) => setTimeout(r, ms));
 }
 
-function pickIndexedUrls(
-  media: MediaRow[],
-  re: RegExp,
-  n: string,
-  count: number
-): string[] {
-  const byIdx: (string | undefined)[] = Array(count).fill(undefined);
-  for (const m of media) {
-    const name = originalName(m);
-    const match = name.match(re);
-    if (match && m.url) {
-      const idx = parseInt(match[1], 10);
-      if (idx >= 0 && idx < count) {
-        if (byIdx[idx]) {
-          throw new Error(`Duplicate ${n} index ${idx} in media library.`);
-        }
-        byIdx[idx] = m.url;
-      }
-    }
-  }
-  if (byIdx.some((u) => !u)) {
-    const missing = byIdx
-      .map((u, i) => (u ? null : i))
-      .filter((x): x is number => x !== null);
-    throw new Error(`Missing ${n} at slot(s): ${missing.join(', ')}.`);
-  }
-  return byIdx as string[];
-}
-
 async function main() {
   console.log(`API_URL=${API_URL}`);
   const token = await login();
   console.log('Logged in as', SEED_EMAIL);
 
-  let [articleCount, magCount, media] = await Promise.all([
-    countArticles(token),
-    countMagazines(token),
-    fetchMedia(token)
-  ]);
+  const expectedArticles = NEWS_CATEGORIES.length * VARIANTS.length;
+  const [articleCount, magCount] = await Promise.all([countArticles(token), countMagazines(token)]);
 
-  const seedImageNames = new Set(
-    media.map((m) => originalName(m)).filter((n) => /^seed-image-\d{2}\.jpe?g$/i.test(n))
-  );
-  const seedPdfNames = new Set(
-    media.map((m) => originalName(m)).filter((n) => /^seed-pdf-\d{2}\.pdf$/i.test(n))
-  );
-
-  if (
-    SKIP_IF_EXISTS &&
-    articleCount >= EXPECTED_ARTICLES &&
-    magCount >= EXPECTED_MAGAZINES &&
-    seedImageNames.size >= EXPECTED_IMAGES &&
-    seedPdfNames.size >= EXPECTED_PDFS
-  ) {
-    console.log(
-      `Skip: already have ≥${EXPECTED_ARTICLES} articles, ≥${EXPECTED_MAGAZINES} magazines, and seed-named images/PDFs. Set SEED_SKIP_IF_EXISTS=0 to force.`
-    );
+  if (SKIP_IF_EXISTS && articleCount >= expectedArticles && magCount >= 3) {
+    console.log(`Skip: already have ${articleCount} articles and ${magCount} magazines. Set SEED_SKIP_IF_EXISTS=0 to force.`);
     return;
   }
 
-  console.log('Uploading seed assets to R2 (missing seed-image-XX / seed-pdf-XX only)…');
-  for (let i = 0; i < EXPECTED_IMAGES; i++) {
-    const name = `seed-image-${i.toString().padStart(2, '0')}.jpg`;
-    if (!seedImageNames.has(name)) {
-      const url = await uploadAsset(token, MIN_JPEG, name, 'image/jpeg');
-      console.log('Uploaded', name, '→', url);
-      await sleep(80);
-    }
-  }
-  for (let i = 0; i < EXPECTED_PDFS; i++) {
-    const name = `seed-pdf-${i.toString().padStart(2, '0')}.pdf`;
-    if (!seedPdfNames.has(name)) {
-      const url = await uploadAsset(token, MIN_PDF, name, 'application/pdf');
-      console.log('Uploaded', name, '→', url);
-      await sleep(80);
-    }
-  }
+  console.log('Uploading seed assets to R2…');
+  const imageUrl = await uploadAsset(token, MIN_JPEG, 'seed-article-cover.jpg', 'image/jpeg');
+  const pdfUrl = await uploadAsset(token, MIN_PDF, 'seed-magazine.pdf', 'application/pdf');
+  console.log('Image URL:', imageUrl);
+  console.log('PDF URL:', pdfUrl);
 
-  media = await fetchMedia(token);
-  const allImageUrls = pickIndexedUrls(
-    media,
-    /^seed-image-(\d{2})\.jpe?g$/i,
-    'image',
-    EXPECTED_IMAGES
-  );
-  const allPdfUrls = pickIndexedUrls(
-    media,
-    /^seed-pdf-(\d{2})\.pdf$/i,
-    'pdf',
-    EXPECTED_PDFS
-  );
-
-  const toCreateArticles = Math.max(0, EXPECTED_ARTICLES - articleCount);
-  if (toCreateArticles > 0) {
-    for (let a = 0; a < toCreateArticles; a++) {
-      const v = VARIANTS[a % VARIANTS.length];
-      const category = NEWS_CATEGORIES[a % NEWS_CATEGORIES.length];
-      const featured = a === 0;
-      const requires_subscription = a === 2;
-      await createArticle(token, {
-        title: `${category}: ${v.titleSuffix}`,
-        category,
-        excerpt: v.excerpt,
-        content: `${v.content}\n\n— Seed content for ${category}.`,
-        image: allImageUrls[a % allImageUrls.length],
-        author: 'Editorial Desk',
-        featured,
-        requires_subscription
-      });
-      console.log(`Article ${a + 1}/${toCreateArticles} created.`);
-      await sleep(80);
+  if (!SKIP_IF_EXISTS || articleCount < expectedArticles) {
+    let created = 0;
+    for (let ci = 0; ci < NEWS_CATEGORIES.length; ci++) {
+      const category = NEWS_CATEGORIES[ci];
+      for (let vi = 0; vi < VARIANTS.length; vi++) {
+        const v = VARIANTS[vi];
+        const featured = ci < 2 && vi === 0;
+        const requires_subscription = vi === 2;
+        await createArticle(token, {
+          title: `${category}: ${v.titleSuffix}`,
+          category,
+          excerpt: v.excerpt,
+          content: `${v.content}\n\n— Seed content for ${category}.`,
+          image: imageUrl,
+          author: 'Editorial Desk',
+          featured,
+          requires_subscription
+        });
+        created++;
+        if (created % 5 === 0) console.log(`Articles: ${created}/${expectedArticles}`);
+        await sleep(80);
+      }
     }
+    console.log(`Created ${created} articles.`);
   } else {
-    console.log(`Skipping articles (have ${articleCount}, need ${EXPECTED_ARTICLES} to create more).`);
+    console.log(`Skipping articles (${articleCount} >= ${expectedArticles}).`);
   }
 
-  const toCreateMags = Math.max(0, EXPECTED_MAGAZINES - magCount);
-  if (toCreateMags > 0) {
+  if (!SKIP_IF_EXISTS || magCount < 3) {
     const baseDate = new Date();
-    for (let i = 0; i < toCreateMags; i++) {
+    for (let i = 0; i < 3; i++) {
       const d = new Date(baseDate);
       d.setMonth(d.getMonth() - i);
       const iso = d.toISOString().split('T')[0];
@@ -320,17 +219,17 @@ async function main() {
         title: `Vartmaan Sarokaar — Seed Issue ${i + 1}`,
         issueNumber: `SEED-${iso}`,
         date: iso,
-        coverImage: allImageUrls[i % allImageUrls.length],
-        pdfUrl: allPdfUrls[i % allPdfUrls.length],
+        coverImage: imageUrl,
+        pdfUrl,
         gatedPage: 2,
         price: 499,
         blurPaywall: true
       });
       await sleep(100);
     }
-    console.log(`Created ${toCreateMags} magazine(s).`);
+    console.log('Created 3 magazines.');
   } else {
-    console.log(`Skipping magazines (${magCount} already).`);
+    console.log(`Skipping magazines (${magCount} >= 3).`);
   }
 
   console.log('Done. Public site should list PUBLISHED articles and magazines after cache/CDN refresh.');

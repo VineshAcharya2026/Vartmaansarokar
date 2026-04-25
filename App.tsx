@@ -1,4 +1,4 @@
-import React, { Suspense, useLayoutEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { HashRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { useTranslation } from 'react-i18next';
@@ -6,17 +6,12 @@ import { AppProvider, useApp } from './AppContext';
 import { TranslationProvider } from './context/TranslationContext';
 import Home from './pages/Home';
 import Sidebar from './components/Sidebar';
-import AuthAccessModal, {
-  AuthAccessModalLaunchOptions,
-  AuthModalView,
-  AccessType,
-  MainAuthTab
-} from './components/AuthAccessModal';
+import AuthAccessModal, { AuthAccessModalLaunchOptions, AuthModalView, AccessType } from './components/AuthAccessModal';
 import SiteNavbar from './components/SiteNavbar';
 import SiteFooter from './components/SiteFooter';
 import ErrorBoundary from './components/ErrorBoundary';
 import ToastProvider from './components/ToastProvider';
-import { STAFF_ROLES, type StaffRole } from './features/auth';
+import { tickerService } from './services/ticker.service';
 
 const Magazine = React.lazy(() => import('./pages/Magazine'));
 const Admin = React.lazy(() => import('./pages/Admin'));
@@ -38,6 +33,9 @@ const AdDetail = React.lazy(() => import('./pages/AdDetail'));
  * ProtectedRoute — redirects to /staff-login if the user is not authenticated
  * or lacks a required role. Preserves the attempted path for post-login redirect.
  */
+const STAFF_ROLES = ['ADMIN', 'SUPER_ADMIN', 'EDITOR'] as const;
+type StaffRole = typeof STAFF_ROLES[number];
+
 const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRoles?: StaffRole[] }> = ({ children, requiredRoles }) => {
   const { currentUser } = useApp();
   const location = useLocation();
@@ -58,10 +56,48 @@ const NewsTicker: React.FC = () => {
   const { news } = useApp();
   const { t } = useTranslation();
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const tickerItems = news.slice(0, 12);
+  const [tickerItems, setTickerItems] = useState<Array<{ id: string; text: string }>>([]);
+  const [cricketItems, setCricketItems] = useState<Array<{ id: string; text: string; url: string }>>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadTicker = async () => {
+      try {
+        const items = await tickerService.getTicker();
+        const cricket = await tickerService.getCricketTicker();
+        if (cancelled) return;
+        const activeItems = (items as Array<{ id: string; text: string; active?: boolean }>)
+          .filter((item) => item.active !== false && item.text)
+          .map((item) => ({ id: item.id, text: item.text }));
+        setTickerItems(activeItems);
+        setCricketItems(
+          (cricket as Array<{ id: string; text: string; url: string }>)
+            .filter((item) => item.text && item.url)
+            .slice(0, 8)
+        );
+      } catch (error) {
+        if (!cancelled) {
+          setTickerItems([]);
+          setCricketItems([]);
+        }
+      }
+    };
+    loadTicker();
+    const interval = window.setInterval(loadTicker, 20000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  const fallbackNewsItems = news.slice(0, 12).map((item) => ({ id: item.id, text: item.title, link: `/news/${item.id}`, external: false }));
+  const manualTickerItems = tickerItems.map((item) => ({ ...item, link: '/articles', external: false }));
+  const cricketTickerItems = cricketItems.map((item) => ({ id: item.id, text: `Cricket: ${item.text}`, link: item.url, external: true }));
+  const displayItems = [...manualTickerItems, ...cricketTickerItems];
+  const effectiveItems = displayItems.length > 0 ? displayItems : fallbackNewsItems;
 
   useLayoutEffect(() => {
-    if (!trackRef.current || tickerItems.length === 0) return;
+    if (!trackRef.current || effectiveItems.length === 0) return;
     const totalWidth = trackRef.current.scrollWidth / 2;
     const pixelsPerSecond = 42;
     const tween = gsap.fromTo(trackRef.current, { x: 0 }, {
@@ -74,24 +110,37 @@ const NewsTicker: React.FC = () => {
     return () => {
       tween.kill();
     };
-  }, [tickerItems.length]);
+  }, [effectiveItems.length]);
 
-  if (tickerItems.length === 0) return null;
+  if (effectiveItems.length === 0) return null;
 
   return (
-    <div className="sticky top-14 lg:top-[76px] z-[109] bg-[#1A1A2E] text-white border-b border-white/10 shadow-lg">
+    <div className="fixed top-14 lg:top-[104px] left-0 right-0 z-[109] bg-[#1A1A2E]/95 backdrop-blur-sm text-white border-b border-white/10 shadow-lg">
       <div className="max-w-[1600px] mx-auto flex items-center">
         <div className="shrink-0 bg-[#800000] px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.35em]">
           {t('ticker.newsflash')}
         </div>
         <div className="overflow-hidden py-2.5 flex-1">
           <div ref={trackRef} className="flex items-center whitespace-nowrap">
-            {[...tickerItems, ...tickerItems].map((item, index) => (
-              <Link key={`${item.id}-${index}`} to={`/news/${item.id}`} className="inline-flex items-center px-6 text-sm text-white/90 hover:text-white transition-colors">
-                <span className="mr-3 text-[#800000]">&bull;</span>
-                <span className="font-semibold">{item.title}</span>
-              </Link>
-            ))}
+            {[...effectiveItems, ...effectiveItems].map((item, index) =>
+              item.external ? (
+                <a
+                  key={`${item.id}-${index}`}
+                  href={item.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center px-6 text-sm text-white/90 hover:text-white transition-colors"
+                >
+                  <span className="mr-3 text-[#800000]">&bull;</span>
+                  <span className="font-semibold">{item.text}</span>
+                </a>
+              ) : (
+                <Link key={`${item.id}-${index}`} to={item.link} className="inline-flex items-center px-6 text-sm text-white/90 hover:text-white transition-colors">
+                  <span className="mr-3 text-[#800000]">&bull;</span>
+                  <span className="font-semibold">{item.text}</span>
+                </Link>
+              )
+            )}
           </div>
         </div>
       </div>
@@ -117,9 +166,7 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const { t } = useTranslation();
   const { isReady } = useApp();
-  const isAdminPage = location.pathname === '/admin' || location.pathname.startsWith('/admin/');
-  const allowContentBeforeDataReady =
-    location.pathname === '/staff-login' || location.pathname === '/admin' || location.pathname.startsWith('/admin/');
+  const isAdminPage = location.pathname === '/admin';
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterMessage, setNewsletterMessage] = useState('');
   const [newsletterError, setNewsletterError] = useState('');
@@ -148,8 +195,9 @@ const AppContent: React.FC = () => {
     isOpen: boolean;
     initialView: AuthModalView;
     initialAccessType: AccessType;
-    initialMainTab?: MainAuthTab;
     prefillEmail?: string;
+    prefillPassword?: string;
+    staffLabel?: string;
   }>({
     isOpen: false,
     initialView: 'subscribe',
@@ -161,8 +209,9 @@ const AppContent: React.FC = () => {
       isOpen: true,
       initialView: options.initialView ?? 'subscribe',
       initialAccessType: options.initialAccessType ?? 'DIGITAL',
-      initialMainTab: options.initialMainTab,
-      prefillEmail: options.prefillEmail
+      prefillEmail: options.prefillEmail,
+      prefillPassword: options.prefillPassword,
+      staffLabel: options.staffLabel
     });
   }, []);
 
@@ -170,7 +219,7 @@ const AppContent: React.FC = () => {
     setAuthModalState((prev) => ({ ...prev, isOpen: false }));
   }, []);
 
-  if (!isReady && !allowContentBeforeDataReady) {
+  if (!isReady) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white px-8 py-6 rounded-2xl shadow-xl border border-gray-100">
@@ -184,6 +233,7 @@ const AppContent: React.FC = () => {
     <div className="flex flex-col min-h-screen">
       <SiteNavbar onOpenAuthModal={openAuthModal} />
       {!isAdminPage && <NewsTicker />}
+      {!isAdminPage && <div className="h-[42px] lg:h-[44px]" />}
       <main className={`flex-1 ${isAdminPage ? 'bg-gray-50' : 'max-w-7xl mx-auto w-full px-4 py-6 md:py-10'}`}>
         <div className={`flex flex-col lg:flex-row gap-8 ${isAdminPage ? 'max-w-none' : ''}`}>
           <div className="flex-1 overflow-hidden">
@@ -196,30 +246,9 @@ const AppContent: React.FC = () => {
                 <Route path="/magazine" element={<Magazine />} />
                 <Route path="/subscribe" element={<Subscribe />} />
                 <Route path="/staff-login" element={<StaffLogin />} />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute requiredRoles={[...STAFF_ROLES]}>
-                      <Admin />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/news/new"
-                  element={
-                    <ProtectedRoute requiredRoles={[...STAFF_ROLES]}>
-                      <ArticleEditor />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/news/edit/:id"
-                  element={
-                    <ProtectedRoute requiredRoles={[...STAFF_ROLES]}>
-                      <ArticleEditor />
-                    </ProtectedRoute>
-                  }
-                />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/admin/news/new" element={<ArticleEditor />} />
+                <Route path="/admin/news/edit/:id" element={<ArticleEditor />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/verify" element={<Verify />} />
@@ -235,7 +264,7 @@ const AppContent: React.FC = () => {
           {!isAdminPage && <Sidebar />}
         </div>
       </main>
-      <SiteFooter />
+      <SiteFooter onOpenAuthModal={openAuthModal} />
       <AuthAccessModal {...authModalState} onClose={closeAuthModal} />
     </div>
   );

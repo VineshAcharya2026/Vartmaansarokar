@@ -1,22 +1,35 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Lock, Mail, ShieldCheck, Upload, User as UserIcon, X } from 'lucide-react';
+import {
+  ArrowRight,
+  BadgeCheck,
+  CheckCircle2,
+  Lock,
+  LogOut,
+  Mail,
+  Phone,
+  ShieldCheck,
+  Upload,
+  User as UserIcon,
+  X
+} from 'lucide-react';
 import { useApp } from '../AppContext';
 import { toast } from 'react-hot-toast';
+import { SubscriptionRequestPayload, UserRole } from '../types';
 import { API_BASE, GOOGLE_CLIENT_ID } from '../utils/app';
+import { fetchApi } from '../utils/api';
+import { translateRole } from '../utils/i18n';
 
 export type AccessType = 'DIGITAL' | 'PHYSICAL';
 export type AuthModalView = 'subscribe' | 'login';
 
-export type MainAuthTab = 'signin' | 'signup' | 'membership';
-
 export interface AuthAccessModalLaunchOptions {
   initialView?: AuthModalView;
   initialAccessType?: AccessType;
-  /** Which tab to show when opening the modal */
-  initialMainTab?: MainAuthTab;
   prefillEmail?: string;
+  prefillPassword?: string;
+  staffLabel?: string;
 }
 
 interface AuthAccessModalProps extends AuthAccessModalLaunchOptions {
@@ -24,135 +37,63 @@ interface AuthAccessModalProps extends AuthAccessModalLaunchOptions {
   onClose: () => void;
 }
 
+const MEMBERSHIP_RESOURCE = {
+  resourceType: 'MAGAZINE' as const,
+  resourceId: 'vartmaansarokar-membership',
+  resourceTitle: 'Vartmaan Sarokaar Membership'
+};
+
 const AuthAccessModal: React.FC<AuthAccessModalProps> = ({
   isOpen,
   onClose,
   initialView = 'subscribe',
   initialAccessType = 'DIGITAL',
-  initialMainTab,
-  prefillEmail
+  prefillEmail,
+  prefillPassword,
+  staffLabel
 }) => {
-  const { currentUser, login, loginWithGoogle, registerReader } = useApp();
+  const { currentUser, login, loginWithGoogle, logout } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const resolveMainTab = (): MainAuthTab => {
-    if (initialMainTab) return initialMainTab;
-    if (initialView === 'login') return 'signin';
-    return 'membership';
-  };
-
-  const [mainTab, setMainTab] = React.useState<MainAuthTab>(resolveMainTab);
   const [accessType, setAccessType] = React.useState<AccessType>(initialAccessType);
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState(prefillEmail || '');
   const [phone, setPhone] = React.useState('');
   const [address, setAddress] = React.useState('');
-  const [signInPassword, setSignInPassword] = React.useState('');
-  const [signUpPassword, setSignUpPassword] = React.useState('');
-  const [signUpConfirm, setSignUpConfirm] = React.useState('');
   const [screenshot, setScreenshot] = React.useState<File | null>(null);
+  
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const googleSignInRef = React.useRef<HTMLDivElement>(null);
-  const googleSignUpRef = React.useRef<HTMLDivElement>(null);
+  const googleButtonRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (!isOpen) return;
-    setMainTab(resolveMainTab());
-    setAccessType(initialAccessType);
-    setEmail((e) => prefillEmail || e || '');
-    setName(currentUser?.name || '');
-  }, [isOpen, initialView, initialAccessType, initialMainTab, prefillEmail, currentUser?.name]);
+    if (isOpen) {
+      setAccessType(initialAccessType);
+      setName(currentUser?.name || '');
+      setEmail(currentUser?.email || prefillEmail || '');
 
-  const initGoogleButton = React.useCallback(
-    (el: HTMLDivElement | null) => {
-      if (!el || !GOOGLE_CLIENT_ID || currentUser) return;
-      try {
-        const g = window.google;
-        g?.accounts?.id?.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: async (response: { credential: string }) => {
-            try {
-              await loginWithGoogle(response.credential);
-              toast.success(t('authAccess.signedIn', 'Signed in'));
-              onClose();
-              navigate('/profile');
-            } catch (e: unknown) {
-              toast.error(e instanceof Error ? e.message : 'Google sign-in failed');
-            }
-          }
-        });
-        el.innerHTML = '';
-        g?.accounts?.id?.renderButton(el, {
-          theme: 'outline',
-          size: 'large',
-          width: Math.min(el.offsetWidth || 320, 400),
-          text: 'continue_with'
-        });
-      } catch (e) {
-        console.error('Google Sign-In init failed', e);
+      // Initialize Google login if needed
+      if (!currentUser && GOOGLE_CLIENT_ID && googleButtonRef.current) {
+        try {
+          // @ts-ignore
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: (response: any) => loginWithGoogle(response.credential)
+          });
+          // @ts-ignore
+          google.accounts.id.renderButton(googleButtonRef.current, {
+            theme: 'outline',
+            size: 'large',
+            width: googleButtonRef.current.offsetWidth || 300
+          });
+        } catch (e) {
+          console.error('Google Sign-In initialization failed', e);
+        }
       }
-    },
-    [GOOGLE_CLIENT_ID, currentUser, loginWithGoogle, navigate, onClose, t]
-  );
-
-  React.useEffect(() => {
-    if (!isOpen || currentUser) return;
-    const t = setTimeout(() => {
-      if (mainTab === 'signin') initGoogleButton(googleSignInRef.current);
-      if (mainTab === 'signup') initGoogleButton(googleSignUpRef.current);
-    }, 0);
-    return () => clearTimeout(t);
-  }, [isOpen, mainTab, currentUser, initGoogleButton]);
+    }
+  }, [isOpen, initialAccessType, currentUser, prefillEmail, loginWithGoogle]);
 
   if (!isOpen) return null;
-
-  const handleEmailSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !signInPassword) {
-      toast.error(t('authAccess.fillAll', 'Enter email and password'));
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      await login(email.trim(), signInPassword);
-      toast.success(t('authAccess.signedIn', 'Signed in'));
-      onClose();
-      navigate('/profile');
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Sign in failed');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !email.trim() || !signUpPassword) {
-      toast.error(t('authAccess.fillAll', 'Fill all required fields'));
-      return;
-    }
-    if (signUpPassword !== signUpConfirm) {
-      toast.error(t('authAccess.passwordMismatch', 'Passwords do not match'));
-      return;
-    }
-    if (signUpPassword.length < 6) {
-      toast.error(t('authAccess.passwordShort', 'Password must be at least 6 characters'));
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      await registerReader({ email: email.trim(), password: signUpPassword, name: name.trim() });
-      toast.success(t('authAccess.checkEmail', 'Check your email to verify your account.'));
-      setMainTab('signin');
-      setSignUpPassword('');
-      setSignUpConfirm('');
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Registration failed');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,14 +105,10 @@ const AuthAccessModal: React.FC<AuthAccessModalProps> = ({
         return;
       }
 
-      if (!currentUser) {
-        toast.error(t('authAccess.signInForPrint', 'Sign in to request print delivery'));
-        setMainTab('signin');
-        return;
-      }
+      const token = localStorage.getItem('token') || window.localStorage.getItem('vartmaan-auth-token') || '';
+      const price = 499;
 
-      if (!screenshot) throw new Error('Payment proof is required for print');
-      const token = localStorage.getItem('token') || '';
+      if (!screenshot) throw new Error('Payment proof is required for Print tier');
       const formData = new FormData();
       formData.append('file', screenshot);
       formData.append('name', name);
@@ -180,357 +117,157 @@ const AuthAccessModal: React.FC<AuthAccessModalProps> = ({
       formData.append('address', address);
       formData.append('plan', 'PRINT');
 
-      const res = await fetch(`${API_BASE}/api/subscriptions`, {
+      const res = await fetch(API_BASE + '/api/subscriptions', {
         method: 'POST',
         headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: formData
       });
-      if (!res.ok) throw new Error('Request failed');
-      toast.success(t('authAccess.printSubmitted', 'Request submitted'));
+      if (!res.ok) throw new Error('API request failed');
+      toast.success('Submitted. Waiting for approval');
       onClose();
       navigate('/profile');
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Subscription failed');
+    } catch (err: any) {
+      toast.error(err.message || 'Subscription failed');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const tabClass = (tab: MainAuthTab) =>
-    `flex-1 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
-      mainTab === tab ? 'bg-[#800000] text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-    }`;
-
   return (
-    <div
-      className="fixed inset-0 z-[300] flex animate-in fade-in items-center justify-center bg-[#001f3f]/85 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="relative w-full max-w-5xl max-h-[92vh] overflow-y-auto rounded-2xl bg-white shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-3 top-3 z-10 rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-red-600"
-          aria-label="Close"
-        >
-          <X size={22} />
+    <div className="fixed inset-0 z-[300] flex animate-in fade-in items-center justify-center bg-[#001f3f]/80 p-4 backdrop-blur-sm" onClick={onClose}>
+      <div className="relative w-full max-w-4xl overflow-hidden rounded-[24px] bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute right-4 top-4 z-10 p-2 text-gray-400 hover:text-red-600 transition-colors">
+          <X size={24} />
         </button>
 
-        <div className="p-6 md:p-8">
-          <div className="mb-6 flex flex-col gap-3 border-b border-gray-100 pb-6 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-2xl font-black text-[#001f3f] serif">
-                {t('authAccess.title', 'Account & membership')}
-              </h2>
-              <p className="mt-1 text-sm text-gray-500">
-                {t('authAccess.subtitle', 'Sign in, create a reader account, or choose a plan. Staff use the dedicated staff login page.')}
-              </p>
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          {/* LEFT SIDE - SELECTION */}
+          <div className="bg-[#f8fafc] p-8 md:p-10 border-r border-[#e2e8f0]">
+            <h2 className="text-3xl font-black text-[#001f3f] serif mb-8">Choose Your Access</h2>
+            
+            <div className="space-y-4">
+              {/* SECTION 1 - DIGITAL */}
+              <button 
+                type="button"
+                onClick={() => setAccessType('DIGITAL')}
+                className={`w-full text-left p-6 rounded-2xl border-2 transition-all ${
+                  accessType === 'DIGITAL' 
+                    ? 'border-[#800000] bg-red-50/50 shadow-sm' 
+                    : 'border-gray-200 bg-white hover:border-red-200'
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <span className="inline-block bg-[#800000] text-white text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded mb-2">Free for Everyone</span>
+                    <h3 className="text-xl font-black text-[#0f172a]">Read Online (Free)</h3>
+                    <p className="text-sm text-gray-500 mt-2">Access all digital content instantly without any extra cost.</p>
+                  </div>
+                  {accessType === 'DIGITAL' && <CheckCircle2 className="text-[#800000]" size={24} />}
+                </div>
+              </button>
+|
+              {/* SECTION 2 - PRINT */}
+              <button 
+                type="button"
+                onClick={() => setAccessType('PHYSICAL')}
+                className={`w-full text-left p-6 rounded-2xl border-2 transition-all ${
+                  accessType === 'PHYSICAL' 
+                    ? 'border-[#001f3f] bg-blue-50/50 shadow-sm' 
+                    : 'border-gray-200 bg-white hover:border-blue-200'
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-xl font-black text-[#0f172a]">Get Print (₹499/month)</h3>
+                    <ul className="text-sm text-gray-500 mt-2 space-y-1">
+                      <li className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-600"/> Monthly magazine delivery</li>
+                      <li className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-600"/> Includes digital access</li>
+                    </ul>
+                  </div>
+                  {accessType === 'PHYSICAL' && <CheckCircle2 className="text-[#001f3f]" size={24} />}
+                </div>
+              </button>
             </div>
           </div>
 
-          <div className="mb-6 flex flex-col gap-2 sm:flex-row">
-            <button type="button" className={tabClass('signin')} onClick={() => setMainTab('signin')}>
-              {t('authAccess.tabSignIn', 'Sign in')}
-            </button>
-            <button type="button" className={tabClass('signup')} onClick={() => setMainTab('signup')}>
-              {t('authAccess.tabCreateAccount', 'Create account')}
-            </button>
-            <button
-              type="button"
-              className={tabClass('membership')}
-              onClick={() => setMainTab('membership')}
-            >
-              {t('authAccess.tabMembership', 'Plans & print')}
-            </button>
-          </div>
-
-          {mainTab === 'signin' && !currentUser && (
-            <div className="grid gap-6 md:grid-cols-2">
-              <form
-                onSubmit={handleEmailSignIn}
-                className="space-y-4 rounded-2xl border border-gray-200 bg-slate-50/80 p-6 shadow-sm"
-              >
-                <h3 className="text-lg font-bold text-[#0f172a]">{t('authAccess.emailSignIn', 'Email sign in')}</h3>
-                <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500">
-                    {t('common.email', 'Email')}
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-xl border border-gray-200 py-3 pl-10 pr-3 text-sm outline-none focus:border-[#800000]"
-                      autoComplete="email"
-                    />
+          {/* RIGHT SIDE - FORM/ACTION */}
+          <div className="p-8 md:p-10 flex flex-col justify-center bg-white">
+            {!currentUser ? (
+              <div className="w-full max-w-sm mx-auto space-y-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-50 text-[#001f3f] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <UserIcon size={32} />
                   </div>
+                  <h3 className="text-2xl font-black text-[#0f172a]">Sign in to Subscribe</h3>
+                  <p className="text-gray-500 mt-2 text-sm">Create an account or sign in to activate your membership and access exclusive content.</p>
                 </div>
-                <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500">
-                    {t('common.password', 'Password')}
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="password"
-                      required
-                      value={signInPassword}
-                      onChange={(e) => setSignInPassword(e.target.value)}
-                      className="w-full rounded-xl border border-gray-200 py-3 pl-10 pr-3 text-sm outline-none focus:border-[#800000]"
-                      autoComplete="current-password"
-                    />
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full rounded-xl bg-[#800000] py-3 text-sm font-bold text-white transition hover:bg-red-900 disabled:opacity-50"
-                >
-                  {isSubmitting ? t('authAccess.working', '…') : t('authAccess.signIn', 'Sign in')}
-                </button>
-              </form>
-              <div className="flex flex-col justify-center space-y-4 rounded-2xl border border-dashed border-gray-200 bg-white p-6 text-center">
-                <h3 className="text-lg font-bold text-[#0f172a]">{t('authAccess.continueWithGoogle', 'Continue with Google')}</h3>
-                <p className="text-sm text-gray-500">
-                  {t('authAccess.googleBlurb', 'One-tap sign in or new account with your Google profile.')}
-                </p>
-                <div ref={googleSignInRef} className="mx-auto w-full min-h-[40px] flex justify-center" />
-                {!GOOGLE_CLIENT_ID && (
-                  <p className="text-xs text-amber-700">{t('authAccess.googleMissing', 'Set VITE_GOOGLE_CLIENT_ID for production.')}</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {mainTab === 'signup' && !currentUser && (
-            <div className="grid gap-6 md:grid-cols-2">
-              <form
-                onSubmit={handleRegister}
-                className="space-y-4 rounded-2xl border border-gray-200 bg-slate-50/80 p-6 shadow-sm"
-              >
-                <h3 className="text-lg font-bold text-[#0f172a]">{t('authAccess.createReader', 'Create a reader account')}</h3>
-                <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500">Name</label>
-                  <div className="relative">
-                    <UserIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full rounded-xl border border-gray-200 py-3 pl-10 pr-3 text-sm outline-none focus:border-[#800000]"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500">Email</label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#800000]"
-                    autoComplete="email"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500">Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={signUpPassword}
-                    onChange={(e) => setSignUpPassword(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#800000]"
-                    autoComplete="new-password"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500">Confirm</label>
-                  <input
-                    type="password"
-                    required
-                    value={signUpConfirm}
-                    onChange={(e) => setSignUpConfirm(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#800000]"
-                    autoComplete="new-password"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full rounded-xl bg-[#001f3f] py-3 text-sm font-bold text-white transition hover:bg-blue-900 disabled:opacity-50"
-                >
-                  {t('authAccess.register', 'Create account')}
-                </button>
-              </form>
-              <div className="flex flex-col justify-center space-y-4 rounded-2xl border border-dashed border-gray-200 bg-white p-6 text-center">
-                <h3 className="text-lg font-bold text-[#0f172a]">Google</h3>
-                <p className="text-sm text-gray-500">{t('authAccess.googleSignUp', 'Prefer Google? Use the same button — new users are registered automatically.')}</p>
-                <div ref={googleSignUpRef} className="mx-auto w-full min-h-[40px] flex justify-center" />
-              </div>
-            </div>
-          )}
-
-          {mainTab === 'membership' && (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="space-y-4 rounded-2xl bg-slate-50 p-6">
-                <h3 className="text-lg font-black text-[#001f3f]">{t('authAccess.choosePlan', 'Choose a plan')}</h3>
-                <button
-                  type="button"
-                  onClick={() => setAccessType('DIGITAL')}
-                  className={`w-full rounded-2xl border-2 p-5 text-left transition ${
-                    accessType === 'DIGITAL'
-                      ? 'border-[#800000] bg-red-50/50 shadow-sm'
-                      : 'border-gray-200 bg-white hover:border-red-200'
-                  }`}
-                >
-                  <span className="mb-1 inline-block rounded bg-[#800000] px-2 py-0.5 text-[10px] font-black uppercase text-white">
-                    Free
-                  </span>
-                  <p className="text-lg font-black text-[#0f172a]">Digital access</p>
-                  <p className="text-sm text-gray-500">Read online; continue on the subscription page.</p>
-                  {accessType === 'DIGITAL' && <CheckCircle2 className="mt-2 text-[#800000]" size={20} />}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAccessType('PHYSICAL')}
-                  className={`w-full rounded-2xl border-2 p-5 text-left transition ${
-                    accessType === 'PHYSICAL'
-                      ? 'border-[#001f3f] bg-blue-50/50 shadow-sm'
-                      : 'border-gray-200 bg-white hover:border-blue-200'
-                  }`}
-                >
-                  <p className="text-lg font-black text-[#0f172a]">Print — ₹499/mo</p>
-                  <p className="text-sm text-gray-500">Delivered; includes digital. Sign in to submit payment proof.</p>
-                  {accessType === 'PHYSICAL' && <CheckCircle2 className="mt-2 text-[#001f3f]" size={20} />}
-                </button>
-              </div>
-              <div>
-                {!currentUser ? (
-                  <div className="space-y-4 rounded-2xl border border-gray-200 p-6 text-center">
-                    {accessType === 'DIGITAL' ? (
-                      <>
-                        <p className="text-sm text-gray-600">
-                          {t('authAccess.freeDigitalBlurb', 'Browse free content or open the full subscription page.')}
-                        </p>
-                        <Link
-                          to="/subscribe"
-                          className="inline-flex w-full justify-center rounded-xl bg-[#800000] px-4 py-3 text-sm font-bold text-white"
-                          onClick={onClose}
-                        >
-                          {t('authAccess.continueSubscribe', 'Continue to subscription')}
-                        </Link>
-                        <p className="text-xs text-gray-400">{t('authAccess.or', 'or')}</p>
-                      </>
-                    ) : (
-                      <p className="text-sm text-gray-600">
-                        {t('authAccess.signInForPlan', 'Sign in or create an account to submit a print request.')}
-                      </p>
-                    )}
-                    <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-                      <button
-                        type="button"
-                        onClick={() => setMainTab('signin')}
-                        className="rounded-xl bg-[#800000] px-4 py-2 text-sm font-bold text-white"
-                      >
-                        {t('authAccess.tabSignIn', 'Sign in')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setMainTab('signup')}
-                        className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-bold text-gray-700"
-                      >
-                        {t('authAccess.tabCreateAccount', 'Create account')}
-                      </button>
-                    </div>
+                
+                {GOOGLE_CLIENT_ID ? (
+                  <div className="mt-8">
+                    <div ref={googleButtonRef} className="w-full flex justify-center" />
                   </div>
                 ) : (
-                  <form onSubmit={handleSubscribe} className="space-y-4 rounded-2xl border border-gray-200 p-6">
-                    {accessType === 'DIGITAL' ? (
-                      <div className="text-center">
-                        <ShieldCheck className="mx-auto text-[#800000]" size={40} />
-                        <h4 className="mt-2 font-bold text-[#0f172a]">Free digital</h4>
-                        <p className="text-sm text-gray-500">You are signed in. Continue to the full subscription page.</p>
-                        <button
-                          type="submit"
-                          className="mt-4 w-full rounded-xl bg-[#800000] py-3 font-bold text-white"
-                        >
-                          Continue
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <h4 className="font-bold text-[#001f3f]">Print delivery</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                          <input
-                            required
-                            className="rounded-xl border border-gray-200 px-3 py-2 text-sm"
-                            placeholder="Name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                          />
-                          <input
-                            required
-                            className="rounded-xl border border-gray-200 px-3 py-2 text-sm"
-                            placeholder="Phone"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                          />
-                        </div>
-                        <input
-                          required
-                          type="email"
-                          className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm"
-                          placeholder="Email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                        />
-                        <textarea
-                          className="h-20 w-full resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm"
-                          placeholder="Address"
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                        />
-                        <label className="flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed border-gray-300 py-6">
-                          <Upload className="h-6 w-6 text-gray-400" />
-                          <span className="text-xs text-gray-500">{screenshot ? screenshot.name : 'Payment screenshot'}</span>
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept="image/jpeg,image/png,application/pdf"
-                            onChange={(e) => setScreenshot(e.target.files?.[0] || null)}
-                          />
-                        </label>
-                        <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="w-full rounded-xl bg-[#001f3f] py-3 font-bold text-white disabled:opacity-50"
-                        >
-                          {isSubmitting ? '…' : 'Submit request'}
-                        </button>
-                      </>
-                    )}
-                  </form>
+                  <div className="rounded-2xl border border-dashed border-gray-200 bg-[#fafafa] px-4 py-3 text-sm text-gray-500 text-center">
+                    Google Sign-in Configuration Missing
+                  </div>
                 )}
+                
+                <p className="text-center text-xs text-gray-400 mt-6">
+                  By joining, you agree to our Terms of Service and Privacy Policy. Staff members can sign in using the dashboard link.
+                </p>
               </div>
-            </div>
-          )}
+            ) : (
+              <form onSubmit={handleSubscribe} className="w-full">
+                {accessType === 'DIGITAL' ? (
+                  <div className="text-center space-y-6">
+                    <div className="w-16 h-16 bg-red-100 text-[#800000] rounded-full flex items-center justify-center mx-auto mb-4">
+                      <ShieldCheck size={32} />
+                    </div>
+                    <h3 className="text-2xl font-black text-[#0f172a]">Ready to read?</h3>
+                    <p className="text-gray-500">You selected the free digital plan. Click below to get instant access to our articles and digital magazines.</p>
+                    <button 
+                      type="submit" 
+                      disabled={isSubmitting}
+                      className="w-full bg-[#800000] text-white py-4 rounded-xl font-bold hover:bg-red-900 transition-colors disabled:opacity-50"
+                    >
+                      {isSubmitting ? 'Activating...' : 'Activate Free Access'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-[#001f3f] mb-4">Delivery Details</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <input required minLength={2} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#001f3f]" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} />
+                      <input required type="tel" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#001f3f]" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} />
+                    </div>
+                    <input required type="email" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#001f3f]" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} />
+                    <textarea className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#001f3f] h-20 resize-none" placeholder="Delivery Address (Optional)" value={address} onChange={e => setAddress(e.target.value)} />
+                    
+                    <div className="mt-4">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Payment Screenshot Upload</label>
+                      <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload className="w-6 h-6 text-gray-400 mb-2" />
+                          <p className="text-xs text-gray-500 font-medium">{screenshot ? screenshot.name : 'Click to upload proof'}</p>
+                        </div>
+                        <input required type="file" className="hidden" accept="image/*" onChange={e => setScreenshot(e.target.files?.[0] || null)} />
+                      </label>
+                    </div>
 
-          {(currentUser && (mainTab === 'signin' || mainTab === 'signup')) && (
-            <p className="mt-4 text-center text-sm text-gray-500">
-              {t('authAccess.alreadyIn', 'You are already signed in.')}{' '}
-              <button type="button" className="font-bold text-[#800000] underline" onClick={() => navigate('/profile')}>
-                Profile
-              </button>
-            </p>
-          )}
+                    <button 
+                      type="submit"
+                      disabled={isSubmitting || !screenshot}
+                      className="w-full mt-6 bg-[#001f3f] text-white py-4 rounded-xl font-bold hover:bg-blue-900 transition-colors disabled:opacity-50"
+                    >
+                      {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                    </button>
+                  </div>
+                )}
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </div>

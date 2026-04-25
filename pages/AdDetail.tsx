@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../AppContext';
 import { ArrowLeft, ExternalLink, Megaphone, Share2 } from 'lucide-react';
 import { resolveAssetUrl } from '../utils/app';
+import toast from 'react-hot-toast';
 
 export default function AdDetail() {
   const { id } = useParams<{ id: string }>();
@@ -80,7 +81,7 @@ export default function AdDetail() {
                      navigator.share({ title: ad.title, url: window.location.href });
                    } else {
                      navigator.clipboard.writeText(window.location.href);
-                     alert('Link copied to clipboard');
+                     toast.success('Link copied to clipboard');
                    }
                 }}
                 className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-100 text-gray-500 py-4 rounded-2xl font-bold hover:border-[#001f3f] hover:text-[#001f3f] transition-all"

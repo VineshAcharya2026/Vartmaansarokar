@@ -100,6 +100,29 @@ const Magazine: React.FC = () => {
           </div>
         </div>
 
+        {selectedMag.pdfUrl && (
+          <div className="mt-10 space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="text-xl font-black text-[#001f3f] serif">Magazine PDF</h3>
+              <a
+                href={resolveAssetUrl(selectedMag.pdfUrl)}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#800000] text-white rounded-xl font-bold hover:bg-red-900 transition-colors"
+              >
+                Open PDF
+              </a>
+            </div>
+            <div className="rounded-2xl border border-gray-200 overflow-hidden bg-gray-50">
+              <iframe
+                src={resolveAssetUrl(selectedMag.pdfUrl)}
+                title={`${selectedMag.title} PDF`}
+                className="w-full h-[680px]"
+              />
+            </div>
+          </div>
+        )}
+
         {/* VALUE PROPS */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-gray-50">
           <div className="flex items-start gap-4">

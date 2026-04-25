@@ -43,7 +43,7 @@ const Sidebar: React.FC = () => {
               >
                 <div className="relative overflow-hidden rounded-xl h-32 mb-3">
                   <img 
-                    src={resolveAssetUrl(ad.image)} 
+                    src={resolveAssetUrl(ad.image || ad.imageUrl || 'https://picsum.photos/800/400')} 
                     alt={ad.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                   />
