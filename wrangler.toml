@@ -1,5 +1,5 @@
 # Cloudflare Pages (Vite → dist/) — must stay Worker-free so Pages Git builds parse this file.
 # API + D1 + R2: see wrangler.worker.toml
-name = "vartmaan-sarokar-pages"
+name = "vartmaansarokar"
 compatibility_date = "2026-04-19"
 pages_build_output_dir = "dist"
