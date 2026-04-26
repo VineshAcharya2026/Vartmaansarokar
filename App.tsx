@@ -264,7 +264,7 @@ const AppContent: React.FC = () => {
           {!isAdminPage && <Sidebar />}
         </div>
       </main>
-      <SiteFooter onOpenAuthModal={openAuthModal} />
+      <SiteFooter />
       <AuthAccessModal {...authModalState} onClose={closeAuthModal} />
     </div>
   );
