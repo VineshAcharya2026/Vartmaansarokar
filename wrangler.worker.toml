@@ -1,5 +1,5 @@
 # API Worker (api.vartmaansarokaar.com) — deploy: wrangler deploy -c wrangler.worker.toml
-name = "vartmaansarokar"
+name = "vartmaansarokaar"
 main = "server/workers-entry.ts"
 compatibility_date = "2026-04-19"
 compatibility_flags = ["nodejs_compat"]

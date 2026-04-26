@@ -36,7 +36,7 @@ wrangler secret put GOOGLE_CLIENT_ID
 ```
 
 ### 5. Update Config Files
-**File: `wrangler.toml`**
+**File: `wrangler.worker.toml`**
 ```toml
 [[d1_databases]]
 database_id = "YOUR_NEW_ID_HERE"    # Replace with copied ID
@@ -49,13 +49,18 @@ routes = [
 ]
 ```
 
-**File: `utils/app.ts`**
-```typescript
-const PRODUCTION_API_URL = 'https://vartmaan-sarokar-api.YOUR_SUBDOMAIN.workers.dev';
+**Cloudflare Pages env var**
+```bash
+VITE_API_BASE_URL=https://api.vartmaansarokaar.com
 ```
 
 ### 6. Deploy
 ```bash
+npx wrangler deploy --config wrangler.worker.toml
+npm run build
+npx wrangler pages deploy dist --project-name vartmaan-sarokar-pages
+
+# OR use helper script
 ./deploy.sh          # macOS/Linux
 # OR
 deploy.bat           # Windows
@@ -85,10 +90,10 @@ git push origin main
 
 | Item | Current | Status |
 |------|---------|--------|
-| Database ID | `22be003e-a1b0-40d1-a356-c0d88155c36b` | ❌ OLD |
+| Database ID | `9cc9608f-c17b-43f4-aa8c-4fc3306f02a4` | ✅ CURRENT (verify account) |
 | R2 Bucket | `vartmaan-media` | ⚠️ Keep name, new bucket |
-| Workers Domain | `vartmaan-sarokaar-api.vineshjm.workers.dev` | ❌ OLD |
-| Pages Domain | `vartmaan-sarokar-pages.pages.dev` | ❌ OLD |
+| Workers Domain | `api.vartmaansarokaar.com` | ✅ TARGET |
+| Pages Domain | `main.vartmaan-sarokar-pages.pages.dev` | ✅ CURRENT |
 
 ---
 
@@ -98,15 +103,14 @@ git push origin main
 |--------|---------|
 | JWT_SECRET | `base64(head -c 32 /dev/urandom)` |
 | STAFF_PASSWORD | `MySecurePass123!` |
-| OPENAI_API_KEY | `sk-proj-...` |
 | GOOGLE_CLIENT_ID | From Google Cloud Console |
 
 ---
 
 ## Files to Modify
 
-1. ✅ `wrangler.toml` - Update database_id & ALLOWED_ORIGINS
-2. ✅ `utils/app.ts` - Update PRODUCTION_API_URL
+1. ✅ `wrangler.worker.toml` - Update database_id & ALLOWED_ORIGINS
+2. ✅ Cloudflare Pages env vars - set `VITE_API_BASE_URL`
 3. ✅ `.env` or `.env.local` - Update local dev API if needed
 
 ---
