@@ -9,7 +9,14 @@
 name: Deploy Worker API
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
+    inputs:
+      apply_d1_migrations:
+        description: "Apply D1 migrations after worker deploy"
+        required: false
+        default: "false"
 
 concurrency:
   group: worker-deploy-${{ github.ref }}
@@ -41,6 +48,13 @@ jobs:
 
       - name: Deploy Worker (API)
         run: npx wrangler@4.85.0 deploy -c wrangler.worker.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Apply D1 migrations (optional)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.apply_d1_migrations == 'true' }}
+        run: npx wrangler@4.85.0 d1 migrations apply vartmaansarokar-db --remote -c wrangler.worker.toml
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
