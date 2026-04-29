@@ -1,0 +1,36 @@
+import { Router } from 'express';
+import {
+  approveSubscriptionRequest,
+  createPublicSubscription,
+  createSubscriptionRequest,
+  createUnlockRequest,
+  deleteSubscriptionRequest,
+  getSubscriptionRequests,
+  registerDigitalSubscriber,
+  registerPhysicalSubscriber,
+  rejectSubscriptionRequest
+} from '../controllers/SubscriptionController.js';
+import { validateSubscription } from '../middlewares/validation.js';
+import { authenticate, requireAnyRole } from '../middlewares/auth.js';
+import { UserRole } from '../../../vartmaan-shared-types.js';
+import { upload } from '../controllers/MediaController.js';
+
+const router = Router();
+
+router.post('/subscribers/digital', registerDigitalSubscriber);
+router.post('/subscribers/physical', upload.single('screenshot'), registerPhysicalSubscriber);
+
+router.post('/subscriptions', upload.single('file'), createPublicSubscription);
+router.post('/subscription-requests', validateSubscription, createSubscriptionRequest);
+router.post('/unlock-requests', createUnlockRequest);
+
+router.get('/subscription-requests', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), getSubscriptionRequests);
+router.get('/subscribers', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), getSubscriptionRequests);
+router.post('/subscription-requests/:id/approve', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), approveSubscriptionRequest);
+router.post('/subscription-requests/:id/reject', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), rejectSubscriptionRequest);
+router.delete('/subscription-requests/:id', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), deleteSubscriptionRequest);
+router.post('/subscribers/:id/approve', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), approveSubscriptionRequest);
+router.post('/subscribers/:id/reject', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), rejectSubscriptionRequest);
+router.delete('/subscribers/:id', authenticate, requireAnyRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), deleteSubscriptionRequest);
+
+export default router;

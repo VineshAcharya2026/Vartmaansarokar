@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist-server",
+    "rootDir": ".",
+    "types": ["node"],
+    "strict": true,
+    "noEmit": false
+  },
+  "include": [
+    "backend/server/index.new.ts",
+    "backend/server/store.ts",
+    "backend/server/controllers/**/*.ts",
+    "backend/server/middlewares/**/*.ts",
+    "backend/server/routes/**/*.ts",
+    "backend/server/services/**/*.ts",
+    "backend/server/utils/**/*.ts",
+    "backend/scripts/**/*.ts",
+    "vartmaan-shared-constants.ts",
+    "vartmaan-shared-types.ts",
+    "backend/worker-configuration.d.ts"
+  ],
+  "exclude": ["backend/server/oauth-worker.ts", "backend/server/jwt-crypto.ts"]
+}

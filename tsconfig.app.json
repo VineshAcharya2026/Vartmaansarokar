@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "allowJs": true,
+    "allowImportingTsExtensions": true,
+    "types": ["vite/client"],
+    "noEmit": true
+  },
+  "include": [
+    "vartmaan-frontend-app.tsx",
+    "vartmaan-frontend-app-context.tsx",
+    "vartmaan-shared-constants.ts",
+    "vartmaan-frontend-index.tsx",
+    "vartmaan-frontend-i18n.js",
+    "vartmaan-shared-types.ts",
+    "vite.config.ts",
+    "vite-env.d.ts",
+    "components/**/*",
+    "pages/**/*",
+    "utils/**/*"
+  ],
+  "exclude": ["dist", "node_modules", "server"]
+}

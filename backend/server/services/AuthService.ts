@@ -1,0 +1,110 @@
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
+import { sharedStore as store, UserRecord } from '../store.js';
+import { UserRole } from '../../../vartmaan-shared-types.js';
+import { AppError } from '../utils/errorHandler.js';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID || '';
+
+export class AuthService {
+  private googleAuthClient: OAuth2Client | null;
+
+  constructor() {
+    this.googleAuthClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
+  }
+
+  async signup(email: string, name: string, password: string, role: UserRole = UserRole.EDITOR) {
+    const existingUser = store.findUserByEmail(email);
+    if (existingUser) throw new AppError('Account already exists.', 409);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await store.createUser({
+      email,
+      name,
+      role,
+      authProvider: 'PASSWORD',
+      passwordHash: hashedPassword
+    });
+
+    const token = this.generateToken(user);
+    return { token, refreshToken: token, user: this.toPublicUser(user) };
+  }
+
+  async login(email: string, password: string) {
+    const user = store.findUserByEmail(email);
+    if (!user || user.isActive === false || !(await bcrypt.compare(password, user.passwordHash))) {
+      throw new AppError('Invalid credentials.', 401);
+    }
+
+    const token = this.generateToken(user);
+    return { token, refreshToken: token, user: this.toPublicUser(user) };
+  }
+
+  async googleLogin(credential: string) {
+    if (!this.googleAuthClient || !GOOGLE_CLIENT_ID) {
+      throw new AppError('Google sign-in is not configured on the server.', 503);
+    }
+
+    let ticket;
+    try {
+      ticket = await this.googleAuthClient.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
+    } catch {
+      throw new AppError('Google token verification failed.', 401);
+    }
+
+    const payload = ticket.getPayload();
+    if (!payload?.email || !payload.sub || !payload.email_verified) {
+      throw new AppError('Google account could not be verified.', 401);
+    }
+
+    const user = await store.upsertGoogleUser({
+      googleId: payload.sub,
+      email: payload.email,
+      name: payload.name || payload.email.split('@')[0],
+      avatarUrl: payload.picture
+    });
+
+    if (!user) throw new AppError('Unable to sign in with Google.', 500);
+
+    const token = this.generateToken(user);
+    return { token, refreshToken: token, user: this.toPublicUser(user) };
+  }
+
+  async quickLogin(email: string) {
+    const user = store.findUserByEmail(email);
+    if (!user || user.isActive === false) {
+      throw new AppError('Invalid credentials.', 401);
+    }
+
+    const token = this.generateToken(user);
+    return { token, refreshToken: token, user: this.toPublicUser(user) };
+  }
+
+  async refresh(userId: string) {
+    const user = store.getUserById(userId);
+    if (!user || user.isActive === false) throw new AppError('Invalid session.', 401);
+    const token = this.generateToken(user);
+    return { token, refreshToken: token, user: this.toPublicUser(user) };
+  }
+
+  async logout() {
+    return { ok: true };
+  }
+
+  getCurrentUser(userId: string) {
+    const user = store.getUserById(userId);
+    if (!user || user.isActive === false) throw new AppError('User not found.', 404);
+    return this.toPublicUser(user);
+  }
+
+  private generateToken(user: { id: string }) {
+    return jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+  }
+
+  private toPublicUser(user: UserRecord) {
+    const { passwordHash, ...safeUser } = user;
+    return safeUser;
+  }
+}

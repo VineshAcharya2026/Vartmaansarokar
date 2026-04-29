@@ -1,0 +1,17 @@
+import { Router } from 'express';
+import { signup, login, googleLogin, quickLogin, activateDigitalSubscription, getCurrentUser, refreshToken, logout } from '../controllers/AuthController.js';
+import { validateAuth, validateSubscription } from '../middlewares/validation.js';
+import { authenticate } from '../middlewares/auth.js';
+import { authLimiter } from '../middlewares/security.js';
+const router = Router();
+router.use(authLimiter);
+router.post('/register', validateAuth, signup);
+router.post('/signup', validateAuth, signup);
+router.post('/login', validateAuth, login);
+router.post('/logout', authenticate, logout);
+router.post('/refresh', authenticate, refreshToken);
+router.post('/google', googleLogin);
+router.post('/users/login', quickLogin);
+router.post('/subscriptions/digital', validateSubscription, activateDigitalSubscription);
+router.get('/me', authenticate, getCurrentUser);
+export default router;
